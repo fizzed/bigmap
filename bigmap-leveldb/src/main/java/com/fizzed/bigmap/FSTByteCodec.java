@@ -17,12 +17,15 @@ package com.fizzed.bigmap;
 
 import org.nustaq.serialization.FSTConfiguration;
 
-public class FSTBigMapCodec<K> implements BigMapCodec<K> {
+public class FSTByteCodec<K> implements ByteCodec<K> {
 
-    // shared instance...
+    // shared instance can be reused across the board
     static public final FSTConfiguration FST = FSTConfiguration.createDefaultConfiguration();
     
-    public FSTBigMapCodec(Class<K> type) {
+    public FSTByteCodec() {
+    }
+    
+    public FSTByteCodec(Class<K> type) {
         FST.registerClass(type);
     }
     

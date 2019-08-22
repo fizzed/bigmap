@@ -15,7 +15,7 @@
  */
 package com.fizzed.bigmap;
 
-public interface BigMapCodec<V> {
+public interface ByteCodec<V> {
     
     byte[] serialize(V value);
     

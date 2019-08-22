@@ -24,65 +24,55 @@ import static com.fizzed.bigmap.Comparators.autoComparator;
 import java.util.Comparator;
 import java.util.Objects;
 
-public class LevelBigMapBuilder<K,V> {
+public class LevelBigSetBuilder<K> {
  
-    private Path scratchDirectory;
-    private long cacheSize;
-    private ByteCodec<?> keyCodec;
-    private Comparator<?> keyComparator;
-    private ByteCodec<?> valueCodec;
+    protected Path scratchDirectory;
+    protected long cacheSize;
+    protected ByteCodec<?> keyCodec;
+    protected Comparator<?> keyComparator;
     
-    public LevelBigMapBuilder() {
+    public LevelBigSetBuilder() {
         this.cacheSize = 30 * 1048576L;  // 30 MB by default
     }
     
-    public LevelBigMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
+    public LevelBigSetBuilder<K> setScratchDirectory(Path scratchDirectory) {
         this.scratchDirectory = scratchDirectory;
         return this;
     }
 
-    public LevelBigMapBuilder<K,V> setCacheSize(long cacheSize) {
+    public LevelBigSetBuilder<K> setCacheSize(long cacheSize) {
         this.cacheSize = cacheSize;
         return this;
     }
     
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType) {
+    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType) {
         return this.setKeyType(keyType, autoCodec(keyType));
     }
-
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType, Comparator<N> keyComparator) {
+    
+    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType, Comparator<N> keyComparator) {
         return this.setKeyType(keyType, autoCodec(keyType), keyComparator);
     }
 
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec) {
+    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec) {
         return this.setKeyType(keyType, keyCodec, autoComparator(keyType));
     }
 
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec, Comparator<N> keyComparator) {
+    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec, Comparator<N> keyComparator) {
         Objects.requireNonNull(keyType, "keyType was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
         Objects.requireNonNull(keyComparator, "keyComparator was null");
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
-        return (LevelBigMapBuilder<N,V>)this;
-    }
-
-    public <N> LevelBigMapBuilder<K,N> setValueType(Class<N> valueType) {
-        return this.setValueType(valueType, autoCodec(valueType));
-    }
-
-    public <N> LevelBigMapBuilder<K,N> setValueType(Class<N> valueType, ByteCodec<N> valueCodec) {
-        this.valueCodec = valueCodec;
-        return (LevelBigMapBuilder<K,N>)this;
+        return (LevelBigSetBuilder<N>)this;
     }
     
-    public LevelBigMap<K,V> build() {
+    public LevelBigSet<K> build() {
         UUID uuid = UUID.randomUUID();
         Path resolvedScratchDir = this.scratchDirectory != null
             ? this.scratchDirectory : Paths.get(".");
-        Path directory = resolvedScratchDir.resolve("levelbigmap-" + uuid);
+        Path directory = resolvedScratchDir.resolve("levelbigset-" + uuid);
         
-        return new LevelBigMap(directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
+        return new LevelBigSet(directory, this.cacheSize, this.keyCodec, this.keyComparator);
     }
     
 }
