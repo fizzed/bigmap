@@ -21,6 +21,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
+import java.util.List;
+import static java.util.stream.Collectors.toList;
 
 public class LevelBigMapTest {
  
@@ -46,10 +48,14 @@ public class LevelBigMapTest {
         String removed = map.put("b", "2");
         
         assertThat(removed, is(nullValue()));
-        
+        assertThat(map.size(), is(1));
+
         String removed1 = map.put("b", "3");
         
         assertThat(removed1, is("2"));
+        assertThat(map.size(), is(1));
+        
+        System.out.println("Map is using key_bytes=" + map.getKeyByteSize() + " and value_bytes=" + map.getValueByteSize());
     }
  
     @Test
@@ -80,4 +86,27 @@ public class LevelBigMapTest {
         assertThat(removed1, is("2"));
     }
     
+    @Test
+    public void sorting() {
+        LevelBigMap<Long,String> map = new LevelBigMapBuilder()
+            .setDirectory(Paths.get("target"))
+            .build(Long.class, String.class);
+
+        map.put(123456789L, "123456789");
+        map.put(-10L, "-10");
+        map.put(5L, "5");
+        map.put(1L, "1");
+        map.put(3L, "3");
+        map.put(2L, "2");
+
+        List<String> values = map.entrySet().stream()
+            .map(entry -> entry.getValue())
+            .collect(toList());
+
+        assertThat(values.get(0), is("1"));
+        assertThat(values.get(1), is("2"));
+        assertThat(values.get(2), is("3"));
+        assertThat(values.get(3), is("5"));
+        assertThat(values.get(4), is("123456789"));
+    }
 }
