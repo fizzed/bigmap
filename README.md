@@ -1,2 +1,1 @@
-Experimental high performance image utilities for Java.  For example, getting the size of an image
-with as little data read from a file as possible.
+Experimental off-heap JVM maps using LevelDB (and possibly other engines).
