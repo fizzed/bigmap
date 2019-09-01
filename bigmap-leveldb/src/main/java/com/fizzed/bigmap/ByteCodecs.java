@@ -31,6 +31,9 @@ public class ByteCodecs {
         else if (Long.class.isAssignableFrom(type)) {
             return (ByteCodec<T>)longCodec();
         }
+        else if (Short.class.isAssignableFrom(type)) {
+            return (ByteCodec<T>)shortCodec();
+        }
         else {
             return new FSTByteCodec(type);
         }
@@ -56,6 +59,30 @@ public class ByteCodecs {
                     return null;
                 }
                 return new String(bytes, StandardCharsets.UTF_8);
+            }
+        };
+    }
+    
+    static public ByteCodec<Short> shortCodec() {
+        return new ByteCodec<Short>() {
+            @Override
+            public byte[] serialize(Short value) {
+                if (value == null) {
+                    return ZERO_BYTES;
+                }
+                int v = value;
+                return new byte[] {
+                    (byte)(v >> 8),
+                    (byte)(v)};
+            }
+
+            @Override
+            public Short deserialize(byte[] bytes) {
+                if (bytes == null) {
+                    return null;
+                }
+                return (short)(((short)bytes[1] & 0xff)
+                     | ((short)bytes[0] & 0xff) << 8);
             }
         };
     }

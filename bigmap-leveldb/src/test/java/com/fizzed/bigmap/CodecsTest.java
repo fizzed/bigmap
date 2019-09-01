@@ -15,6 +15,7 @@
  */
 package com.fizzed.bigmap;
 
+import com.fizzed.crux.util.Base16;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import java.nio.charset.StandardCharsets;
@@ -71,6 +72,22 @@ public class CodecsTest {
         assertThat(c.deserialize(Longs.toByteArray(Long.MIN_VALUE)), is(Long.MIN_VALUE));
         assertThat(c.serialize(Long.MAX_VALUE), is(Longs.toByteArray(Long.MAX_VALUE)));
         assertThat(c.deserialize(Longs.toByteArray(Long.MAX_VALUE)), is(Long.MAX_VALUE));
+    }
+    
+    @Test
+    public void shortCodec() {
+        ByteCodec<Short> c = ByteCodecs.autoCodec(Short.class);
+        
+        assertThat(c.serialize((short)0), is(Base16.decode("0000")));
+        assertThat(c.deserialize(Base16.decode("0000")), is((short)0));
+        assertThat(c.serialize((short)1), is(Base16.decode("0001")));
+        assertThat(c.deserialize(Base16.decode("0001")), is((short)1));
+        assertThat(c.serialize((short)-1), is(Base16.decode("FFFF")));
+        assertThat(c.deserialize(Base16.decode("FFFF")), is((short)-1));
+        assertThat(c.serialize(Short.MAX_VALUE), is(Base16.decode("7FFF")));
+        assertThat(c.deserialize(Base16.decode("7FFF")), is((short)Short.MAX_VALUE));
+        assertThat(c.serialize(Short.MIN_VALUE), is(Base16.decode("8000")));
+        assertThat(c.deserialize(Base16.decode("8000")), is((short)Short.MIN_VALUE));
     }
     
 }
