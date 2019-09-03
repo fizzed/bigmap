@@ -63,6 +63,26 @@ public class ByteCodecs {
         };
     }
     
+    static public ByteCodec<String> utf8CiStringCodec() {
+        return new ByteCodec<String>() {
+            @Override
+            public byte[] serialize(String value) {
+                if (value == null) {
+                    return ZERO_BYTES;
+                }
+                return value.toLowerCase().getBytes(StandardCharsets.UTF_8);
+            }
+
+            @Override
+            public String deserialize(byte[] bytes) {
+                if (bytes == null) {
+                    return null;
+                }
+                return new String(bytes, StandardCharsets.UTF_8);
+            }
+        };
+    }
+    
     static public ByteCodec<Short> shortCodec() {
         return new ByteCodec<Short>() {
             @Override
