@@ -2,8 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.fizzed</groupId>
-    <artifactId>bigmap-leveldb</artifactId>
-    <name>bigmap-leveldb</name>
+    <artifactId>bigmap-core</artifactId>
+    <name>bigmap-core</name>
     <packaging>jar</packaging>
     
     <parent>
@@ -13,20 +13,11 @@
     </parent>
 
     <dependencies>
-        
-        <dependency>
-            <groupId>com.fizzed</groupId>
-            <artifactId>bigmap-core</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.iq80.leveldb</groupId>
-            <artifactId>leveldb</artifactId>
-        </dependency>
-        
+
         <dependency>
             <groupId>de.ruedigermoeller</groupId>
             <artifactId>fst</artifactId>
+            <optional>true</optional>
         </dependency>
         
         <!-- testing -->
