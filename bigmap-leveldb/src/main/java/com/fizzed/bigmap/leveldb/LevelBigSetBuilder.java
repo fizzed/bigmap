@@ -27,17 +27,24 @@ import java.util.Objects;
 public class LevelBigSetBuilder<K> {
  
     protected boolean persistent;
+    protected boolean counts;
     protected Path scratchDirectory;
     protected long cacheSize;
     protected ByteCodec<?> keyCodec;
     protected Comparator<?> keyComparator;
     
     public LevelBigSetBuilder() {
+        this.counts = true;
         this.cacheSize = 30 * 1048576L;  // 30 MB by default
     }
     
     public LevelBigSetBuilder<K> setPersistent(boolean persistent) {
         this.persistent = persistent;
+        return this;
+    }
+    
+    public LevelBigSetBuilder<K> setCounts(boolean counts) {
+        this.counts = counts;
         return this;
     }
     
@@ -82,7 +89,7 @@ public class LevelBigSetBuilder<K> {
             directory = resolvedScratchDir.resolve("levelbigset-" + uuid);
         }
         
-        return new LevelBigSet(this.persistent, directory, this.cacheSize, this.keyCodec, this.keyComparator);
+        return new LevelBigSet(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator);
     }
     
 }

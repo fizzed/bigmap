@@ -28,6 +28,7 @@ public class LevelBigMapBuilder<K,V> {
  
     protected Path scratchDirectory;
     protected boolean persistent;
+    protected boolean counts;
     protected long cacheSize;
     protected ByteCodec<?> keyCodec;
     protected Comparator<?> keyComparator;
@@ -35,11 +36,17 @@ public class LevelBigMapBuilder<K,V> {
     
     public LevelBigMapBuilder() {
         this.persistent = false;
+        this.counts = true;
         this.cacheSize = 30 * 1048576L;  // 30 MB by default
     }
     
     public LevelBigMapBuilder<K,V> setPersistent(boolean persistent) {
         this.persistent = persistent;
+        return this;
+    }
+    
+    public LevelBigMapBuilder<K,V> setCounts(boolean counts) {
+        this.counts = counts;
         return this;
     }
     
@@ -93,7 +100,7 @@ public class LevelBigMapBuilder<K,V> {
             directory = resolvedScratchDir.resolve("levelbigmap-" + uuid);
         }
         
-        return new LevelBigMap(this.persistent, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
+        return new LevelBigMap(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
     }
     
 }

@@ -33,6 +33,7 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 public class AbstractLevelBigCollection<K> implements Closeable {
 
     protected final boolean persistent;
+    protected final boolean counts;
     protected final Path directory;
     protected final long cacheSize;
     protected final ByteCodec<K> keyCodec;
@@ -46,6 +47,7 @@ public class AbstractLevelBigCollection<K> implements Closeable {
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public AbstractLevelBigCollection(
             boolean persistent,
+            boolean counts,
             Path directory,
             long cacheSize,
             ByteCodec<K> keyCodec,
@@ -56,6 +58,7 @@ public class AbstractLevelBigCollection<K> implements Closeable {
         Objects.requireNonNull(keyComparator, "keyComparator was null");
 
         this.persistent = persistent;
+        this.counts = counts;
         this.directory = directory;
         this.cacheSize = cacheSize;
         this.keyCodec = keyCodec;
@@ -91,18 +94,21 @@ public class AbstractLevelBigCollection<K> implements Closeable {
             
             // build database, initialize stats we track
             this.db = factory.open(directory.toFile(), options);
+            
             this.size = 0;
             this.keyByteSize = 0L;
             this.valueByteSize = 0L;
             
             // we need to load the stats we track
-            this.loadStats();
+            if (this.counts) {
+                this.loadCounts();
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
     
-    protected void loadStats() throws IOException {
+    protected void loadCounts() throws IOException {
         try (DBIterator it = this.db.iterator()) {
             it.seekToFirst();
             while (it.hasNext()) {

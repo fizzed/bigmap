@@ -32,13 +32,14 @@ public class LevelBigSet<K> implements SortedSet<K> {
     
     protected LevelBigSet(
             boolean persistent,
+            boolean counts,
             Path directory,
             long cacheSize,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator) {
         
         this(new LevelBigMap<K,byte[]>(
-            persistent, directory, cacheSize, keyCodec, keyComparator, byteArrayCodec()));
+            persistent, counts, directory, cacheSize, keyCodec, keyComparator, byteArrayCodec()));
     }
     
     protected LevelBigSet(
