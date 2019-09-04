@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.hasSize;
@@ -379,6 +379,61 @@ public class LevelBigMapTest {
         assertThat(it.next(), is("1-2"));
         assertThat(it.next(), is("1-5"));
         assertThat(it.next(), is("0-1"));
+    }
+    
+    @Test
+    public void persistent() throws IOException {
+        final Path dbDir = Paths.get("target/persistent-"+UUID.randomUUID());
+        
+        LevelBigMap<Integer,String> map = new LevelBigMapBuilder()
+            .setPersistent(true)
+            .setScratchDirectory(dbDir)
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
+        
+        map.put(1, "1");
+        map.put(1025, "1025");
+        map.put(651, "651");
+        
+        map.close();
+        map = null;
+        
+        
+        map = new LevelBigMapBuilder()
+            .setPersistent(true)
+            .setScratchDirectory(dbDir)
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
+        
+        assertThat(map, hasKey(1));
+        assertThat(map, hasKey(1025));
+        assertThat(map, hasKey(651));
+        assertThat(map, not(hasKey(2)));
+        
+        assertThat(map.size(), is(3));
+        assertThat(map.getKeyByteSize(), is(12L));
+        assertThat(map.getValueByteSize(), is(8L));
+        
+        map.clear();
+        
+        assertThat(map.size(), is(0));
+        
+        map.close();
+        map = null;
+        
+        
+        map = new LevelBigMapBuilder()
+            .setPersistent(true)
+            .setScratchDirectory(dbDir)
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
+        
+        map.put(1, "1");
+        
+        assertThat(map.size(), is(1));
     }
     
 }

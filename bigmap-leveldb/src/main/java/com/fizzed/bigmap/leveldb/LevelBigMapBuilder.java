@@ -26,14 +26,21 @@ import java.util.Objects;
 
 public class LevelBigMapBuilder<K,V> {
  
-    private Path scratchDirectory;
-    private long cacheSize;
-    private ByteCodec<?> keyCodec;
-    private Comparator<?> keyComparator;
-    private ByteCodec<?> valueCodec;
+    protected Path scratchDirectory;
+    protected boolean persistent;
+    protected long cacheSize;
+    protected ByteCodec<?> keyCodec;
+    protected Comparator<?> keyComparator;
+    protected ByteCodec<?> valueCodec;
     
     public LevelBigMapBuilder() {
+        this.persistent = false;
         this.cacheSize = 30 * 1048576L;  // 30 MB by default
+    }
+    
+    public LevelBigMapBuilder<K,V> setPersistent(boolean persistent) {
+        this.persistent = persistent;
+        return this;
     }
     
     public LevelBigMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
@@ -80,9 +87,13 @@ public class LevelBigMapBuilder<K,V> {
         UUID uuid = UUID.randomUUID();
         Path resolvedScratchDir = this.scratchDirectory != null
             ? this.scratchDirectory : Paths.get(".");
-        Path directory = resolvedScratchDir.resolve("levelbigmap-" + uuid);
         
-        return new LevelBigMap(directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
+        Path directory = resolvedScratchDir;
+        if (!this.persistent) {
+            directory = resolvedScratchDir.resolve("levelbigmap-" + uuid);
+        }
+        
+        return new LevelBigMap(this.persistent, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
     }
     
 }

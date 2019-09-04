@@ -27,12 +27,12 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map.Entry;
-import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.Options;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 public class AbstractLevelBigCollection<K> implements Closeable {
 
+    protected final boolean persistent;
     protected final Path directory;
     protected final long cacheSize;
     protected final ByteCodec<K> keyCodec;
@@ -45,6 +45,7 @@ public class AbstractLevelBigCollection<K> implements Closeable {
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public AbstractLevelBigCollection(
+            boolean persistent,
             Path directory,
             long cacheSize,
             ByteCodec<K> keyCodec,
@@ -54,18 +55,19 @@ public class AbstractLevelBigCollection<K> implements Closeable {
         Objects.requireNonNull(keyCodec, "keyCodec was null");
         Objects.requireNonNull(keyComparator, "keyComparator was null");
 
+        this.persistent = persistent;
         this.directory = directory;
         this.cacheSize = cacheSize;
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
-        this.buildDatabase();
+        this.open();
     }
 
     public Path getDirectory() {
         return directory;
     }
     
-    protected void buildDatabase() {
+    protected void open() {
         try {
             this.close();
         } catch (IOException e) {
@@ -73,19 +75,42 @@ public class AbstractLevelBigCollection<K> implements Closeable {
         }
 
         this.options = new Options();
-        this.options.compressionType(CompressionType.NONE);
+        //this.options.compressionType(CompressionType.NONE);
         this.options.createIfMissing(true);
         this.options.comparator(new LevelJavaComparator(this.keyCodec, this.keyComparator));
         this.options.cacheSize(this.cacheSize);   // 100MB cache
 
         try {
+//            boolean currentlyExists = false;
+//            
+//            // any .sst files in the dir?
+//            if (Files.isDirectory(this.directory)) {
+//                currentlyExists = Files.list(this.directory)
+//                    .anyMatch(v -> v.getFileName().toString().endsWith(".sst"));
+//            }
+            
             // build database, initialize stats we track
             this.db = factory.open(directory.toFile(), options);
             this.size = 0;
             this.keyByteSize = 0L;
             this.valueByteSize = 0L;
+            
+            // we need to load the stats we track
+            this.loadStats();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+    
+    protected void loadStats() throws IOException {
+        try (DBIterator it = this.db.iterator()) {
+            it.seekToFirst();
+            while (it.hasNext()) {
+                Entry<byte[],byte[]> entry = it.next();
+                this.size++;
+                this.keyByteSize += entry.getKey().length;
+                this.valueByteSize += entry.getValue().length;
+            }
         }
     }
     
@@ -94,28 +119,35 @@ public class AbstractLevelBigCollection<K> implements Closeable {
         if (this.db != null) {
             this.db.close();
             
-            // we want to DESTROY it too!
-            factory.destroy(this.directory.toFile(), this.options);
+            if (!this.persistent) {
+                this.destroy();
+            }
             
             this.db = null;
-            this.size = 0;
-            this.keyByteSize = 0L;
-            this.valueByteSize = 0L;
+        }
+    }
+    
+    protected void destroy() throws IOException {
+        // we want to DESTROY it too!
+        factory.destroy(this.directory.toFile(), this.options);
 
-            // remove existing database...
-            try {
-                if (Files.exists(this.directory)) {
-                    Files.list(this.directory).forEach(file -> {
-                        try {
-                            Files.delete(file);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException("Unable to delete existing database file!", e);
-                        }
-                    });
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException("Unable to list existing database directory!", e);
+        this.size = 0;
+        this.keyByteSize = 0L;
+        this.valueByteSize = 0L;
+        
+        // remove existing database...
+        try {
+            if (Files.exists(this.directory)) {
+                Files.list(this.directory).forEach(file -> {
+                    try {
+                        Files.delete(file);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException("Unable to delete existing database file!", e);
+                    }
+                });
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unable to list existing database directory!", e);
         }
     }
 
@@ -139,8 +171,13 @@ public class AbstractLevelBigCollection<K> implements Closeable {
 
     public void clear() {
         this.checkIfClosed();
-        // this will delete existing files, then create a new one!
-        this.buildDatabase();
+        try {
+            this.close();
+            this.destroy();
+            this.open();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
     
     protected boolean containsKey(Object key) {

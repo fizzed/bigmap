@@ -34,13 +34,14 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     protected final ByteCodec<V> valueCodec;
     
     protected LevelBigMap(
+            boolean persistent,
             Path directory,
             long cacheSize,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
-        super(directory, cacheSize, keyCodec, keyComparator);
+        super(persistent, directory, cacheSize, keyCodec, keyComparator);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
         
