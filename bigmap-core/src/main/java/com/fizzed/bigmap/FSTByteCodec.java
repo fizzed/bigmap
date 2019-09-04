@@ -19,19 +19,21 @@ import org.nustaq.serialization.FSTConfiguration;
 
 public class FSTByteCodec<K> implements ByteCodec<K> {
 
-    // shared instance can be reused across the board
-    static public final FSTConfiguration FST = FSTConfiguration.createDefaultConfiguration();
+    // NOTE: not safe to use one fst instance across the app
+    private final FSTConfiguration fst;
     
     public FSTByteCodec() {
+        this.fst = FSTConfiguration.createDefaultConfiguration();
     }
     
     public FSTByteCodec(Class<K> type) {
-        FST.registerClass(type);
+        fst = FSTConfiguration.createDefaultConfiguration();
+        fst.registerClass(type);
     }
     
     @Override
     public byte[] serialize(K value) {
-        return FST.asByteArray(value);
+        return fst.asByteArray(value);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class FSTByteCodec<K> implements ByteCodec<K> {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        return (K)FST.asObject(bytes);
+        return (K)fst.asObject(bytes);
     }
     
 }
