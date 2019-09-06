@@ -17,25 +17,85 @@ package com.fizzed.bigmap;
 
 public class Bytes {
  
-    static public boolean startsWith(byte[] bytes, byte[] prefix) {
+    static public boolean startsWith(
+            byte[] bytes,
+            byte[] prefix) {
+        
+        return startsWith(bytes, prefix, null);
+    }
+    
+    /**
+     * Verifies if the bytes start with the provided prefix. Optionally, a
+     * wildcard byte can be provided, where if the prefix contains that byte
+     * that position will be considered a match.
+     * @param bytes
+     * @param prefix
+     * @param wildcardMarker
+     * @return 
+     */
+    static public boolean startsWith(
+            byte[] bytes,
+            byte[] prefix,
+            Byte wildcardMarker) {
+        
+        if (bytes == null && prefix == null) {
+            return true;
+        }
+        if (bytes == null || prefix == null) {
+            return false;
+        }
         if (prefix.length > bytes.length) {
             return false;
         }
         for (int i = 0; i < prefix.length; i++) {
-            if (bytes[i] != prefix[i]) {
+            if (bytes[i] != prefix[i]
+                    && (wildcardMarker == null || prefix[i] != wildcardMarker)) {
                 return false;
             }
         }
         return true;
     }
     
-    static public boolean endsWith(byte[] bytes, byte[] suffix) {
+    static public boolean endsWith(
+            byte[] bytes,
+            byte[] suffix) {
+        
+        if (bytes == null && suffix == null) {
+            return true;
+        }
+        if (bytes == null || suffix == null) {
+            return false;
+        }
         if (suffix.length > bytes.length) {
             return false;
         }
         int offset = bytes.length - suffix.length;
         for (int i = 0; i < suffix.length; i++) {
             if (bytes[offset+i] != suffix[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    static public boolean endsWith(
+            byte[] bytes,
+            byte[] suffix,
+            Byte wildcardMarker) {
+        
+        if (bytes == null && suffix == null) {
+            return true;
+        }
+        if (bytes == null || suffix == null) {
+            return false;
+        }
+        if (suffix.length > bytes.length) {
+            return false;
+        }
+        int offset = bytes.length - suffix.length;
+        for (int i = 0; i < suffix.length; i++) {
+            if (bytes[offset+i] != suffix[i]
+                    && (wildcardMarker == null || suffix[i] != wildcardMarker)) {
                 return false;
             }
         }
