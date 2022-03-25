@@ -103,4 +103,9 @@ public class LevelBigMapBuilder<K,V> {
         return new LevelBigMap(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
     }
     
+    public LevelBigLinkedMap<K,V> buildLinked() {
+        
+        return new LevelBigLinkedMap(this.keyComparator);
+    }
+
 }
