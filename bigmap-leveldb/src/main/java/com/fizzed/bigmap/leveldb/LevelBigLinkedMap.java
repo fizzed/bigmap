@@ -261,7 +261,7 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public boolean contains(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
@@ -314,7 +314,7 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
@@ -382,42 +382,42 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public Object[] toArray() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
         public <T> T[] toArray(T[] a) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
         public boolean add(V e) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
         public boolean remove(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public boolean addAll(Collection<? extends V> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public boolean removeAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
         public boolean retainAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet."); 
         }
 
         @Override
@@ -427,7 +427,7 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public boolean contains(Object arg0) {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
     }
