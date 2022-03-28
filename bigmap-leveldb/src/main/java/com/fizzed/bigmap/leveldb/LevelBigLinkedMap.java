@@ -15,37 +15,25 @@
  */
 package com.fizzed.bigmap.leveldb;
 
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import javax.print.attribute.UnmodifiableSetException;
 import org.iq80.leveldb.DBIterator;
 import java.nio.file.Paths;
+import java.util.LinkedHashSet;
 import java.util.concurrent.atomic.AtomicLong;
-import org.iq80.leveldb.DBException;
+import javax.print.attribute.UnmodifiableSetException;
 
 public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
-    static class InsertionOrder {
-
-        private static final AtomicLong c = new AtomicLong(0);
-
-        public static void increment() {
-            c.getAndIncrement();
-        }
-
-        public static long value() {
-            return c.get();
-        }
-    }
-    
     final private LevelBigMap<K, V> wrappedMap;
     final private LevelBigMap<K, Long> keyToInsertionOrderMap;
     final private LevelBigMap<Long, K> insertionToOrderToKeyMap;
 
+    private AtomicLong c = new AtomicLong(0);
+    
     LevelBigLinkedMap( Comparator<?> keyComparator ) {
 
         // LevelBigMap builder
@@ -96,21 +84,15 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
     @Override
     public V get(Object key) {
-        this.wrappedMap.checkIfClosed();
-        
-        byte[] keyBytes = this.wrappedMap.keyCodec.serialize((K)key);
-
-        byte[] valueBytes = this.wrappedMap.db.get(keyBytes);
-
-        return this.wrappedMap.valueCodec.deserialize(valueBytes);
+        return this.wrappedMap.get(key);
     }
 
     @Override
     public V put(K arg0, V arg1) {
         if (this.wrappedMap.get(arg0) == null) {
-            this.insertionToOrderToKeyMap.put(InsertionOrder.value(), arg0);
-            this.keyToInsertionOrderMap.put(arg0, InsertionOrder.value());
-            InsertionOrder.increment();
+            long index = c.getAndIncrement();
+            this.insertionToOrderToKeyMap.put(index, arg0);
+            this.keyToInsertionOrderMap.put(arg0, index);
         }
 
         return this.wrappedMap.put(arg0, arg1);
@@ -118,75 +100,15 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
     @Override
     public V remove(Object key) {
+        Long insertionOrder = this.keyToInsertionOrderMap.remove(key);
+        this.insertionToOrderToKeyMap.remove(insertionOrder);
+        return this.wrappedMap.remove(key);
         
-        byte[] valueBytes = removeFromWrappedBigMap(key);
- 
-        removeFromSupportBigMap(key);
-
-        return this.wrappedMap.valueCodec.deserialize(valueBytes);
-    }
-
-    private void removeFromSupportBigMap(Object key) throws DBException {
-        this.keyToInsertionOrderMap.checkIfClosed();
-        
-        byte[] keyBytesKeyToInsertOrder = this.keyToInsertionOrderMap.keyCodec.serialize((K)key);
-
-        byte[] valueBytesToInsertOrder = this.keyToInsertionOrderMap.db.get(keyBytesKeyToInsertOrder);
-        
-        Long insertionOrderNumber;
-        insertionOrderNumber = this.keyToInsertionOrderMap.get(key);
-        
-        if (valueBytesToInsertOrder != null) {
-            // remove the key, then deduct its info
-            this.keyToInsertionOrderMap.db.delete(keyBytesKeyToInsertOrder);
-            this.keyToInsertionOrderMap.size--;
-            this.keyToInsertionOrderMap.keyByteSize -= sizeOf(keyBytesKeyToInsertOrder);
-            this.keyToInsertionOrderMap.valueByteSize -= sizeOf(valueBytesToInsertOrder);
-        }
-        
-        this.insertionToOrderToKeyMap.checkIfClosed();
-        
-        byte[] keyBytesInsertOrderKey = this.insertionToOrderToKeyMap.keyCodec.serialize(insertionOrderNumber);
-
-        byte[] valueBytesInsertOrderKey = this.insertionToOrderToKeyMap.db.get(keyBytesInsertOrderKey);
-        
-        if (valueBytesInsertOrderKey != null) {
-            // remove the key, then deduct its info
-            this.insertionToOrderToKeyMap.db.delete(keyBytesInsertOrderKey);
-            this.insertionToOrderToKeyMap.size--;
-            this.insertionToOrderToKeyMap.keyByteSize -= sizeOf(keyBytesInsertOrderKey);
-            this.insertionToOrderToKeyMap.valueByteSize -= sizeOf(valueBytesInsertOrderKey);
-        }
-    }
-
-    private byte[] removeFromWrappedBigMap(Object key) throws DBException {
-        this.wrappedMap.checkIfClosed();
-        byte[] keyBytes = this.wrappedMap.keyCodec.serialize((K)key);
-        byte[] valueBytes = this.wrappedMap.db.get(keyBytes);
-        if (valueBytes != null) {
-            // remove the key, then deduct its info
-            this.wrappedMap.db.delete(keyBytes);
-            this.wrappedMap.size--;
-            this.wrappedMap.keyByteSize -= sizeOf(keyBytes);
-            this.wrappedMap.valueByteSize -= sizeOf(valueBytes);
-        }
-        return valueBytes;
     }
     
     public K firstKey() {
-        this.insertionToOrderToKeyMap.checkIfClosed();
-
-        DBIterator itInsOrder = this.insertionToOrderToKeyMap.db.iterator();
-        Entry<byte[], byte[]> firstEntry = itInsOrder.next();
-
-        DBIterator it = this.wrappedMap.db.iterator();
-        it.seek(firstEntry.getValue());
-        Entry<byte[], byte[]> first = it.next();
-        
-        if (first != null) {
-            return this.wrappedMap.keyCodec.deserialize(first.getKey());
-        }
-        return null;
+        Long firstInsertionOrder = this.insertionToOrderToKeyMap.firstKey();
+        return this.insertionToOrderToKeyMap.get(firstInsertionOrder);
     }
     
     @Override
@@ -203,9 +125,7 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
     @Override
     public Set<K> keySet() {
-        this.wrappedMap.checkIfClosed();
-        
-        return new LevelBigSet<>(this.wrappedMap);
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
@@ -219,33 +139,6 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
     public Set<Entry<K,V>> entrySet() {
         
         return new LevelBigLinkedMap.EntrySetView();
-    }
-    
-    class EntryView implements Entry<K,V> {
-
-        private final byte[] keyBytes;
-        private final byte[] valueBytes;
-
-        public EntryView(byte[] keyBytes, byte[] valueBytes) {
-            this.keyBytes = keyBytes;
-            this.valueBytes = valueBytes;
-        }
-        
-        @Override
-        public K getKey() {
-            return LevelBigLinkedMap.this.wrappedMap.keyCodec.deserialize(keyBytes);
-        }
-
-        @Override
-        public V getValue() {
-            return LevelBigLinkedMap.this.wrappedMap.valueCodec.deserialize(valueBytes);
-        }
-
-        @Override
-        public V setValue(V value) {
-            return LevelBigLinkedMap.this.wrappedMap.putValue(keyBytes, value);
-        }
-        
     }
 
     class EntrySetView implements Set<Entry<K,V>> {
@@ -268,7 +161,6 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
         public Iterator<Entry<K,V>> iterator() {
             
             final DBIterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.db.iterator();
-            final DBIterator it = LevelBigLinkedMap.this.wrappedMap.db.iterator();
 
             return new Iterator<Entry<K, V>>() {
                 @Override
@@ -279,13 +171,11 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
                 @Override
                 public Entry<K,V> next() {
                     Entry<byte[],byte[]> nextInsOrder = itInsOrder.next();
-                   
-                    it.seek(nextInsOrder.getValue());
-                    
-                    Entry<byte[],byte[]> next = it.next();
-                    
-                    if (next != null) {
-                        return new EntryView(next.getKey(), next.getValue());
+         
+                      if (nextInsOrder != null) {
+                          K key = insertionToOrderToKeyMap.valueCodec.deserialize(nextInsOrder.getValue());
+                          byte[] valueBytes = wrappedMap.valueCodec.serialize(wrappedMap.get(key));
+                        return wrappedMap.new EntryView(nextInsOrder.getValue(), valueBytes);
                     }
                     return null;
                 }
@@ -366,14 +256,11 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
                     // NOTE: this throws a NoSuchElementException is no element exists
                     Entry<byte[], byte[]> nextInsOrder = itInsOrder.next();
 
-                    final DBIterator it = LevelBigLinkedMap.this.wrappedMap.db.iterator();
-
-                    it.seek(nextInsOrder.getValue());
-
-                    Entry<byte[], byte[]> next = it.next();
-
-                    if (next != null) {
-                        return LevelBigLinkedMap.this.wrappedMap.valueCodec.deserialize(next.getValue());
+                    if (nextInsOrder != null) {
+                        K key = insertionToOrderToKeyMap.valueCodec.deserialize(nextInsOrder.getValue());
+                        byte [] valueBytes = wrappedMap.valueCodec.serialize(wrappedMap.get(key));
+                        
+                        return LevelBigLinkedMap.this.wrappedMap.valueCodec.deserialize(valueBytes);
                     }
                     return null;
                 }
