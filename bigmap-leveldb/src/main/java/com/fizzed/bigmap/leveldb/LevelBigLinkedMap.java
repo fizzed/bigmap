@@ -20,47 +20,46 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import org.iq80.leveldb.DBIterator;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.print.attribute.UnmodifiableSetException;
 
-public class LevelBigLinkedMap<K,V> implements Map<K,V> {
+public class LevelBigLinkedMap<K, V> implements Map<K, V> {
 
     final private LevelBigMap<K, V> wrappedMap;
     final private LevelBigMap<K, Long> keyToInsertionOrderMap;
     final private LevelBigMap<Long, K> insertionToOrderToKeyMap;
 
     private AtomicLong c = new AtomicLong(0);
-    
-    LevelBigLinkedMap( Comparator<?> keyComparator ) {
+
+    LevelBigLinkedMap(Comparator<?> keyComparator) {
 
         // LevelBigMap builder
-        final LevelBigMap<K,V> wrappedMap = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(Object.class, keyComparator)
-            .setValueType(Object.class)
-            .build();
-        
+        final LevelBigMap<K, V> wrappedMap = new LevelBigMapBuilder()
+                .setScratchDirectory(Paths.get("target"))
+                .setKeyType(Object.class, keyComparator)
+                .setValueType(Object.class)
+                .build();
+
         this.wrappedMap = wrappedMap;
-        
-        final LevelBigMap<K,Long> keyToInsertionOrderMap = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("targetK2Order"))
-            .setKeyType(Object.class, keyComparator)
-            .setValueType(Long.class)
-            .build();
-        
+
+        final LevelBigMap<K, Long> keyToInsertionOrderMap = new LevelBigMapBuilder()
+                .setScratchDirectory(Paths.get("targetK2Order"))
+                .setKeyType(Object.class, keyComparator)
+                .setValueType(Long.class)
+                .build();
+
         this.keyToInsertionOrderMap = keyToInsertionOrderMap;
-        
+
         final LevelBigMap<Long, K> insertionToOrderToKeyMap = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("targetOrder2K"))
-            .setKeyType(Long.class, keyComparator)
-            .setValueType(Object.class)
-            .build();
-        
+                .setScratchDirectory(Paths.get("targetOrder2K"))
+                .setKeyType(Long.class, keyComparator)
+                .setValueType(Object.class)
+                .build();
+
         this.insertionToOrderToKeyMap = insertionToOrderToKeyMap;
     }
-    
+
     @Override
     public int size() {
         return this.wrappedMap.size();
@@ -102,17 +101,17 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
         Long insertionOrder = this.keyToInsertionOrderMap.remove(key);
         this.insertionToOrderToKeyMap.remove(insertionOrder);
         return this.wrappedMap.remove(key);
-        
+
     }
-    
+
     public K firstKey() {
         Long firstInsertionOrder = this.insertionToOrderToKeyMap.firstKey();
         return this.insertionToOrderToKeyMap.get(firstInsertionOrder);
     }
-    
+
     @Override
     public void putAll(Map<? extends K, ? extends V> arg0) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -124,23 +123,24 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
     @Override
     public Set<K> keySet() {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Collection<V> values() {
         this.wrappedMap.checkIfClosed();
-        
-        return new ValueCollectionView();    
+
+        return new ValueCollectionView();
     }
 
     @Override
-    public Set<Entry<K,V>> entrySet() {
-        
+    public Set<Entry<K, V>> entrySet() {
+
         return new LevelBigLinkedMap.EntrySetView();
     }
 
-    class EntrySetView implements Set<Entry<K,V>> {
+    class EntrySetView implements Set<Entry<K, V>> {
+
         @Override
         public int size() {
             return LevelBigLinkedMap.this.size();
@@ -153,13 +153,13 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public boolean contains(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
-        public Iterator<Entry<K,V>> iterator() {
-            
-            final DBIterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.db.iterator();
+        public Iterator<Entry<K, V>> iterator() {
+
+            final Iterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.entrySet().iterator();
 
             return new Iterator<Entry<K, V>>() {
                 @Override
@@ -168,13 +168,26 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
                 }
 
                 @Override
-                public Entry<K,V> next() {
-                    Entry<byte[],byte[]> nextInsOrder = itInsOrder.next();
-         
-                      if (nextInsOrder != null) {
-                          K key = insertionToOrderToKeyMap.valueCodec.deserialize(nextInsOrder.getValue());
-                          byte[] valueBytes = wrappedMap.valueCodec.serialize(wrappedMap.get(key));
-                        return wrappedMap.new EntryView(nextInsOrder.getValue(), valueBytes);
+                public Entry<K, V> next() {
+                    Entry<K, V> nextInsOrder = (Entry<K, V>) itInsOrder.next();
+                    if (nextInsOrder != null) {
+
+                        return new Entry<K, V>() {
+                            @Override
+                            public K getKey() {
+                                return (K) nextInsOrder.getValue();
+                            }
+
+                            @Override
+                            public V getValue() {
+                                return (V) wrappedMap.get((K) nextInsOrder.getValue());
+                            }
+
+                            @Override
+                            public V setValue(V value) {
+                                throw new UnsupportedOperationException("Not supported yet.");
+                            }
+                        };
                     }
                     return null;
                 }
@@ -192,7 +205,7 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
         }
 
         @Override
-        public boolean add(Entry<K,V> e) {
+        public boolean add(Entry<K, V> e) {
             throw new UnmodifiableSetException();
         }
 
@@ -203,11 +216,11 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
-        public boolean addAll(Collection<? extends Entry<K,V>> c) {
+        public boolean addAll(Collection<? extends Entry<K, V>> c) {
             throw new UnmodifiableSetException();
         }
 
@@ -225,7 +238,7 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
         public void clear() {
             LevelBigLinkedMap.this.clear();
         }
-                
+
     }
 
     class ValueCollectionView implements Collection<V> {
@@ -242,7 +255,8 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public Iterator<V> iterator() {
-            final DBIterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.db.iterator();
+
+            final Iterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.entrySet().iterator();
 
             return new Iterator<V>() {
                 @Override
@@ -252,14 +266,15 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
                 @Override
                 public V next() {
-                    // NOTE: this throws a NoSuchElementException is no element exists
-                    Entry<byte[], byte[]> nextInsOrder = itInsOrder.next();
+
+                    Entry<K, V> nextInsOrder = (Entry<K, V>) itInsOrder.next();
 
                     if (nextInsOrder != null) {
-                        K key = insertionToOrderToKeyMap.valueCodec.deserialize(nextInsOrder.getValue());
-                        byte [] valueBytes = wrappedMap.valueCodec.serialize(wrappedMap.get(key));
-                        
-                        return LevelBigLinkedMap.this.wrappedMap.valueCodec.deserialize(valueBytes);
+
+                        K key = (K) nextInsOrder.getValue();
+
+                        return LevelBigLinkedMap.this.wrappedMap.get(key);
+
                     }
                     return null;
                 }
@@ -268,22 +283,22 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public Object[] toArray() {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public <T> T[] toArray(T[] a) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public boolean add(V e) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public boolean remove(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
@@ -298,12 +313,12 @@ public class LevelBigLinkedMap<K,V> implements Map<K,V> {
 
         @Override
         public boolean removeAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public boolean retainAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); 
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
