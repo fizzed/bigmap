@@ -94,33 +94,32 @@ public class LevelBigMapBuilder<K,V> {
         return (LevelBigMapBuilder<K,V>)this;
     }
     
-    public LevelBigMap<K,V> build() {
+    private Path prepFolderDirectoryPath(final String folderName) {
+
         UUID uuid = UUID.randomUUID();
         Path resolvedScratchDir = this.scratchDirectory != null
-            ? this.scratchDirectory : Paths.get(".");
-        
+                ? this.scratchDirectory : Paths.get(".");
+
         Path directory = resolvedScratchDir;
         if (!this.persistent) {
-            directory = resolvedScratchDir.resolve("levelbigmap-" + uuid);
+            directory = resolvedScratchDir.resolve(folderName + "-" + uuid);
         }
+
+        return directory;
+    }
+    
+    public LevelBigMap<K,V> build() {
+
+        Path directory = prepFolderDirectoryPath("levelbigmap");
         
         return new LevelBigMap(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
     }
     
     public LevelBigLinkedMap<K,V> buildLinked() {
         
-        UUID uuid = UUID.randomUUID();
-        Path resolvedScratchDir = this.scratchDirectory != null
-            ? this.scratchDirectory : Paths.get(".");
+        Path directory = prepFolderDirectoryPath("levelbigmaplinked");
         
-        Path directory = resolvedScratchDir;
-        if (!this.persistent) {
-            directory = resolvedScratchDir.resolve("levelbiglinkedmap-" + uuid);
-        }
-        
-        return new LevelBigLinkedMap(this.keyComparator, keyClass, valueClass, directory);
-      
-        
+        return new LevelBigLinkedMap(this.keyComparator, keyClass, valueClass, directory);       
     }
 
 }
