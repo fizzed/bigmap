@@ -39,7 +39,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void putGetWithStrings() {
         LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(String.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -72,7 +72,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void putGetWithLongs() {
         LevelBigLinkedMap<Long, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(Long.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -102,7 +102,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void firstKey() {
         LevelBigLinkedMap<Long, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(Long.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -117,7 +117,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void firstKeyString() {
         LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(String.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -132,7 +132,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void ordering() {
         LevelBigLinkedMap<Long, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(Long.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -161,7 +161,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void clear() throws IOException {
         LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(String.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -185,7 +185,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void entrySet() {
         LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(String.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -216,7 +216,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void values() {
         LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(String.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -258,7 +258,7 @@ public class LevelBigLinkedMapTest {
     @Test
     public void keySet() {
         LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(String.class)
                 .setValueType(String.class)
                 .buildLinked();
@@ -302,11 +302,11 @@ public class LevelBigLinkedMapTest {
             return c;
         };
 
-        LevelBigMap<CustomKey, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
+        LevelBigLinkedMap<CustomKey, String> map = new LevelBigMapBuilder()
+                .setScratchDirectory(Paths.get("targetlinked"))
                 .setKeyType(CustomKey.class, keyComparator)
                 .setValueType(String.class)
-                .build();
+                .buildLinked();
 
         map.put(new CustomKey(0L, 1), "0-1");
         map.put(new CustomKey(1L, 5), "1-5");
@@ -318,13 +318,14 @@ public class LevelBigLinkedMapTest {
 
         Iterator<String> it = map.values().iterator();
 
-        assertThat(it.next(), is("15-1"));
-        assertThat(it.next(), is("10-6"));
-        assertThat(it.next(), is("3-1"));
+        assertThat(it.next(), is("0-1"));
+        assertThat(it.next(), is("1-5"));
         assertThat(it.next(), is("1-1"));
         assertThat(it.next(), is("1-2"));
-        assertThat(it.next(), is("1-5"));
-        assertThat(it.next(), is("0-1"));
+        assertThat(it.next(), is("3-1"));
+        assertThat(it.next(), is("10-6"));
+        assertThat(it.next(), is("15-1"));
+
     }
 
 }

@@ -15,12 +15,12 @@
  */
 package com.fizzed.bigmap.leveldb;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.print.attribute.UnmodifiableSetException;
 
@@ -31,30 +31,29 @@ public class LevelBigLinkedMap<K, V> implements Map<K, V> {
     final private LevelBigMap<Long, K> insertionToOrderToKeyMap;
 
     private AtomicLong c = new AtomicLong(0);
-
-    LevelBigLinkedMap(Comparator<?> keyComparator) {
-
-        // LevelBigMap builder
+  
+    LevelBigLinkedMap(Comparator<K> keyComparator, Class keyClass, Class valueClass, Path path) {
+        
         final LevelBigMap<K, V> wrappedMap = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("target"))
-                .setKeyType(Object.class, keyComparator)
-                .setValueType(Object.class)
+                .setScratchDirectory(path)
+                .setKeyType(keyClass, keyComparator)
+                .setValueType(valueClass)
                 .build();
-
+        
         this.wrappedMap = wrappedMap;
 
         final LevelBigMap<K, Long> keyToInsertionOrderMap = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetK2Order"))
-                .setKeyType(Object.class, keyComparator)
+                .setScratchDirectory(path)
+                .setKeyType(keyClass, keyComparator)
                 .setValueType(Long.class)
                 .build();
 
         this.keyToInsertionOrderMap = keyToInsertionOrderMap;
 
         final LevelBigMap<Long, K> insertionToOrderToKeyMap = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetOrder2K"))
-                .setKeyType(Long.class, keyComparator)
-                .setValueType(Object.class)
+                .setScratchDirectory(path)
+                .setKeyType(Long.class, Comparator.comparingLong(Long::longValue))
+                .setValueType(keyClass)
                 .build();
 
         this.insertionToOrderToKeyMap = insertionToOrderToKeyMap;
@@ -159,7 +158,7 @@ public class LevelBigLinkedMap<K, V> implements Map<K, V> {
         @Override
         public Iterator<Entry<K, V>> iterator() {
 
-            final Iterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.entrySet().iterator();
+            final Iterator<Entry<Long, K>> itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.entrySet().iterator();
 
             return new Iterator<Entry<K, V>>() {
                 @Override
@@ -169,18 +168,18 @@ public class LevelBigLinkedMap<K, V> implements Map<K, V> {
 
                 @Override
                 public Entry<K, V> next() {
-                    Entry<K, V> nextInsOrder = (Entry<K, V>) itInsOrder.next();
+                    Entry<Long, K> nextInsOrder = itInsOrder.next();
                     if (nextInsOrder != null) {
 
                         return new Entry<K, V>() {
                             @Override
                             public K getKey() {
-                                return (K) nextInsOrder.getValue();
+                                return  nextInsOrder.getValue();
                             }
 
                             @Override
                             public V getValue() {
-                                return (V) wrappedMap.get((K) nextInsOrder.getValue());
+                                return wrappedMap.get( nextInsOrder.getValue());
                             }
 
                             @Override
@@ -256,7 +255,7 @@ public class LevelBigLinkedMap<K, V> implements Map<K, V> {
         @Override
         public Iterator<V> iterator() {
 
-            final Iterator itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.entrySet().iterator();
+            final Iterator<Entry<Long, K>> itInsOrder = LevelBigLinkedMap.this.insertionToOrderToKeyMap.entrySet().iterator();
 
             return new Iterator<V>() {
                 @Override
@@ -267,11 +266,11 @@ public class LevelBigLinkedMap<K, V> implements Map<K, V> {
                 @Override
                 public V next() {
 
-                    Entry<K, V> nextInsOrder = (Entry<K, V>) itInsOrder.next();
+                    Entry<Long, K> nextInsOrder = itInsOrder.next();
 
                     if (nextInsOrder != null) {
 
-                        K key = (K) nextInsOrder.getValue();
+                        K key = nextInsOrder.getValue();
 
                         return LevelBigLinkedMap.this.wrappedMap.get(key);
 
