@@ -30,6 +30,8 @@ public class LevelBigMapBuilder<K,V> {
     protected boolean persistent;
     protected boolean counts;
     protected long cacheSize;
+    protected Class<K> keyClass;
+    protected Class<V> valueClass;
     protected ByteCodec<?> keyCodec;
     protected Comparator<?> keyComparator;
     protected ByteCodec<?> valueCodec;
@@ -60,47 +62,64 @@ public class LevelBigMapBuilder<K,V> {
         return this;
     }
     
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType) {
+    public LevelBigMapBuilder<K,V> setKeyType(Class<K> keyType) {
         return this.setKeyType(keyType, autoCodec(keyType));
     }
 
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType, Comparator<N> keyComparator) {
+    public LevelBigMapBuilder<K,V> setKeyType(Class<K> keyType, Comparator<K> keyComparator) {
         return this.setKeyType(keyType, autoCodec(keyType), keyComparator);
     }
 
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec) {
+    public LevelBigMapBuilder<K,V> setKeyType(Class<K> keyType, ByteCodec<K> keyCodec) {
         return this.setKeyType(keyType, keyCodec, autoComparator(keyType));
     }
 
-    public <N> LevelBigMapBuilder<N,V> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec, Comparator<N> keyComparator) {
+    public LevelBigMapBuilder<K,V> setKeyType(Class<K> keyType, ByteCodec<K> keyCodec, Comparator<K> keyComparator) {
         Objects.requireNonNull(keyType, "keyType was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
         Objects.requireNonNull(keyComparator, "keyComparator was null");
+        this.keyClass = keyType;
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
-        return (LevelBigMapBuilder<N,V>)this;
+        return (LevelBigMapBuilder<K,V>)this;
     }
 
-    public <N> LevelBigMapBuilder<K,N> setValueType(Class<N> valueType) {
+    public LevelBigMapBuilder<K,V> setValueType(Class<V> valueType) {
         return this.setValueType(valueType, autoCodec(valueType));
     }
 
-    public <N> LevelBigMapBuilder<K,N> setValueType(Class<N> valueType, ByteCodec<N> valueCodec) {
+    public LevelBigMapBuilder<K,V> setValueType(Class<V> valueType, ByteCodec<V> valueCodec) {
+        this.valueClass = valueType;
         this.valueCodec = valueCodec;
-        return (LevelBigMapBuilder<K,N>)this;
+        return (LevelBigMapBuilder<K,V>)this;
+    }
+    
+    private Path prepFolderDirectoryPath(final String folderName) {
+
+        UUID uuid = UUID.randomUUID();
+        Path resolvedScratchDir = this.scratchDirectory != null
+                ? this.scratchDirectory : Paths.get(".");
+
+        Path directory = resolvedScratchDir;
+        if (!this.persistent) {
+            directory = resolvedScratchDir.resolve(folderName + "-" + uuid);
+        }
+
+        return directory;
     }
     
     public LevelBigMap<K,V> build() {
-        UUID uuid = UUID.randomUUID();
-        Path resolvedScratchDir = this.scratchDirectory != null
-            ? this.scratchDirectory : Paths.get(".");
-        
-        Path directory = resolvedScratchDir;
-        if (!this.persistent) {
-            directory = resolvedScratchDir.resolve("levelbigmap-" + uuid);
-        }
+
+        Path directory = prepFolderDirectoryPath("levelbigmap");
         
         return new LevelBigMap(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
     }
     
+    public LevelBigLinkedMap<K,V> buildLinked() {
+        
+        Path directory = prepFolderDirectoryPath("levelbigmaplinked");
+        
+        return new LevelBigLinkedMap(this.keyComparator, keyClass, valueClass, directory);       
+    }
+
 }
