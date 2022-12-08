@@ -16,12 +16,15 @@
 package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.crux.util.StopWatch;
+import org.h2.mvstore.MVStore;
+import oshi.SystemInfo;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
+
+import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class PerfDemo {
  
@@ -35,40 +38,80 @@ public class PerfDemo {
         String g;
         Integer h;
     }
-    
+
+    static OperatingSystem os = new SystemInfo().getOperatingSystem();
+
     static public void printMemory() {
         System.out.println("Memory Used (MB): " + (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024*1024));
+
+        OSProcess process = os.getCurrentProcess();
+        long rss = process.getResidentSetSize();
+
+        System.out.println("PID " + process.getProcessID() + ", RSS (MB): " + (double)(rss/(1024*1024)));
     }
-    
-    static public void main(String[] args) throws Exception {
-        final LevelBigMap<String,Item> map = new LevelBigMapBuilder()
+
+    static public Map<String,Item> buildMap() {
+        final Map<String,Item> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
+            .setCacheSize(2)
             .setKeyType(String.class)
             .setValueType(Item.class)
             .build();
 
+//        final Map<String,Item> map = new LevelBigLinkedMapBuilder()
+//            .setScratchDirectory(Paths.get("target"))
+//            .setCacheSize(2 * 1048576L)
+//            .setKeyType(String.class)
+//            .setValueType(Item.class)
+//            .build();
+
 //        final TreeMap<String,Item> map = new TreeMap<>();
 //        final Map<String,Item> map = new HashMap<>();
 //        final Map<String,Item> map = new LinkedHashMap<>();
-        
+
+        // open the store (in-memory if fileName is null)
+//        MVStore s = new MVStore.Builder()
+//            .fileName(Paths.get("target/mvstore-"+UUID.randomUUID()).toAbsolutePath().toString())
+//            .cacheSize(2)
+//            .open();
+//
+//        // create/get the map named "data"
+//        final Map<String,Item> map = s.openMap("data");
+
+        return map;
+    }
+    
+    static public void main(String[] args) throws Exception {
+        int mapCount = 10;
+        int iterations = 1000000;
+
+        final List<Map<String,Item>> maps = new ArrayList<>(mapCount);
+        for (int i = 0; i < mapCount; i++) {
+            maps.add(buildMap());
+        }
+
         printMemory();
         
         StopWatch writeTimer = StopWatch.timeMillis();
-        for (int i = 0; i < 100000; i++) {
-            if (i % 5000 == 0) {
-                System.out.print("@ iteration " + i + " -> ");
-                printMemory();
+
+        for (int j = 0; j < mapCount; j++) {
+            Map<String,Item> map = maps.get(j);
+            for (int i = 0; i < 1000000; i++) {
+                if (i % 5000 == 0) {
+                    System.out.print("map #" + j + " @ iteration " + i + " -> ");
+                    printMemory();
+                }
+                Item item = new Item();
+                item.a = (long) i;
+                item.b = "This is sooooo cool dude! " + i;
+                item.c = "Look mom no hands " + i;
+                item.d = "Woooo baby! " + i;
+                item.e = "Woza! " + i;
+                item.g = "Blah blah aljlfjalfrjsd;lfjsdlfjsdlafjsdlfjsdlfjsdlfjsldafjlsdfjsdlfjsdlfjsdalfjsdlfjsdlfjdsjf" + i;
+                item.h = i;
+
+                map.put(i + "", item);
             }
-            Item item = new Item();
-            item.a = (long)i;
-            item.b = "This is sooooo cool dude! " + i;
-            item.c = "Look mom no hands " + i;
-            item.d = "Woooo baby! " + i;
-            item.e = "Woza! " + i;
-            item.g = "Blah blah aljlfjalfrjsd;lfjsdlfjsdlafjsdlfjsdlfjsdlfjsldafjlsdfjsdlfjsdlfjsdalfjsdlfjsdlfjdsjf" + i;
-            item.h = i;
-            
-            map.put(i+"", item);
         }
         
         System.out.println("Took "+writeTimer+" to populate map");
@@ -79,9 +122,13 @@ public class PerfDemo {
         // intensive read back now
         StopWatch readTimer = StopWatch.timeMillis();
         int readCount = 0;
-        for (int i = 0; i < map.size(); i+=100) {
-            map.get(i+"");
-            readCount++;
+
+        for (int j = 0; j < mapCount; j++) {
+            Map<String, Item> map = maps.get(j);
+            for (int i = 0; i < map.size(); i += 100) {
+                map.get(i + "");
+                readCount++;
+            }
         }
         
         System.out.println("Took "+readTimer+" to fetch "+readCount+" random items");
@@ -92,7 +139,7 @@ public class PerfDemo {
         printMemory();
         
         // this forces JVM to NOT gc map yet!
-        map.get("1");
+        maps.get(0).get("1");
         
         
 //        System.out.println("Map had "+map.getKeyByteSize()+" key bytes and "+map.getValueByteSize()+" value bytes");

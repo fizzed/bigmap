@@ -20,30 +20,21 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.UUID;
+
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.Matchers.aMapWithSize;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.fail;
 
 public class LevelBigMapTest {
  
     @Test
     public void putGetWithStrings() {
-        LevelBigMap<String,String> map = new LevelBigMapBuilder()
+        final Map<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
@@ -71,13 +62,11 @@ public class LevelBigMapTest {
         
         assertThat(removed1, is("2"));
         assertThat(map.size(), is(1));
-        
-        System.out.println("Map is using key_bytes=" + map.getKeyByteSize() + " and value_bytes=" + map.getValueByteSize());
     }
  
     @Test
     public void putGetWithLongs() {
-        LevelBigMap<Long,String> map = new LevelBigMapBuilder()
+        final Map<Long,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(Long.class)
             .setValueType(String.class)
@@ -107,23 +96,57 @@ public class LevelBigMapTest {
  
     @Test
     public void firstKey() {
-        LevelBigMap<Long,String> map = new LevelBigMapBuilder()
+        final SortedMap<Long,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(Long.class)
             .setValueType(String.class)
             .build();
-        
+
+        try {
+            map.firstKey(); // java map throws a NoSuchElementException
+            fail();
+        }
+        catch (NoSuchElementException e) {
+            // expected
+        }
+
         map.put(5L,"5");
-        map.put(1L, "1");
         map.put(2L, "2");
+        map.put(1L, "1");
         
         assertThat(map.firstKey(), is(1L));
-//        assertThat(map.lastKey(), is(5L));
+        assertThat(map, aMapWithSize(3));
+        assertThat(map.isEmpty(), is(false));
+
+        map.remove(1L);
+
+        assertThat(map.firstKey(), is(2L));
+        assertThat(map, aMapWithSize(2));
+        assertThat(map.isEmpty(), is(false));
+
+        map.remove(2L);
+
+        assertThat(map.firstKey(), is(5L));
+        assertThat(map, aMapWithSize(1));
+        assertThat(map.isEmpty(), is(false));
+
+        map.remove(5L);
+
+        assertThat(map, aMapWithSize(0));
+        assertThat(map.isEmpty(), is(true));
+
+        try {
+            map.firstKey(); // java map throws a NoSuchElementException
+            fail();
+        }
+        catch (NoSuchElementException e) {
+            // expected
+        }
     }
     
     @Test
     public void ordering() {
-        LevelBigMap<Long,String> map = new LevelBigMapBuilder()
+        final Map<Long,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(Long.class)
             .setValueType(String.class)
@@ -136,8 +159,8 @@ public class LevelBigMapTest {
         map.put(3L, "3");
         map.put(2L, "2");
 
-        List<String> values = map.entrySet().stream()
-            .map(entry -> entry.getValue())
+        final List<String> values = map.values()
+            .stream()
             .collect(toList());
 
         assertThat(values.get(0), is("-10"));
@@ -150,7 +173,7 @@ public class LevelBigMapTest {
     
     @Test
     public void byteSizeTracking() {
-        LevelBigMap<String,String> map = new LevelBigMapBuilder()
+        final LevelBigMap<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
@@ -173,12 +196,11 @@ public class LevelBigMapTest {
         
         assertThat(map.getKeyByteSize(), is(1L));
         assertThat(map.getValueByteSize(), is(9L));
-        
     }
     
     @Test
     public void clear() throws IOException {
-        LevelBigMap<String,String> map = new LevelBigMapBuilder()
+        final LevelBigMap<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
@@ -209,21 +231,94 @@ public class LevelBigMapTest {
         assertThat(map.getKeyByteSize(), is(2L));
         assertThat(map.getValueByteSize(), is(2L));
     }
-    
+
     @Test
-    public void entrySet() {
-        LevelBigMap<String,String> map = new LevelBigMapBuilder()
+    public void containsKey() throws IOException {
+        final Map<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
             .build();
 
-        map.put("1", "123456789");
-        map.put("2", "-10");
-        
+        map.put("1", "1");
+        map.put("2", "2");
+
+        assertThat(map, aMapWithSize(2));
+
+        assertThat(map.containsKey("1"), is(true));
+        assertThat(map.containsKey("2"), is(true));
+        assertThat(map.containsKey("0"), is(false));
+        assertThat(map.containsKey(""), is(false));
+        assertThat(map.containsKey(null), is(false));
+
+        map.remove("1");
+
+        assertThat(map.containsKey("1"), is(false));
+        assertThat(map.containsKey("2"), is(true));
+
+        map.remove("2");
+
+        assertThat(map.containsKey("1"), is(false));
+        assertThat(map.containsKey("2"), is(false));
+    }
+
+    @Test
+    public void remove() throws IOException {
+        final Map<String,String> map = new LevelBigMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(String.class)
+            .setValueType(String.class)
+            .build();
+
+        map.put("1", "1");
+        map.put("2", "2");
+
+        assertThat(map, aMapWithSize(2));
+
+        String removed;
+
+        removed = map.remove("0");
+
+        assertThat(map, aMapWithSize(2));
+        assertThat(removed, is(nullValue()));
+        assertThat(map.values().stream().collect(toList()), hasItems("1", "2"));
+
+        removed = map.remove("1");
+
+        assertThat(map, aMapWithSize(1));
+        assertThat(removed, is("1"));
+        assertThat(map.values().stream().collect(toList()), hasItems("2"));
+
+        // try to remove it again
+        removed = map.remove("1");
+
+        assertThat(map, aMapWithSize(1));
+        assertThat(removed, is(nullValue()));
+        assertThat(map.values().stream().collect(toList()), hasItems("2"));
+
+        removed = map.remove("2");
+
+        assertThat(map, aMapWithSize(0));
+        assertThat(removed, is("2"));
+        assertThat(map.values().stream().collect(toList()), hasSize(0));
+    }
+    
+    @Test
+    public void entrySet() {
+        final Map<String,String> map = new LevelBigMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(String.class)
+            .setValueType(String.class)
+            .build();
+
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put("3", "3");
+        map.put("4", "4");
+
         Set<Map.Entry<String,String>> entrySet = map.entrySet();
         
-        assertThat(entrySet.size(), is(2));
+        assertThat(entrySet.size(), is(4));
         assertThat(entrySet.isEmpty(), is(false));
         
         Iterator<Map.Entry<String, String>> it = entrySet.iterator();
@@ -231,6 +326,8 @@ public class LevelBigMapTest {
         assertThat(it.hasNext(), is(true));
         assertThat(it.next().getKey(), is("1"));
         assertThat(it.next().getKey(), is("2"));
+        assertThat(it.next().getKey(), is("3"));
+        assertThat(it.next().getKey(), is("4"));
         assertThat(it.hasNext(), is(false));
         
         try {
@@ -239,11 +336,42 @@ public class LevelBigMapTest {
         } catch (NoSuchElementException e) {
             // expected
         }
+
+        // test removal
+        map.remove("1");
+
+        List<Map.Entry<String,String>> ar = map.entrySet().stream().collect(toList());
+
+        assertThat(ar, hasSize(3));
+        assertThat(ar.get(0).getKey(), is("2"));
+        assertThat(ar.get(1).getKey(), is("3"));
+        assertThat(ar.get(2).getKey(), is("4"));
+
+        map.remove("3");
+
+        ar = map.entrySet().stream().collect(toList());
+
+        assertThat(ar, hasSize(2));
+        assertThat(ar.get(0).getKey(), is("2"));
+        assertThat(ar.get(1).getKey(), is("4"));
+
+        map.remove("4");
+
+        ar = map.entrySet().stream().collect(toList());
+
+        assertThat(ar, hasSize(1));
+        assertThat(ar.get(0).getKey(), is("2"));
+
+        map.remove("2");
+
+        ar = map.entrySet().stream().collect(toList());
+
+        assertThat(ar, hasSize(0));
     }
     
     @Test
     public void keySet() {
-        LevelBigMap<String,String> map = new LevelBigMapBuilder()
+        final Map<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
@@ -283,6 +411,13 @@ public class LevelBigMapTest {
         keys.remove("1");
         
         assertThat(keys, hasSize(2));
+
+        it = keys.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next(), is("2"));
+        assertThat(it.next(), is("a"));
+        assertThat(it.hasNext(), is(false));
         
         keys.clear();
         
@@ -292,7 +427,7 @@ public class LevelBigMapTest {
     
     @Test
     public void values() {
-        LevelBigMap<String,String> map = new LevelBigMapBuilder()
+        final Map<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
@@ -330,6 +465,40 @@ public class LevelBigMapTest {
         
         assertThat(values.isEmpty(), is(true));
         assertThat(values.size(), is(0));
+
+        // test removal of items too
+        map.put("2", "2");
+        map.put("3", "3");
+        map.put("1", "1");
+        map.put("4", "4");
+
+        List<String> ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasItems("1", "2", "3", "4"));
+
+        map.remove("1");
+
+        ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasItems("2", "3", "4"));
+
+        map.remove("4");
+
+        ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasItems("2", "3"));
+
+        map.remove("2");
+
+        ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasItems("3"));
+
+        map.remove("3");
+
+        ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasSize(0));
     }
     
     static public class CustomKey implements Serializable {
@@ -356,7 +525,7 @@ public class LevelBigMapTest {
             return c;
         };
         
-        LevelBigMap<CustomKey,String> map = new LevelBigMapBuilder()
+        final Map<CustomKey,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(CustomKey.class, keyComparator)
             .setValueType(String.class)

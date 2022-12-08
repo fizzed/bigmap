@@ -17,17 +17,15 @@ package com.fizzed.bigmap.leveldb;
 
 import static com.fizzed.bigmap.BigMapHelper.sizeOf;
 import com.fizzed.bigmap.BigMapNonScalableException;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedMap;
+
+import java.util.*;
 import javax.print.attribute.UnmodifiableSetException;
 import org.iq80.leveldb.DBIterator;
 import com.fizzed.bigmap.ByteCodec;
+import org.iq80.leveldb.WriteOptions;
+
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 
 public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements SortedMap<K,V> {
 
@@ -111,7 +109,7 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     @Override
     public V remove(Object key) {
         this.checkIfClosed();
-        
+
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
         byte[] valueBytes = this.db.get(keyBytes);
@@ -159,8 +157,13 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     @Override
     public K firstKey() {
         this.checkIfClosed();
-        
+
+        if (this.isEmpty()) {
+            throw new NoSuchElementException("Map is empty");
+        }
+
         DBIterator it = this.db.iterator();
+        it.seekToFirst();
         Entry<byte[], byte[]> firstEntry = it.next();
         if (firstEntry != null) {
             return this.keyCodec.deserialize(firstEntry.getKey());
@@ -170,16 +173,16 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
     @Override
     public K lastKey() {
-        this.checkIfClosed();
-        
-        throw new UnsupportedOperationException("Not supported yet");
-//        DBIterator it = this.db.iterator();
-//        it.seekToLast();
-//        Entry<byte[], byte[]> lastEntry = it.next();
-//        if (lastEntry != null) {
-//            return this.keyCodec.deserialize(lastEntry.getKey());
-//        }
-//        return null;
+        throw new UnsupportedOperationException();
+        /*this.checkIfClosed();
+
+        DBIterator it = this.db.iterator();
+        it.seekToLast();
+        Entry<byte[],byte[]> lastEntry = it.prev();
+        if (lastEntry != null) {
+            return this.keyCodec.deserialize(lastEntry.getKey());
+        }
+        return null;*/
     }
 
     @Override
@@ -250,6 +253,7 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
         @Override
         public Iterator<V> iterator() {
             final DBIterator it = LevelBigMap.this.db.iterator();
+            it.seekToFirst();
             return new Iterator<V>() {
                 @Override
                 public boolean hasNext() {
@@ -334,6 +338,7 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
         @Override
         public Iterator<Entry<K,V>> iterator() {
             final DBIterator it = LevelBigMap.this.db.iterator();
+            it.seekToFirst();
 
             return new Iterator<Entry<K, V>>() {
                 @Override

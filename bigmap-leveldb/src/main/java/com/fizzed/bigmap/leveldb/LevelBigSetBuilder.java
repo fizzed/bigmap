@@ -80,16 +80,9 @@ public class LevelBigSetBuilder<K> {
     }
     
     public LevelBigSet<K> build() {
-        UUID uuid = UUID.randomUUID();
-        Path resolvedScratchDir = this.scratchDirectory != null
-            ? this.scratchDirectory : Paths.get(".");
-        
-        Path directory = resolvedScratchDir;
-        if (!this.persistent) {
-            directory = resolvedScratchDir.resolve("levelbigset-" + uuid);
-        }
-        
-        return new LevelBigSet(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator);
+        final Path dir = LevelBigMapHelper.prepFolderDirectoryPath(this.scratchDirectory, this.persistent, "levelbigset");
+
+        return new LevelBigSet(this.persistent, this.counts, dir, this.cacheSize, this.keyCodec, this.keyComparator);
     }
     
 }

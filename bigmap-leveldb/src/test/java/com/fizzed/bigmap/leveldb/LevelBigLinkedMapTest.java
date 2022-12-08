@@ -18,18 +18,15 @@ package com.fizzed.bigmap.leveldb;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.junit.Assert.fail;
@@ -37,12 +34,12 @@ import static org.junit.Assert.fail;
 public class LevelBigLinkedMapTest {
 
     @Test
-    public void putGetWithStrings() {
-        LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(String.class)
-                .setValueType(String.class)
-                .buildLinked();
+    public void putAndGet() {
+        final Map<String, String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(String.class)
+            .setValueType(String.class)
+            .build();
 
         map.put("a", "1");
 
@@ -66,76 +63,42 @@ public class LevelBigLinkedMapTest {
 
         assertThat(removed1, is("2"));
         assertThat(map.size(), is(1));
-
-    }
-
-    @Test
-    public void putGetWithLongs() {
-        LevelBigLinkedMap<Long, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(Long.class)
-                .setValueType(String.class)
-                .buildLinked();
-
-        map.put(1L, "1");
-
-        assertThat(map, hasKey(1L));
-        assertThat(map.get(1L), is("1"));
-        assertThat(map.size(), is(1));
-        assertThat(map.isEmpty(), is(false));
-
-        map.remove(1L);
-
-        assertThat(map.get(1L), is(nullValue()));
-        assertThat(map.size(), is(0));
-        assertThat(map.isEmpty(), is(true));
-
-        String removed = map.put(2L, "2");
-
-        assertThat(removed, is(nullValue()));
-
-        String removed1 = map.put(2L, "3");
-
-        assertThat(removed1, is("2"));
     }
 
     @Test
     public void firstKey() {
-        LevelBigLinkedMap<Long, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(Long.class)
-                .setValueType(String.class)
-                .buildLinked();
+        final SortedMap<Long,String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(Long.class)
+            .setValueType(String.class)
+            .build();
+
+        try {
+            map.firstKey(); // java map throws a NoSuchElementException
+            fail();
+        }
+        catch (NoSuchElementException e) {
+            // expected
+        }
 
         map.put(5L, "5");
-        map.put(1L, "1");
         map.put(2L, "2");
+        map.put(1L, "1");   // this would normally be first in a sorted map, but the first element inserted is 5L
 
         assertThat(map.firstKey(), is(5L));
-    }
 
-    @Test
-    public void firstKeyString() {
-        LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(String.class)
-                .setValueType(String.class)
-                .buildLinked();
+        map.remove(5L);
 
-        map.put("Z", "5");
-        map.put("A", "1");
-        map.put("C", "2");
-
-        assertThat(map.firstKey(), is("Z"));
+        assertThat(map.firstKey(), is(2L));
     }
 
     @Test
     public void ordering() {
-        LevelBigLinkedMap<Long, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(Long.class)
-                .setValueType(String.class)
-                .buildLinked();
+        final Map<Long,String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(Long.class)
+            .setValueType(String.class)
+            .build();
 
         map.put(123456789L, "123456789");
         map.put(-10L, "-10");
@@ -144,11 +107,9 @@ public class LevelBigLinkedMapTest {
         map.put(3L, "3");
         map.put(2L, "2");
 
-        System.out.println(map.toString());
-
-        List<String> values = map.entrySet().stream()
-                .map(entry -> entry.getValue())
-                .collect(toList());
+        final List<String> values = map.values()
+            .stream()
+            .collect(toList());
 
         assertThat(values.get(0), is("123456789"));
         assertThat(values.get(1), is("-10"));
@@ -159,12 +120,68 @@ public class LevelBigLinkedMapTest {
     }
 
     @Test
+    public void remove() throws IOException {
+        final SortedMap<Integer,String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
+
+        map.put(4, "4");
+        map.put(1, "1");
+        map.put(1, "1replaced");
+        map.put(2, "2");
+
+        assertThat(map, aMapWithSize(3));
+        assertThat(map.firstKey(), is(4));
+        assertThat(map.get(1), is("1replaced"));
+
+        String removed;
+
+        removed = map.remove(0);
+
+        assertThat(map, aMapWithSize(3));
+        assertThat(map.firstKey(), is(4));
+        assertThat(removed, is(nullValue()));
+
+        removed = map.remove(1);
+
+        assertThat(map, aMapWithSize(2));
+        assertThat(map.firstKey(), is(4));
+        assertThat(removed, is("1replaced"));
+
+        // try to remove it again
+        removed = map.remove(1);
+
+        assertThat(map, aMapWithSize(2));
+        assertThat(removed, is(nullValue()));
+
+        removed = map.remove(4);
+
+        assertThat(map, aMapWithSize(1));
+        assertThat(removed, is("4"));
+        assertThat(map.firstKey(), is(2));
+
+        removed = map.remove(2);
+
+        assertThat(map, aMapWithSize(0));
+        assertThat(removed, is("2"));
+
+        try {
+            map.firstKey();
+            fail();
+        } catch (NoSuchElementException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void clear() throws IOException {
-        LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(String.class)
-                .setValueType(String.class)
-                .buildLinked();
+        LevelBigLinkedMap<String, String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(String.class)
+            .setValueType(String.class)
+            .build();
 
         map.put("1", "123456789");
         map.put("2", "-10");
@@ -179,30 +196,33 @@ public class LevelBigLinkedMapTest {
         map.put("3", "5");
 
         assertThat(map, aMapWithSize(2));
-
     }
 
     @Test
     public void entrySet() {
-        LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(String.class)
-                .setValueType(String.class)
-                .buildLinked();
+        final Map<Integer,String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
 
-        map.put("2", "-10");
-        map.put("1", "123456789");
+        map.put(3, "3");
+        map.put(2, "-10");
+        map.put(1, "123456789");
+        map.put(4, "4");
 
-        Set<Map.Entry<String, String>> entrySet = map.entrySet();
+        Set<Map.Entry<Integer,String>> entrySet = map.entrySet();
 
-        assertThat(entrySet.size(), is(2));
+        assertThat(entrySet.size(), is(4));
         assertThat(entrySet.isEmpty(), is(false));
 
-        Iterator<Map.Entry<String, String>> it = entrySet.iterator();
+        Iterator<Map.Entry<Integer,String>> it = entrySet.iterator();
 
         assertThat(it.hasNext(), is(true));
-        assertThat(it.next().getKey(), is("2"));
-        assertThat(it.next().getKey(), is("1"));
+        assertThat(it.next().getKey(), is(3));
+        assertThat(it.next().getKey(), is(2));
+        assertThat(it.next().getKey(), is(1));
+        assertThat(it.next().getKey(), is(4));
         assertThat(it.hasNext(), is(false));
 
         try {
@@ -215,14 +235,14 @@ public class LevelBigLinkedMapTest {
 
     @Test
     public void values() {
-        LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(String.class)
-                .setValueType(String.class)
-                .buildLinked();
+        final Map<Integer,String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
 
-        map.put("2", "-10");
-        map.put("1", "123456789");
+        map.put(2, "2");
+        map.put(1, "1");
 
         Collection<String> values = map.values();
 
@@ -230,16 +250,16 @@ public class LevelBigLinkedMapTest {
         assertThat(values.isEmpty(), is(false));
 
         // test if map backing it changes, this works
-        map.put("a", "b");
+        map.put(0, "0");
 
         assertThat(values.size(), is(3));
 
         Iterator<String> it = values.iterator();
 
         assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("-10"));
-        assertThat(it.next(), is("123456789"));
-        assertThat(it.next(), is("b"));
+        assertThat(it.next(), is("2"));
+        assertThat(it.next(), is("1"));
+        assertThat(it.next(), is("0"));
         assertThat(it.hasNext(), is(false));
 
         try {
@@ -249,6 +269,19 @@ public class LevelBigLinkedMapTest {
             // expected
         }
 
+        // test removal
+        map.remove(2);
+
+        List<String> ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasItems("1", "0"));
+
+        map.remove(0);
+
+        ar = map.values().stream().collect(toList());
+
+        assertThat(ar, hasItems("1"));
+
         values.clear();
 
         assertThat(values.isEmpty(), is(true));
@@ -257,75 +290,50 @@ public class LevelBigLinkedMapTest {
 
     @Test
     public void keySet() {
-        LevelBigLinkedMap<String, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(String.class)
-                .setValueType(String.class)
-                .buildLinked();
+        final Map<Integer,String> map = new LevelBigLinkedMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(Integer.class)
+            .setValueType(String.class)
+            .build();
 
-        map.put("22", "123456789");
-        map.put("1", "111");
-        map.put("2", "-10");
+        map.put(3, "3");
+        map.put(2, "2");
+        map.put(1, "1");
+        map.put(4, "4");
+
+        Set<Integer> entrySet = map.keySet();
+
+        assertThat(entrySet.size(), is(4));
+        assertThat(entrySet.isEmpty(), is(false));
+
+        Iterator<Integer> it = entrySet.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next(), is(3));
+        assertThat(it.next(), is(2));
+        assertThat(it.next(), is(1));
+        assertThat(it.next(), is(4));
+        assertThat(it.hasNext(), is(false));
 
         try {
-            Set<String> keys = map.keySet();
-
-            assertThat(keys.size(), is(3));
-
-        } catch (UnsupportedOperationException ex) {
+            it.next();
+            fail();
+        } catch (NoSuchElementException e) {
             // expected
         }
 
-    }
+        // test removal
+        map.remove(3);
 
-    static public class CustomKey implements Serializable {
+        List<Integer> ar = map.keySet().stream().collect(toList());
 
-        Long a;
-        Integer b;
+        assertThat(ar, hasItems(2, 1, 4));
 
-        public CustomKey(Long a, Integer b) {
-            this.a = a;
-            this.b = b;
-        }
+        map.remove(4);
 
-    }
+        ar = map.keySet().stream().collect(toList());
 
-    @Test
-    public void customComparator() {
-        Comparator<CustomKey> keyComparator = (CustomKey o1, CustomKey o2) -> {
-            // right first then left for A
-            int c = o2.a.compareTo(o1.a);
-            if (c == 0) {
-                // left first then right for B
-                c = o1.b.compareTo(o2.b);
-            }
-            return c;
-        };
-
-        LevelBigLinkedMap<CustomKey, String> map = new LevelBigMapBuilder()
-                .setScratchDirectory(Paths.get("targetlinked"))
-                .setKeyType(CustomKey.class, keyComparator)
-                .setValueType(String.class)
-                .buildLinked();
-
-        map.put(new CustomKey(0L, 1), "0-1");
-        map.put(new CustomKey(1L, 5), "1-5");
-        map.put(new CustomKey(1L, 1), "1-1");
-        map.put(new CustomKey(1L, 2), "1-2");
-        map.put(new CustomKey(3L, 1), "3-1");
-        map.put(new CustomKey(10L, 6), "10-6");
-        map.put(new CustomKey(15L, 1), "15-1");
-
-        Iterator<String> it = map.values().iterator();
-
-        assertThat(it.next(), is("0-1"));
-        assertThat(it.next(), is("1-5"));
-        assertThat(it.next(), is("1-1"));
-        assertThat(it.next(), is("1-2"));
-        assertThat(it.next(), is("3-1"));
-        assertThat(it.next(), is("10-6"));
-        assertThat(it.next(), is("15-1"));
-
+        assertThat(ar, hasItems(2, 1));
     }
 
 }

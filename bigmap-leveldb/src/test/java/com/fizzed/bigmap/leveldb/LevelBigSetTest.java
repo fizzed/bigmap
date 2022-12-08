@@ -114,14 +114,18 @@ public class LevelBigSetTest {
             .setKeyType(String.class)
             .build();
 
+        set.add("4");
         set.add("1");
+        set.add("3");
         set.add("2");
-        
+
         Iterator<String> it = set.iterator();
 
         assertThat(it.hasNext(), is(true));
         assertThat(it.next(), is("1"));
         assertThat(it.next(), is("2"));
+        assertThat(it.next(), is("3"));
+        assertThat(it.next(), is("4"));
         assertThat(it.hasNext(), is(false));
         
         try {
@@ -130,6 +134,40 @@ public class LevelBigSetTest {
         } catch (NoSuchElementException e) {
             // expected
         }
+
+        // test removal
+        set.remove("1");
+
+        it = set.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next(), is("2"));
+        assertThat(it.next(), is("3"));
+        assertThat(it.next(), is("4"));
+        assertThat(it.hasNext(), is(false));
+
+        set.remove("3");
+
+        it = set.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next(), is("2"));
+        assertThat(it.next(), is("4"));
+        assertThat(it.hasNext(), is(false));
+
+        set.remove("4");
+
+        it = set.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(it.next(), is("2"));
+        assertThat(it.hasNext(), is(false));
+
+        set.remove("2");
+
+        it = set.iterator();
+
+        assertThat(it.hasNext(), is(false));
     }
     
 }
