@@ -85,6 +85,7 @@ public class LevelBigSet<K> implements SortedSet<K> {
     @Override
     public Iterator<K> iterator() {
         final DBIterator it = this.map.db.iterator();
+        it.seekToFirst();
         return new Iterator<K>() {
             @Override
             public boolean hasNext() {

@@ -27,6 +27,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map.Entry;
+
+//import org.iq80.leveldb.*;
+//import static org.fusesource.leveldbjni.JniDBFactory.*;
 import org.iq80.leveldb.Options;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
@@ -81,7 +84,7 @@ public class AbstractLevelBigCollection<K> implements Closeable {
         //this.options.compressionType(CompressionType.NONE);
         this.options.createIfMissing(true);
         this.options.comparator(new LevelJavaComparator(this.keyCodec, this.keyComparator));
-        this.options.cacheSize(this.cacheSize);   // 100MB cache
+        this.options.cacheSize(this.cacheSize);
 
         try {
 //            boolean currentlyExists = false;

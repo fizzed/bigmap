@@ -23,6 +23,14 @@
             <groupId>org.iq80.leveldb</groupId>
             <artifactId>leveldb</artifactId>
         </dependency>
+
+        <!--
+        <dependency>
+            <groupId>org.fusesource.leveldbjni</groupId>
+            <artifactId>leveldbjni-linux64</artifactId>
+            <version>1.8</version>
+        </dependency>
+        -->
         
         <dependency>
             <groupId>de.ruedigermoeller</groupId>
@@ -78,6 +86,27 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core-java11</artifactId>
+            <version>6.4.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2-mvstore</artifactId>
+            <version>2.1.214</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rocksdb</groupId>
+            <artifactId>rocksdbjni</artifactId>
+            <version>7.7.3</version>
             <scope>test</scope>
         </dependency>
         

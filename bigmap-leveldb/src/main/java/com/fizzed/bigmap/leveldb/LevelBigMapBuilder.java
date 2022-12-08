@@ -39,7 +39,7 @@ public class LevelBigMapBuilder<K,V> {
     public LevelBigMapBuilder() {
         this.persistent = false;
         this.counts = true;
-        this.cacheSize = 30 * 1048576L;  // 30 MB by default
+        this.cacheSize = 2 * 1048576L;  // 2 MB by default
     }
     
     public LevelBigMapBuilder<K,V> setPersistent(boolean persistent) {
@@ -94,32 +94,10 @@ public class LevelBigMapBuilder<K,V> {
         return (LevelBigMapBuilder<K,V>)this;
     }
     
-    private Path prepFolderDirectoryPath(final String folderName) {
-
-        UUID uuid = UUID.randomUUID();
-        Path resolvedScratchDir = this.scratchDirectory != null
-                ? this.scratchDirectory : Paths.get(".");
-
-        Path directory = resolvedScratchDir;
-        if (!this.persistent) {
-            directory = resolvedScratchDir.resolve(folderName + "-" + uuid);
-        }
-
-        return directory;
-    }
-    
     public LevelBigMap<K,V> build() {
-
-        Path directory = prepFolderDirectoryPath("levelbigmap");
+        final Path dir = LevelBigMapHelper.prepFolderDirectoryPath(this.scratchDirectory, this.persistent, "levelbigmap");
         
-        return new LevelBigMap(this.persistent, this.counts, directory, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
-    }
-    
-    public LevelBigLinkedMap<K,V> buildLinked() {
-        
-        Path directory = prepFolderDirectoryPath("levelbigmaplinked");
-        
-        return new LevelBigLinkedMap(this.keyComparator, keyClass, valueClass, directory);       
+        return new LevelBigMap(this.persistent, this.counts, dir, this.cacheSize, this.keyCodec, this.keyComparator, this.valueCodec);
     }
 
 }
