@@ -15,6 +15,7 @@
  */
 package com.fizzed.bigmap.leveldb;
 
+import com.fizzed.bigmap.BigMapHelper;
 import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
@@ -86,8 +87,7 @@ public class LevelBigLinkedMapBuilder<K,V> {
     }
 
     public LevelBigLinkedMap<K,V> build() {
-
-        final Path dir = LevelBigMapHelper.prepFolderDirectoryPath(this.mapBuilder.scratchDirectory, this.mapBuilder.persistent, "levelbiglinkedmap");
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.mapBuilder.scratchDirectory, this.mapBuilder.persistent, "levelbiglinkedmap");
 
         // we need 3 subdir paths
         final Path dataDir = dir.resolve("data");

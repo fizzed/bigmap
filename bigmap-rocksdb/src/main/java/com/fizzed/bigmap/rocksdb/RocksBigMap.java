@@ -13,34 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.leveldb;
+package com.fizzed.bigmap.rocksdb;
+
+import com.fizzed.bigmap.BigMapDataException;
+import com.fizzed.bigmap.BigMapNonScalableException;
+import com.fizzed.bigmap.ByteCodec;
+import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
+
+import javax.print.attribute.UnmodifiableSetException;
+import java.nio.file.Path;
+import java.util.*;
 
 import static com.fizzed.bigmap.BigMapHelper.sizeOf;
-import com.fizzed.bigmap.BigMapNonScalableException;
 
-import java.util.*;
-import javax.print.attribute.UnmodifiableSetException;
-import org.iq80.leveldb.DBIterator;
-import com.fizzed.bigmap.ByteCodec;
-import org.iq80.leveldb.WriteOptions;
-
-import java.nio.file.Path;
-import java.util.stream.Collectors;
-
-public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements SortedMap<K,V> {
+public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements SortedMap<K,V> {
 
     protected final ByteCodec<V> valueCodec;
     
-    protected LevelBigMap(
-            boolean persistent,
-            boolean counts,
+    protected RocksBigMap(
+//            boolean persistent,
+//            boolean counts,
             Path directory,
-            long cacheSize,
+//            long cacheSize,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
-        super(persistent, counts, directory, cacheSize, keyCodec, keyComparator);
+        super(directory, keyCodec, keyComparator);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
         
@@ -69,9 +69,14 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
         
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
-        byte[] valueBytes = this.db.get(keyBytes);
+        try {
+            byte[] valueBytes = this.db.get(keyBytes);
 
-        return this.valueCodec.deserialize(valueBytes);
+            return this.valueCodec.deserialize(valueBytes);
+        }
+        catch (RocksDBException e) {
+            throw new BigMapDataException(e);
+        }
     }
 
     @Override
@@ -105,17 +110,22 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
-        byte[] valueBytes = this.db.get(keyBytes);
-        
-        if (valueBytes != null) {
-            // remove the key, then deduct its info
-            this.db.delete(keyBytes);
-            this.size--;
-            this.keyByteSize -= sizeOf(keyBytes);
-            this.valueByteSize -= sizeOf(valueBytes);
-        }
+        try {
+            byte[] valueBytes = this.db.get(keyBytes);
 
-        return this.valueCodec.deserialize(valueBytes);
+            if (valueBytes != null) {
+                // remove the key, then deduct its info
+                this.db.delete(keyBytes);
+                this.size--;
+                this.keyByteSize -= sizeOf(keyBytes);
+                this.valueByteSize -= sizeOf(valueBytes);
+            }
+
+            return this.valueCodec.deserialize(valueBytes);
+        }
+        catch (RocksDBException e) {
+            throw new BigMapDataException(e);
+        }
     }
 
     @Override
@@ -170,7 +180,8 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     public Set<K> keySet() {
         this.checkIfClosed();
         
-        return new LevelBigSet<>(this);
+        //return new LevelBigSet<>(this);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -184,7 +195,8 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     public Set<Entry<K,V>> entrySet() {
         this.checkIfClosed();
         
-        return new EntrySetView();
+//        return new EntrySetView();
+        throw new UnsupportedOperationException();
     }
     
     class EntryView implements Entry<K,V> {
@@ -199,17 +211,17 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
         
         @Override
         public K getKey() {
-            return LevelBigMap.this.keyCodec.deserialize(keyBytes);
+            return RocksBigMap.this.keyCodec.deserialize(keyBytes);
         }
 
         @Override
         public V getValue() {
-            return LevelBigMap.this.valueCodec.deserialize(valueBytes);
+            return RocksBigMap.this.valueCodec.deserialize(valueBytes);
         }
 
         @Override
         public V setValue(V value) {
-            return LevelBigMap.this.putValue(keyBytes, value);
+            return RocksBigMap.this.putValue(keyBytes, value);
         }
         
     }
@@ -218,12 +230,12 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
         @Override
         public int size() {
-            return LevelBigMap.this.size();
+            return RocksBigMap.this.size();
         }
 
         @Override
         public boolean isEmpty() {
-            return LevelBigMap.this.isEmpty();
+            return RocksBigMap.this.isEmpty();
         }
 
         @Override
@@ -233,8 +245,9 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
         @Override
         public Iterator<V> iterator() {
-            final DBIterator it = LevelBigMap.this.db.iterator();
-            it.seekToFirst();
+            final RocksIterator _it = RocksBigMap.this.db.newIterator();
+            _it.seekToFirst();
+            final RocksForwardIterator it = new RocksForwardIterator(_it);
             return new Iterator<V>() {
                 @Override
                 public boolean hasNext() {
@@ -243,12 +256,9 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
                 @Override
                 public V next() {
-                    // NOTE: this throws a NoSuchElementException is no element exists
-                    Entry<byte[],byte[]> next = it.next();
-                    if (next != null) {
-                        return LevelBigMap.this.valueCodec.deserialize(next.getValue());
-                    }
-                    return null;
+                    final RocksKeyValue kv = it.next();
+
+                    return RocksBigMap.this.valueCodec.deserialize(kv.getValue());
                 }
             };
         }
@@ -295,20 +305,20 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
         @Override
         public void clear() {
-            LevelBigMap.this.clear();
+            RocksBigMap.this.clear();
         }
         
     }
     
-    class EntrySetView implements Set<Entry<K,V>> {
+    /*class EntrySetView implements Set<Entry<K,V>> {
         @Override
         public int size() {
-            return LevelBigMap.this.size();
+            return RocksBigMap.this.size();
         }
 
         @Override
         public boolean isEmpty() {
-            return LevelBigMap.this.isEmpty();
+            return RocksBigMap.this.isEmpty();
         }
 
         @Override
@@ -318,7 +328,7 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
         @Override
         public Iterator<Entry<K,V>> iterator() {
-            final DBIterator it = LevelBigMap.this.db.iterator();
+            final DBIterator it = RocksBigMap.this.db.iterator();
             it.seekToFirst();
 
             return new Iterator<Entry<K, V>>() {
@@ -380,9 +390,9 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
 
         @Override
         public void clear() {
-            LevelBigMap.this.clear();
+            RocksBigMap.this.clear();
         }
                 
-    }
+    }*/
     
 }

@@ -25,6 +25,8 @@
     <modules>
         <module>bigmap-core</module>
         <module>bigmap-leveldb</module>
+        <module>bigmap-rocksdb</module>
+        <module>bigmap-demo</module>
     </modules>
 
     <dependencyManagement>
@@ -34,6 +36,18 @@
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>bigmap-leveldb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>bigmap-rocksdb</artifactId>
                 <version>${project.version}</version>
             </dependency>
             
@@ -49,6 +63,13 @@
                 <groupId>org.iq80.leveldb</groupId>
                 <artifactId>leveldb</artifactId>
                 <version>0.12</version>
+            </dependency>
+
+            <!-- rocksdb impl -->
+            <dependency>
+                <groupId>org.rocksdb</groupId>
+                <artifactId>rocksdbjni</artifactId>
+                <version>7.7.3</version>
             </dependency>
             
             <!-- testing -->

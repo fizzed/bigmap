@@ -18,6 +18,8 @@ package com.fizzed.bigmap.leveldb;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+
+import com.fizzed.bigmap.BigMapHelper;
 import com.fizzed.bigmap.ByteCodec;
 import static com.fizzed.bigmap.ByteCodecs.autoCodec;
 import static com.fizzed.bigmap.Comparators.autoComparator;
@@ -80,7 +82,7 @@ public class LevelBigSetBuilder<K> {
     }
     
     public LevelBigSet<K> build() {
-        final Path dir = LevelBigMapHelper.prepFolderDirectoryPath(this.scratchDirectory, this.persistent, "levelbigset");
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, this.persistent, "levelbigset");
 
         return new LevelBigSet(this.persistent, this.counts, dir, this.cacheSize, this.keyCodec, this.keyComparator);
     }

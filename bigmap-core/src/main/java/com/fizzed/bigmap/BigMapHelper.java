@@ -15,10 +15,31 @@
  */
 package com.fizzed.bigmap;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
 public class BigMapHelper {
  
     static public long sizeOf(byte[] b) {
         return b != null ? b.length : 0;
+    }
+
+    static public Path resolveScratchDirectory(Path scratchDirectory, boolean persistent, String nonPersistentPrefixName) {
+        final Path resolvedScratchDir = scratchDirectory != null ? scratchDirectory : Paths.get(".");
+
+        Path directory = resolvedScratchDir;
+        if (!persistent) {
+            String nonPersistentName = UUID.randomUUID().toString();
+
+            if (nonPersistentPrefixName != null) {
+                nonPersistentName = nonPersistentPrefixName + "-" + nonPersistentName;
+            }
+
+            directory = resolvedScratchDir.resolve(nonPersistentName);
+        }
+
+        return directory;
     }
     
 }

@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.leveldb;
+package com.fizzed.bigmap;
 
-import com.fizzed.crux.util.StopWatch;
-
-import java.io.Serializable;
-import java.nio.file.Paths;
-import java.util.SortedMap;
+import java.util.Map;
 import java.util.TreeMap;
 
-public class MapDemo {
+public class JavaTreeMapTest extends AbstractBigMapTest {
 
-    static public void main(String[] args) throws Exception {
-        final SortedMap<String,String> map = new TreeMap<>();
-
-        map.firstKey();
+    @Override
+    public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {
+        return new TreeMap<>();
     }
-    
+
 }

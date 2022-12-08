@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.leveldb;
+package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.ByteCodec;
 import com.fizzed.bigmap.ByteCodecs;
+import com.fizzed.bigmap.rocksdb.RocksBigMapBuilder;
 import com.fizzed.crux.util.StopWatch;
 import org.h2.mvstore.MVStore;
 import oshi.SystemInfo;
@@ -54,12 +55,18 @@ public class PerfDemo {
     }
 
     static public Map<String,Item> buildMap() {
-        final Map<String,Item> map = new LevelBigMapBuilder()
+        final Map<String,Item> map = new RocksBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
-            .setCacheSize(2 * 1024 * 1024)
             .setKeyType(String.class)
             .setValueType(Item.class)
             .build();
+
+//        final Map<String,Item> map = new LevelBigMapBuilder()
+//            .setScratchDirectory(Paths.get("target"))
+//            .setCacheSize(2 * 1024 * 1024)
+//            .setKeyType(String.class)
+//            .setValueType(Item.class)
+//            .build();
 
 //        final Map<String,Item> map = new LevelBigLinkedMapBuilder()
 //            .setScratchDirectory(Paths.get("target"))
