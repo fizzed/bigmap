@@ -25,6 +25,7 @@ import oshi.software.os.OperatingSystem;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -53,12 +54,12 @@ public class PerfDemo {
     }
 
     static public Map<String,Item> buildMap() {
-//        final Map<String,Item> map = new LevelBigMapBuilder()
-//            .setScratchDirectory(Paths.get("target"))
-//            .setCacheSize(2 * 1024 * 1024)
-//            .setKeyType(String.class)
-//            .setValueType(Item.class)
-//            .build();
+        final Map<String,Item> map = new LevelBigMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setCacheSize(2 * 1024 * 1024)
+            .setKeyType(String.class)
+            .setValueType(Item.class)
+            .build();
 
 //        final Map<String,Item> map = new LevelBigLinkedMapBuilder()
 //            .setScratchDirectory(Paths.get("target"))
@@ -75,12 +76,9 @@ public class PerfDemo {
         // create/get the map named "data"
 //        final Map<String,Item> map = MVSTORE.openMap("data-"+UUID.randomUUID());
 
-        final Map<String,Item> map = new PerfRocksDBMap<>(ByteCodecs.utf8StringCodec(), ByteCodecs.autoCodec(Item.class));
-//            .setScratchDirectory(Paths.get("target"))
-//            .setCacheSize(2 * 1024 * 1024)
-//            .setKeyType(String.class)
-//            .setValueType(Item.class)
-//            .build();
+        //final Map<String,Item> map = new PerfRocksDBMap<>(ByteCodecs.utf8StringCodec(), ByteCodecs.autoCodec(Item.class));
+
+//        final Map<String,Item> map = new TkrzwMap<>(ByteCodecs.utf8StringCodec(), ByteCodecs.autoCodec(Item.class));
 
         return map;
     }

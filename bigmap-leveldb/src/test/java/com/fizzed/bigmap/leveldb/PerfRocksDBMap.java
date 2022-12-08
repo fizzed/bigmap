@@ -49,6 +49,8 @@ public class PerfRocksDBMap<K,V> implements Map<K,V> {
             options.setCreateIfMissing(true);
             Path dbDir = Paths.get("target/rocks-" + UUID.randomUUID());
             Files.createDirectories(dbDir.toAbsolutePath());
+            // apparently these help control memory usage
+
             ;
 //        try {
 
