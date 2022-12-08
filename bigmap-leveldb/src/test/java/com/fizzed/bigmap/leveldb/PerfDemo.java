@@ -15,6 +15,8 @@
  */
 package com.fizzed.bigmap.leveldb;
 
+import com.fizzed.bigmap.ByteCodec;
+import com.fizzed.bigmap.ByteCodecs;
 import com.fizzed.crux.util.StopWatch;
 import org.h2.mvstore.MVStore;
 import oshi.SystemInfo;
@@ -51,12 +53,12 @@ public class PerfDemo {
     }
 
     static public Map<String,Item> buildMap() {
-        final Map<String,Item> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setCacheSize(2)
-            .setKeyType(String.class)
-            .setValueType(Item.class)
-            .build();
+//        final Map<String,Item> map = new LevelBigMapBuilder()
+//            .setScratchDirectory(Paths.get("target"))
+//            .setCacheSize(2 * 1024 * 1024)
+//            .setKeyType(String.class)
+//            .setValueType(Item.class)
+//            .build();
 
 //        final Map<String,Item> map = new LevelBigLinkedMapBuilder()
 //            .setScratchDirectory(Paths.get("target"))
@@ -70,20 +72,27 @@ public class PerfDemo {
 //        final Map<String,Item> map = new LinkedHashMap<>();
 
         // open the store (in-memory if fileName is null)
-//        MVStore s = new MVStore.Builder()
-//            .fileName(Paths.get("target/mvstore-"+UUID.randomUUID()).toAbsolutePath().toString())
-//            .cacheSize(2)
-//            .open();
-//
-//        // create/get the map named "data"
-//        final Map<String,Item> map = s.openMap("data");
+        // create/get the map named "data"
+//        final Map<String,Item> map = MVSTORE.openMap("data-"+UUID.randomUUID());
+
+        final Map<String,Item> map = new PerfRocksDBMap<>(ByteCodecs.utf8StringCodec(), ByteCodecs.autoCodec(Item.class));
+//            .setScratchDirectory(Paths.get("target"))
+//            .setCacheSize(2 * 1024 * 1024)
+//            .setKeyType(String.class)
+//            .setValueType(Item.class)
+//            .build();
 
         return map;
     }
+
+//    static private MVStore MVSTORE = new MVStore.Builder()
+//        .fileName(Paths.get("target/mvstore-"+UUID.randomUUID()).toAbsolutePath().toString())
+//        .cacheSize(5)
+//        .open();
     
     static public void main(String[] args) throws Exception {
         int mapCount = 10;
-        int iterations = 1000000;
+        int iterations = 3000000;
 
         final List<Map<String,Item>> maps = new ArrayList<>(mapCount);
         for (int i = 0; i < mapCount; i++) {
@@ -96,7 +105,7 @@ public class PerfDemo {
 
         for (int j = 0; j < mapCount; j++) {
             Map<String,Item> map = maps.get(j);
-            for (int i = 0; i < 1000000; i++) {
+            for (int i = 0; i < iterations; i++) {
                 if (i % 5000 == 0) {
                     System.out.print("map #" + j + " @ iteration " + i + " -> ");
                     printMemory();
@@ -125,7 +134,7 @@ public class PerfDemo {
 
         for (int j = 0; j < mapCount; j++) {
             Map<String, Item> map = maps.get(j);
-            for (int i = 0; i < map.size(); i += 100) {
+            for (int i = 0; i < iterations; i += 100) {
                 map.get(i + "");
                 readCount++;
             }
@@ -133,14 +142,15 @@ public class PerfDemo {
         
         System.out.println("Took "+readTimer+" to fetch "+readCount+" random items");
         
-        System.gc();
+        //System.gc();
         
         System.out.print("Final memory: ");
         printMemory();
         
         // this forces JVM to NOT gc map yet!
         maps.get(0).get("1");
-        
+
+        Thread.sleep(10000000L);
         
 //        System.out.println("Map had "+map.getKeyByteSize()+" key bytes and "+map.getValueByteSize()+" value bytes");
 //        
