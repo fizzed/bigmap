@@ -66,7 +66,9 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
     @Override
     public V get(Object key) {
         this.checkIfClosed();
-        
+
+        Objects.requireNonNull(key, "key was null");
+
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
         try {
@@ -82,7 +84,10 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
     @Override
     public V put(K key, V value) {
         this.checkIfClosed();
-        
+
+        Objects.requireNonNull(key, "key was null");
+        Objects.requireNonNull(value, "value was null");
+
         byte[] keyBytes = this.keyCodec.serialize(key);
         
         return this.putValue(keyBytes, value);
@@ -165,23 +170,13 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
     @Override
     public K lastKey() {
         throw new UnsupportedOperationException();
-        /*this.checkIfClosed();
-
-        DBIterator it = this.db.iterator();
-        it.seekToLast();
-        Entry<byte[],byte[]> lastEntry = it.prev();
-        if (lastEntry != null) {
-            return this.keyCodec.deserialize(lastEntry.getKey());
-        }
-        return null;*/
     }
 
     @Override
     public Set<K> keySet() {
         this.checkIfClosed();
-        
-        //return new LevelBigSet<>(this);
-        throw new UnsupportedOperationException();
+
+        return new KeySetView();
     }
 
     @Override
@@ -195,37 +190,9 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
     public Set<Entry<K,V>> entrySet() {
         this.checkIfClosed();
         
-//        return new EntrySetView();
-        throw new UnsupportedOperationException();
+        return new EntrySetView();
     }
-    
-    class EntryView implements Entry<K,V> {
 
-        private final byte[] keyBytes;
-        private final byte[] valueBytes;
-
-        public EntryView(byte[] keyBytes, byte[] valueBytes) {
-            this.keyBytes = keyBytes;
-            this.valueBytes = valueBytes;
-        }
-        
-        @Override
-        public K getKey() {
-            return RocksBigMap.this.keyCodec.deserialize(keyBytes);
-        }
-
-        @Override
-        public V getValue() {
-            return RocksBigMap.this.valueCodec.deserialize(valueBytes);
-        }
-
-        @Override
-        public V setValue(V value) {
-            return RocksBigMap.this.putValue(keyBytes, value);
-        }
-        
-    }
-    
     class ValueCollectionView implements Collection<V> {
 
         @Override
@@ -241,6 +208,11 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
         @Override
         public boolean contains(Object o) {
             throw new BigMapNonScalableException("Checking if a value exists is a bad performance decision");
+        }
+
+        @Override
+        public void clear() {
+            RocksBigMap.this.clear();
         }
 
         @Override
@@ -265,52 +237,46 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
 
         @Override
         public Object[] toArray() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public <T> T[] toArray(T[] a) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public boolean add(V e) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public boolean remove(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new BigMapNonScalableException("Checking if a value exists is a bad performance decision");
         }
 
         @Override
         public boolean addAll(Collection<? extends V> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public boolean removeAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public boolean retainAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
         }
-
-        @Override
-        public void clear() {
-            RocksBigMap.this.clear();
-        }
-        
     }
     
-    /*class EntrySetView implements Set<Entry<K,V>> {
+    class EntrySetView implements Set<Entry<K,V>> {
         @Override
         public int size() {
             return RocksBigMap.this.size();
@@ -323,15 +289,20 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
 
         @Override
         public boolean contains(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void clear() {
+            RocksBigMap.this.clear();
         }
 
         @Override
         public Iterator<Entry<K,V>> iterator() {
-            final DBIterator it = RocksBigMap.this.db.iterator();
-            it.seekToFirst();
-
-            return new Iterator<Entry<K, V>>() {
+            final RocksIterator _it = RocksBigMap.this.db.newIterator();
+            _it.seekToFirst();
+            final RocksForwardIterator it = new RocksForwardIterator(_it);
+            return new Iterator<Entry<K,V>>() {
                 @Override
                 public boolean hasNext() {
                     return it.hasNext();
@@ -339,11 +310,23 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
 
                 @Override
                 public Entry<K,V> next() {
-                    Entry<byte[],byte[]> next = it.next();
-                    if (next != null) {
-                        return new EntryView(next.getKey(), next.getValue());
-                    }
-                    return null;
+                    final RocksKeyValue kv = it.next();
+                    return new Entry<K,V>() {
+                        @Override
+                        public K getKey() {
+                            return RocksBigMap.this.keyCodec.deserialize(kv.getKey());
+                        }
+
+                        @Override
+                        public V getValue() {
+                            return RocksBigMap.this.valueCodec.deserialize(kv.getValue());
+                        }
+
+                        @Override
+                        public V setValue(V value) {
+                            return RocksBigMap.this.putValue(kv.getKey(), value);
+                        }
+                    };
                 }
             };
         }
@@ -387,12 +370,89 @@ public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements S
         public boolean removeAll(Collection<?> c) {
             throw new UnmodifiableSetException();
         }
+    }
+
+    class KeySetView implements Set<K> {
+        @Override
+        public int size() {
+            return RocksBigMap.this.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return RocksBigMap.this.isEmpty();
+        }
+
+        @Override
+        public boolean remove(Object key) {
+            return RocksBigMap.this.remove(key) != null;
+        }
+
+        @Override
+        public boolean contains(Object key) {
+            return RocksBigMap.this.containsKey(key);
+        }
 
         @Override
         public void clear() {
             RocksBigMap.this.clear();
         }
-                
-    }*/
+
+        @Override
+        public Iterator<K> iterator() {
+            final RocksIterator _it = RocksBigMap.this.db.newIterator();
+            _it.seekToFirst();
+            final RocksForwardIterator it = new RocksForwardIterator(_it);
+            return new Iterator<K>() {
+                @Override
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                @Override
+                public K next() {
+                    final RocksKeyValue kv = it.next();
+
+                    return RocksBigMap.this.keyCodec.deserialize(kv.getKey());
+                }
+            };
+        }
+
+        @Override
+        public Object[] toArray() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean add(K e) {
+            throw new UnmodifiableSetException();
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends K> c) {
+            throw new UnmodifiableSetException();
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnmodifiableSetException();
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnmodifiableSetException();
+        }
+
+    }
     
 }

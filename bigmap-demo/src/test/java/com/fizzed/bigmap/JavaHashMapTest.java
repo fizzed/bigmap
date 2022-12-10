@@ -15,16 +15,30 @@
  */
 package com.fizzed.bigmap;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class JavaHashMapTest extends AbstractBigMapTest {
 
     @Override
     public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {
         return new HashMap<>();
+    }
+
+    @Test @Ignore("nulls are technically allowed with a java hashmap")
+    public void putNullKey() {
+        super.putNullKey();
+    }
+
+    @Test  @Ignore("nulls are technically allowed with a java hashmap")
+    public void putNullValue() {
+        super.putNullKey();
     }
 
 }

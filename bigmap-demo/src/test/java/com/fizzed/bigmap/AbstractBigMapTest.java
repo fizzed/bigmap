@@ -15,6 +15,7 @@
  */
 package com.fizzed.bigmap;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,11 +24,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.Map.Entry;
 
+import static com.fizzed.bigmap.BigMapHelper.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeThat;
 
 abstract public class AbstractBigMapTest {
 
@@ -35,27 +39,29 @@ abstract public class AbstractBigMapTest {
 
     @Test
     public void putNullKey() {
-        // SHOULD THIS BE ACCEPTABLE OR SHOULD WE PREVENT NULL KEYs?
         final Map<String,String> map = this.newMap(String.class, String.class);
 
-        assertThat(map.containsKey(null), is(false));
-
-        map.put(null, "1");
-
-        assertThat(map.containsKey(null), is(true));
+        try {
+            map.put(null, "1");
+            fail();
+        }
+        catch (NullPointerException e) {
+            // expected
+        }
     }
 
-    /**
     @Test
     public void putNullValue() {
         final Map<String,String> map = this.newMap(String.class, String.class);
 
-        map.put("1", null);
-
-        assertThat(map.containsKey("1"), is(true));
-        assertThat(map.get("1"), is(nullValue()));
+        try {
+            map.put("1", null);
+            fail();
+        }
+        catch (NullPointerException e) {
+            // expected
+        }
     }
-     */
 
     @Test
     public void putAndGetWithStrings() {
@@ -122,7 +128,6 @@ abstract public class AbstractBigMapTest {
         assertThat(map.containsKey("2"), is(true));
         assertThat(map.containsKey("0"), is(false));
         assertThat(map.containsKey(""), is(false));
-        assertThat(map.containsKey(null), is(false));
 
         map.remove("1");
 
@@ -135,45 +140,247 @@ abstract public class AbstractBigMapTest {
         assertThat(map.containsKey("2"), is(false));
     }
 
-    /*
+    @Test
+    public void containsKeyWithNull() {
+        final Map<String,String> map = this.newMap(String.class, String.class);
+
+        assertThat(map.containsKey(null), is(false));
+    }
+
     @Test
     public void clear() throws IOException {
         final Map<String,String> map = this.newMap(String.class, String.class);
 
-        map.put("1", "123456789");
-        map.put("2", "-10");
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put("0", "0");
 
-        assertThat(map, aMapWithSize(2));
-
-        Path directory = map.getDirectory();
-
-        assertThat(Files.list(directory).count(), is(4L));
-        Path firstFile = Files.list(directory).findFirst().orElse(null);
+        assertThat(map, aMapWithSize(3));
 
         map.clear();
 
         assertThat(map, aMapWithSize(0));
-        assertThat(map.getKeyByteSize(), is(0L));
-        assertThat(map.getValueByteSize(), is(0L));
 
         map.put("2", "1");
         map.put("3", "5");
 
         assertThat(map, aMapWithSize(2));
-        assertThat(map.getKeyByteSize(), is(2L));
-        assertThat(map.getValueByteSize(), is(2L));
     }
 
-     */
+    @Test
+    public void remove() throws IOException {
+        final Map<String,String> map = this.newMap(String.class, String.class);
 
-    /*
+        map.put("1", "1");
+        map.put("2", "2");
+
+        assertThat(map, aMapWithSize(2));
+
+        String removed;
+
+        removed = map.remove("0");
+
+        assertThat(map, aMapWithSize(2));
+        assertThat(removed, is(nullValue()));
+        assertThat(toValueList(map), hasItems("1", "2"));
+
+        removed = map.remove("1");
+
+        assertThat(map, aMapWithSize(1));
+        assertThat(removed, is("1"));
+        assertThat(toValueList(map), hasItems("2"));
+
+        // try to remove it again
+        removed = map.remove("1");
+
+        assertThat(map, aMapWithSize(1));
+        assertThat(removed, is(nullValue()));
+        assertThat(toValueList(map), hasItems("2"));
+
+        removed = map.remove("2");
+
+        assertThat(map, aMapWithSize(0));
+        assertThat(removed, is("2"));
+        assertThat(toValueList(map), hasSize(0));
+    }
+
+    @Test
+    public void values() {
+        final Map<String,String> map = this.newMap(String.class, String.class);
+
+        map.put("1", "1");
+        map.put("2", "2");
+
+        Collection<String> values = map.values();
+
+        assertThat(values.size(), is(2));
+        assertThat(values.isEmpty(), is(false));
+
+        // test if map backing it changes, this works
+        map.put("a", "b");
+
+        assertThat(values.size(), is(3));
+
+        Iterator<String> it = values.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(toIteratedList(it, 3), containsInAnyOrder("1", "2", "b"));
+        assertThat(it.hasNext(), is(false));
+
+        try {
+            it.next();
+            fail();
+        } catch (NoSuchElementException e) {
+            // expected
+        }
+
+        values.clear();
+
+        assertThat(values.isEmpty(), is(true));
+        assertThat(values.size(), is(0));
+
+        // test removal of items too
+        map.put("2", "2");
+        map.put("3", "3");
+        map.put("1", "1");
+        map.put("4", "4");
+
+        assertThat(toValueList(map), containsInAnyOrder("1", "2", "3", "4"));
+
+        map.remove("1");
+
+        assertThat(toValueList(map), containsInAnyOrder("2", "3", "4"));
+
+        map.remove("4");
+
+        assertThat(toValueList(map), containsInAnyOrder("2", "3"));
+
+        map.remove("2");
+
+        assertThat(toValueList(map), containsInAnyOrder("3"));
+
+        map.remove("3");
+
+        assertThat(toValueList(map), hasSize(0));
+    }
+
+    @Test
+    public void keySet() {
+        final Map<String,String> map = this.newMap(String.class, String.class);
+
+        map.put("1", "1");
+        map.put("2", "2");
+
+        Set<String> keys = map.keySet();
+
+        assertThat(keys.size(), is(2));
+        assertThat(keys.isEmpty(), is(false));
+        assertThat(keys.contains("1"), is(true));
+        assertThat(keys.contains("2"), is(true));
+        assertThat(keys.contains("a"), is(false));
+
+        // test if map backing it changes, this works
+        map.put("a", "b");
+
+        assertThat(keys, hasSize(3));
+        assertThat(keys.contains("a"), is(true));
+
+        Iterator<String> it = keys.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(toIteratedList(it, 3), containsInAnyOrder("1", "2", "a"));
+        assertThat(it.hasNext(), is(false));
+
+        try {
+            it.next();
+            fail();
+        } catch (NoSuchElementException e) {
+            // expected
+        }
+
+        keys.remove("1");
+
+        assertThat(keys, hasSize(2));
+
+        it = keys.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(toIteratedList(it, 2), containsInAnyOrder("2", "a"));
+        assertThat(it.hasNext(), is(false));
+
+        keys.clear();
+
+        assertThat(keys.isEmpty(), is(true));
+        assertThat(keys.size(), is(0));
+    }
+
+    @Test
+    public void entrySet() {
+        final Map<String,String> map = this.newMap(String.class, String.class);
+
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put("3", "3");
+        map.put("4", "4");
+
+        Set<Entry<String,String>> entrySet = map.entrySet();
+
+        assertThat(entrySet.size(), is(4));
+        assertThat(entrySet.isEmpty(), is(false));
+
+        Iterator<Entry<String,String>> it = entrySet.iterator();
+
+        assertThat(it.hasNext(), is(true));
+        assertThat(toIteratedKeyList(it, 4), containsInAnyOrder("1", "2", "3", "4"));
+        assertThat(it.hasNext(), is(false));
+
+        try {
+            it.next();
+            fail();
+        } catch (NoSuchElementException e) {
+            // expected
+        }
+
+        // test removal
+        map.remove("1");
+
+        entrySet = map.entrySet();
+
+        assertThat(entrySet, hasSize(3));
+        assertThat(toIteratedKeyList(entrySet.iterator(), 3), containsInAnyOrder("2", "3", "4"));
+
+        map.remove("3");
+
+        entrySet = map.entrySet();
+
+        assertThat(entrySet, hasSize(2));
+        assertThat(toIteratedKeyList(entrySet.iterator(), 2), containsInAnyOrder("2", "4"));
+
+        map.remove("4");
+
+        entrySet = map.entrySet();
+
+        assertThat(entrySet, hasSize(1));
+        assertThat(toIteratedKeyList(entrySet.iterator(), 1), containsInAnyOrder("2"));
+
+        map.remove("2");
+
+        entrySet = map.entrySet();
+
+        assertThat(entrySet, hasSize(0));
+    }
+
+    //
+    // SortedMap tests
+    //
+
     @Test
     public void firstKey() {
-        final SortedMap<Long,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(Long.class)
-            .setValueType(String.class)
-            .build();
+        final Map<Long,String> _map = this.newMap(Long.class, String.class);
+
+        assumeThat(_map, instanceOf(SortedMap.class));
+
+        final SortedMap<Long,String> map = (SortedMap<Long,String>)_map;
 
         try {
             map.firstKey(); // java map throws a NoSuchElementException
@@ -217,36 +424,25 @@ abstract public class AbstractBigMapTest {
         }
     }
 
-     */
-
-    /*
     @Test
-    public void ordering() {
-        final Map<Long,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(Long.class)
-            .setValueType(String.class)
-            .build();
+    public void sortedOrdering() {
+        final Map<Long,String> _map = this.newMap(Long.class, String.class);
+
+        assumeThat(_map, instanceOf(SortedMap.class));
+
+        final SortedMap<Long,String> map = (SortedMap<Long,String>)_map;
 
         map.put(123456789L, "123456789");
-        map.put(-10L, "-10");
         map.put(5L, "5");
         map.put(1L, "1");
         map.put(3L, "3");
         map.put(2L, "2");
+        map.put(0L, "0");
 
-        final List<String> values = map.values()
-            .stream()
-            .collect(toList());
-
-        assertThat(values.get(0), is("-10"));
-        assertThat(values.get(1), is("1"));
-        assertThat(values.get(2), is("2"));
-        assertThat(values.get(3), is("3"));
-        assertThat(values.get(4), is("5"));
-        assertThat(values.get(5), is("123456789"));
+        assertThat(toValueList(map), hasItems("0", "1", "2", "3", "5", "123456789"));
     }
 
+    /*
     @Test
     public void byteSizeTracking() {
         final LevelBigMap<String,String> map = new LevelBigMapBuilder()
@@ -275,7 +471,7 @@ abstract public class AbstractBigMapTest {
     }
 
     @Test
-    public void clear() throws IOException {
+    public void clearWithDisk() throws IOException {
         final LevelBigMap<String,String> map = new LevelBigMapBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
@@ -306,247 +502,6 @@ abstract public class AbstractBigMapTest {
         assertThat(map, aMapWithSize(2));
         assertThat(map.getKeyByteSize(), is(2L));
         assertThat(map.getValueByteSize(), is(2L));
-    }
-
-
-
-    @Test
-    public void remove() throws IOException {
-        final Map<String,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(String.class)
-            .setValueType(String.class)
-            .build();
-
-        map.put("1", "1");
-        map.put("2", "2");
-
-        assertThat(map, aMapWithSize(2));
-
-        String removed;
-
-        removed = map.remove("0");
-
-        assertThat(map, aMapWithSize(2));
-        assertThat(removed, is(nullValue()));
-        assertThat(map.values().stream().collect(toList()), hasItems("1", "2"));
-
-        removed = map.remove("1");
-
-        assertThat(map, aMapWithSize(1));
-        assertThat(removed, is("1"));
-        assertThat(map.values().stream().collect(toList()), hasItems("2"));
-
-        // try to remove it again
-        removed = map.remove("1");
-
-        assertThat(map, aMapWithSize(1));
-        assertThat(removed, is(nullValue()));
-        assertThat(map.values().stream().collect(toList()), hasItems("2"));
-
-        removed = map.remove("2");
-
-        assertThat(map, aMapWithSize(0));
-        assertThat(removed, is("2"));
-        assertThat(map.values().stream().collect(toList()), hasSize(0));
-    }
-
-    @Test
-    public void entrySet() {
-        final Map<String,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(String.class)
-            .setValueType(String.class)
-            .build();
-
-        map.put("1", "1");
-        map.put("2", "2");
-        map.put("3", "3");
-        map.put("4", "4");
-
-        Set<Map.Entry<String,String>> entrySet = map.entrySet();
-
-        assertThat(entrySet.size(), is(4));
-        assertThat(entrySet.isEmpty(), is(false));
-
-        Iterator<Map.Entry<String, String>> it = entrySet.iterator();
-
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next().getKey(), is("1"));
-        assertThat(it.next().getKey(), is("2"));
-        assertThat(it.next().getKey(), is("3"));
-        assertThat(it.next().getKey(), is("4"));
-        assertThat(it.hasNext(), is(false));
-
-        try {
-            it.next();
-            fail();
-        } catch (NoSuchElementException e) {
-            // expected
-        }
-
-        // test removal
-        map.remove("1");
-
-        List<Map.Entry<String,String>> ar = map.entrySet().stream().collect(toList());
-
-        assertThat(ar, hasSize(3));
-        assertThat(ar.get(0).getKey(), is("2"));
-        assertThat(ar.get(1).getKey(), is("3"));
-        assertThat(ar.get(2).getKey(), is("4"));
-
-        map.remove("3");
-
-        ar = map.entrySet().stream().collect(toList());
-
-        assertThat(ar, hasSize(2));
-        assertThat(ar.get(0).getKey(), is("2"));
-        assertThat(ar.get(1).getKey(), is("4"));
-
-        map.remove("4");
-
-        ar = map.entrySet().stream().collect(toList());
-
-        assertThat(ar, hasSize(1));
-        assertThat(ar.get(0).getKey(), is("2"));
-
-        map.remove("2");
-
-        ar = map.entrySet().stream().collect(toList());
-
-        assertThat(ar, hasSize(0));
-    }
-
-    @Test
-    public void keySet() {
-        final Map<String,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(String.class)
-            .setValueType(String.class)
-            .build();
-
-        map.put("1", "123456789");
-        map.put("2", "-10");
-
-        Set<String> keys = map.keySet();
-
-        assertThat(keys.size(), is(2));
-        assertThat(keys.isEmpty(), is(false));
-        assertThat(keys.contains("1"), is(true));
-        assertThat(keys.contains("a"), is(false));
-
-        // test if map backing it changes, this works
-        map.put("a", "b");
-
-        assertThat(keys.size(), is(3));
-        assertThat(keys.contains("a"), is(true));
-
-        Iterator<String> it = keys.iterator();
-
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("1"));
-        assertThat(it.next(), is("2"));
-        assertThat(it.next(), is("a"));
-        assertThat(it.hasNext(), is(false));
-
-        try {
-            it.next();
-            fail();
-        } catch (NoSuchElementException e) {
-            // expected
-        }
-
-        keys.remove("1");
-
-        assertThat(keys, hasSize(2));
-
-        it = keys.iterator();
-
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("2"));
-        assertThat(it.next(), is("a"));
-        assertThat(it.hasNext(), is(false));
-
-        keys.clear();
-
-        assertThat(keys.isEmpty(), is(true));
-        assertThat(keys.size(), is(0));
-    }
-
-    @Test
-    public void values() {
-        final Map<String,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(String.class)
-            .setValueType(String.class)
-            .build();
-
-        map.put("1", "123456789");
-        map.put("2", "-10");
-
-        Collection<String> values = map.values();
-
-        assertThat(values.size(), is(2));
-        assertThat(values.isEmpty(), is(false));
-
-        // test if map backing it changes, this works
-        map.put("a", "b");
-
-        assertThat(values.size(), is(3));
-
-        Iterator<String> it = values.iterator();
-
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("123456789"));
-        assertThat(it.next(), is("-10"));
-        assertThat(it.next(), is("b"));
-        assertThat(it.hasNext(), is(false));
-
-        try {
-            it.next();
-            fail();
-        } catch (NoSuchElementException e) {
-            // expected
-        }
-
-        values.clear();
-
-        assertThat(values.isEmpty(), is(true));
-        assertThat(values.size(), is(0));
-
-        // test removal of items too
-        map.put("2", "2");
-        map.put("3", "3");
-        map.put("1", "1");
-        map.put("4", "4");
-
-        List<String> ar = map.values().stream().collect(toList());
-
-        assertThat(ar, hasItems("1", "2", "3", "4"));
-
-        map.remove("1");
-
-        ar = map.values().stream().collect(toList());
-
-        assertThat(ar, hasItems("2", "3", "4"));
-
-        map.remove("4");
-
-        ar = map.values().stream().collect(toList());
-
-        assertThat(ar, hasItems("2", "3"));
-
-        map.remove("2");
-
-        ar = map.values().stream().collect(toList());
-
-        assertThat(ar, hasItems("3"));
-
-        map.remove("3");
-
-        ar = map.values().stream().collect(toList());
-
-        assertThat(ar, hasSize(0));
     }
 
     static public class CustomKey implements Serializable {

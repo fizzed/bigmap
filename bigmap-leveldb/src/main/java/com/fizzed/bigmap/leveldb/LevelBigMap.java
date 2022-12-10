@@ -66,6 +66,8 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     @Override
     public V get(Object key) {
         this.checkIfClosed();
+
+        Objects.requireNonNull(key, "key was null");
         
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
@@ -77,6 +79,9 @@ public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements S
     @Override
     public V put(K key, V value) {
         this.checkIfClosed();
+
+        Objects.requireNonNull(key, "key was null");
+        Objects.requireNonNull(value, "value was null");
         
         byte[] keyBytes = this.keyCodec.serialize(key);
         

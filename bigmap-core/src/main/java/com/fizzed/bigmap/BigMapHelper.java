@@ -17,10 +17,33 @@ package com.fizzed.bigmap;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static java.util.stream.Collectors.toList;
 
 public class BigMapHelper {
- 
+
+    static public <V> List<V> toValueList(Map<?,V> map) {
+        return map.values().stream().collect(toList());
+    }
+
+    static public <V> List<V> toIteratedList(Iterator<V> it, int count) {
+        List<V> items = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            items.add(it.next());
+        }
+        return items;
+    }
+
+    static public <K,V> List<K> toIteratedKeyList(Iterator<Entry<K,V>> it, int count) {
+        List<K> items = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            items.add(it.next().getKey());
+        }
+        return items;
+    }
+
     static public long sizeOf(byte[] b) {
         return b != null ? b.length : 0;
     }

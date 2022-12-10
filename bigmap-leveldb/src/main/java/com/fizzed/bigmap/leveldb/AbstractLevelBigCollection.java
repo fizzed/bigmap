@@ -192,6 +192,10 @@ public class AbstractLevelBigCollection<K> implements Closeable {
     
     protected boolean containsKey(Object key) {
         this.checkIfClosed();
+
+        if (key == null) {
+            return false;   // this will always be false
+        }
         
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
