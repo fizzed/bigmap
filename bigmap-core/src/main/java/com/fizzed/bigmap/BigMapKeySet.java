@@ -19,12 +19,13 @@ import javax.print.attribute.UnmodifiableSetException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map.Entry;
 
-public class BigMapKeySet<K> implements Set<K> {
+public class BigMapKeySet<K,V> implements Set<K> {
 
-    private final BigMap<K,?> map;
+    private final BigMap<K,V> map;
 
-    public BigMapKeySet(BigMap<K,?> map) {
+    public BigMapKeySet(BigMap<K,V> map) {
         this.map = map;
     }
 
@@ -54,7 +55,7 @@ public class BigMapKeySet<K> implements Set<K> {
     }
 
     public Iterator<K> iterator() {
-        final Iterator<KeyValueBytes> iterator = this.map._forwardIterator();
+        final Iterator<Entry<K,V>> iterator = this.map.forwardIterator();
 
         return new Iterator<K>() {
             @Override
@@ -64,9 +65,9 @@ public class BigMapKeySet<K> implements Set<K> {
 
             @Override
             public K next() {
-                final KeyValueBytes kvb = iterator.next();
+                final Entry<K,V> entry = iterator.next();
 
-                return map.getKeyCodec().deserialize(kvb.getKey());
+                return entry.getKey();
             }
         };
     }

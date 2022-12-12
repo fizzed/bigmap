@@ -17,12 +17,11 @@ package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.*;
 import org.rocksdb.RocksDBException;
-import org.rocksdb.RocksIterator;
 
 import java.nio.file.Path;
 import java.util.*;
 
-public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements BigSortedMap<K,V> {
+public class RocksBigMap<K,V> extends AbstractRocksBigCollection<K> implements ByteBufferBigMap<K,V>, BigSortedMap<K,V> {
 
     protected final ByteCodec<V> valueCodec;
     

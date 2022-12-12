@@ -17,12 +17,13 @@ package com.fizzed.bigmap;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
-public class BigMapValueCollection<V> implements Collection<V> {
+public class BigMapValueCollection<K,V> implements Collection<V> {
 
-    private final BigMap<?,V> map;
+    private final BigMap<K,V> map;
 
-    public BigMapValueCollection(BigMap<?, V> map) {
+    public BigMapValueCollection(BigMap<K,V> map) {
         this.map = map;
     }
 
@@ -47,7 +48,7 @@ public class BigMapValueCollection<V> implements Collection<V> {
     }
 
     public Iterator<V> iterator() {
-        final Iterator<KeyValueBytes> iterator = this.map._forwardIterator();
+        final Iterator<Entry<K,V>> iterator = this.map.forwardIterator();
 
         return new Iterator<V>() {
             @Override
@@ -57,9 +58,9 @@ public class BigMapValueCollection<V> implements Collection<V> {
 
             @Override
             public V next() {
-                final KeyValueBytes kvb = iterator.next();
+                final Entry<K,V> entry = iterator.next();
 
-                return map.getValueCodec().deserialize(kvb.getValue());
+                return entry.getValue();
             }
         };
     }

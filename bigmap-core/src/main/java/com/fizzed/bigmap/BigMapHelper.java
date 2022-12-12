@@ -24,6 +24,10 @@ import static java.util.stream.Collectors.toList;
 
 public class BigMapHelper {
 
+    static public <K> List<K> toKeyList(Map<K,?> map) {
+        return map.keySet().stream().collect(toList());
+    }
+
     static public <V> List<V> toValueList(Map<?,V> map) {
         return map.values().stream().collect(toList());
     }

@@ -50,7 +50,7 @@ public class BigMapEntrySet<K,V> implements Set<Entry<K,V>> {
     }
 
     public Iterator<Entry<K,V>> iterator() {
-        final Iterator<KeyValueBytes> iterator = this.map._forwardIterator();
+        final Iterator<Entry<K,V>> iterator = this.map.forwardIterator();
 
         return new Iterator<Entry<K,V>>() {
             @Override
@@ -60,28 +60,7 @@ public class BigMapEntrySet<K,V> implements Set<Entry<K,V>> {
 
             @Override
             public Entry<K,V> next() {
-                final KeyValueBytes kvb = iterator.next();
-
-                return new Entry<K,V>() {
-                    @Override
-                    public K getKey() {
-                        return map.getKeyCodec().deserialize(kvb.getKey());
-                    }
-
-                    @Override
-                    public V getValue() {
-                        return map.getValueCodec().deserialize(kvb.getValue());
-                    }
-
-                    @Override
-                    public V setValue(V value) {
-                        byte[] valueBytes = map.getValueCodec().serialize(value);
-
-                        byte[] oldValueBytes = map._put(kvb.getKey(), valueBytes);
-
-                        return map.getValueCodec().deserialize(oldValueBytes);
-                    }
-                };
+                return iterator.next();
             }
         };
     }
