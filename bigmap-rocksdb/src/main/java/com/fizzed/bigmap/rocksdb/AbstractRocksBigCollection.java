@@ -33,7 +33,6 @@ import static com.fizzed.bigmap.BigMapHelper.sizeOf;
 public class AbstractRocksBigCollection<K> implements Closeable {
 
     protected final Path directory;
-//    protected final long cacheSize;
     protected final ByteCodec<K> keyCodec;
     protected final Comparator<K> keyComparator;
     private Options options;
@@ -44,10 +43,7 @@ public class AbstractRocksBigCollection<K> implements Closeable {
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public AbstractRocksBigCollection(
-//            boolean persistent,
-//            boolean counts,
             Path directory,
-//            long cacheSize,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator) {
         
@@ -55,13 +51,14 @@ public class AbstractRocksBigCollection<K> implements Closeable {
         Objects.requireNonNull(keyCodec, "keyCodec was null");
         Objects.requireNonNull(keyComparator, "keyComparator was null");
 
-//        this.persistent = persistent;
-//        this.counts = counts;
         this.directory = directory;
-//        this.cacheSize = cacheSize;
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
         this.open();
+    }
+
+    public ByteCodec<K> getKeyCodec() {
+        return keyCodec;
     }
 
     public Path getDirectory() {
@@ -146,7 +143,7 @@ public class AbstractRocksBigCollection<K> implements Closeable {
         }
     }
 
-    protected void checkIfClosed() {
+    public void checkIfClosed() {
         if (this.db == null) {
             throw new IllegalStateException("BigMap rocksdb database is closed!");
         }
@@ -164,6 +161,18 @@ public class AbstractRocksBigCollection<K> implements Closeable {
         return this.size <= 0;
     }
 
+    public void _entryAdded(long keyByteSize, long valueByteSize) {
+        this.size++;
+        this.keyByteSize += keyByteSize;
+        this.valueByteSize += valueByteSize;
+    }
+
+    public void _entryRemoved(long keyByteSize, long valueByteSize) {
+        this.size--;
+        this.keyByteSize -= keyByteSize;
+        this.valueByteSize -= valueByteSize;
+    }
+
     public void clear() {
         this.checkIfClosed();
         try {
@@ -172,22 +181,6 @@ public class AbstractRocksBigCollection<K> implements Closeable {
             this.open();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        }
-    }
-    
-    protected boolean containsKey(Object key) {
-        this.checkIfClosed();
-        
-        byte[] keyBytes = this.keyCodec.serialize((K)key);
-
-        try {
-            byte[] valueBytes = this.db.get(keyBytes);
-
-            // skip deserialization!
-            return valueBytes != null;
-        }
-        catch (RocksDBException e) {
-            throw new BigMapDataException(e);
         }
     }
 
@@ -207,36 +200,6 @@ public class AbstractRocksBigCollection<K> implements Closeable {
         }
 
         return null;
-    }
-    
-    protected byte[] putBytes(byte[] keyBytes, byte[] valueBytes) {
-        this.checkIfClosed();
-
-        try {
-            // get current value
-            byte[] oldValueBytes = this.db.get(keyBytes);
-
-            // put the new value
-            this.db.put(keyBytes, valueBytes);
-
-            // does this key already exist?
-            if (oldValueBytes != null) {
-                // old value was removed, so deduct its size
-                this.valueByteSize -= sizeOf(oldValueBytes);
-            } else {
-                // key was added so bump up key bytes
-                this.keyByteSize += sizeOf(keyBytes);
-                this.size++;
-            }
-
-            // always add the size of the value
-            this.valueByteSize += sizeOf(valueBytes);
-
-            return oldValueBytes;
-        }
-        catch (RocksDBException e) {
-            throw new BigMapDataException(e);
-        }
     }
 
 }

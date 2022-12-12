@@ -1,11 +1,11 @@
-package com.fizzed.bigmap.rocksdb;
+package com.fizzed.bigmap;
 
-public class RocksKeyValue {
+public class KeyValueBytes {
 
     private final byte[] key;
     private final byte[] value;
 
-    public RocksKeyValue(byte[] key, byte[] value) {
+    public KeyValueBytes(byte[] key, byte[] value) {
         this.key = key;
         this.value = value;
     }

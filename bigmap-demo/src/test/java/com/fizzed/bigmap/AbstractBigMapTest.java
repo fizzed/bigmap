@@ -268,8 +268,8 @@ abstract public class AbstractBigMapTest {
     public void keySet() {
         final Map<String,String> map = this.newMap(String.class, String.class);
 
-        map.put("1", "1");
-        map.put("2", "2");
+        map.put("1", "1t");
+        map.put("2", "2t");
 
         Set<String> keys = map.keySet();
 
@@ -280,7 +280,7 @@ abstract public class AbstractBigMapTest {
         assertThat(keys.contains("a"), is(false));
 
         // test if map backing it changes, this works
-        map.put("a", "b");
+        map.put("a", "at");
 
         assertThat(keys, hasSize(3));
         assertThat(keys.contains("a"), is(true));
