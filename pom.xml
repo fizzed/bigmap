@@ -26,6 +26,7 @@
         <module>bigmap-core</module>
         <module>bigmap-leveldb</module>
         <module>bigmap-rocksdb</module>
+        <module>bigmap-tokyocabinet</module>
         <module>bigmap-integration-tests</module>
         <module>bigmap-demo</module>
     </modules>
@@ -51,6 +52,12 @@
                 <artifactId>bigmap-rocksdb</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>bigmap-tokyocabinet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             
             <!-- waaaay faster generic object serialization than jvm, optional -->
             <dependency>
@@ -58,7 +65,14 @@
                 <artifactId>fst</artifactId>
                 <version>2.57</version>
             </dependency>
-            
+
+            <!-- tokyocabinet impl -->
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>tokyocabinet-linux-x64</artifactId>
+                <version>0.0.5</version>
+            </dependency>
+
             <!-- pure java leveldb for bigmap-leveldb only -->
             <dependency>
                 <groupId>org.iq80.leveldb</groupId>
