@@ -13,58 +13,88 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.rocksdb;
+package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.BigMapDataException;
-import com.fizzed.bigmap.ByteCodec;
-import org.rocksdb.*;
-
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
 
-public class AbstractRocksBigCollection<K> implements Closeable {
+abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
 
     protected final Path directory;
+    protected final boolean persistent;
     protected final ByteCodec<K> keyCodec;
     protected final Comparator<K> keyComparator;
-    private Options options;
-    protected RocksDB db;
+    protected final ByteCodec<V> valueCodec;
     protected int size;
     protected long keyByteSize;
     protected long valueByteSize;
 
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public AbstractRocksBigCollection(
+    public AbstractBigMap(
             Path directory,
+            boolean persistent,
             ByteCodec<K> keyCodec,
-            Comparator<K> keyComparator) {
+            Comparator<K> keyComparator,
+            ByteCodec<V> valueCodec) {
         
         Objects.requireNonNull(directory, "directory was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
         Objects.requireNonNull(keyComparator, "keyComparator was null");
 
         this.directory = directory;
+        this.persistent = persistent;
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
+        this.valueCodec = valueCodec;
         this.open();
     }
 
-    public ByteCodec<K> getKeyCodec() {
-        return keyCodec;
+    public Path getDirectory() {
+        return this.directory;
     }
 
-    public Path getDirectory() {
-        return directory;
+    public boolean isPersistent() {
+        return persistent;
     }
-    
+
+    public ByteCodec<K> getKeyCodec() {
+        return this.keyCodec;
+    }
+
+    public Comparator<K> getKeyComparator() {
+        return this.keyComparator;
+    }
+
+    public ByteCodec<V> getValueCodec() {
+        return this.valueCodec;
+    }
+
+    @Override
+    public long getKeyByteSize() {
+        return this.keyByteSize;
+    }
+
+    @Override
+    public long getValueByteSize() {
+        return this.valueByteSize;
+    }
+
+    @Override
+    public int size() {
+        return this.size;
+    }
+
+    @Override
+    public void checkIfClosed() {
+        if (this.isClosed()) {
+            throw new IllegalStateException("Underlying database is closed. Unable to perform map operations.");
+        }
+    }
+
     protected void open() {
         try {
             this.close();
@@ -72,27 +102,22 @@ public class AbstractRocksBigCollection<K> implements Closeable {
             // do nothing
         }
 
-        this.options = new Options();
-        //this.options.compressionType(CompressionType.NONE);
-        this.options.setCreateIfMissing(true);
-        this.options.setComparator(BuiltinComparator.BYTEWISE_COMPARATOR);
-        // wow, this comparator causes a massive memory leak
-        //this.options.setComparator(new RocksJavaComparator(this.keyCodec, this.keyComparator));
-        this.options.setDisableAutoCompactions(true);
-
         try {
-            Files.createDirectories(this.directory.toAbsolutePath());
+            if (this.directory != null) {
+                Files.createDirectories(this.directory.toAbsolutePath());
+            }
 
-            // build database, initialize stats we track
-            this.db = RocksDB.open(this.options, this.directory.toAbsolutePath().toString());
-            
+            this._open();
+
             this.size = 0;
             this.keyByteSize = 0L;
             this.valueByteSize = 0L;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new BigMapDataException(e);
         }
     }
+
+    abstract protected void _open();
     
 //    protected void loadCounts() throws IOException {
 //        try (DBIterator it = this.db.iterator()) {
@@ -105,24 +130,21 @@ public class AbstractRocksBigCollection<K> implements Closeable {
 //            }
 //        }
 //    }
-    
+
     @Override
     public void close() throws IOException {
-        if (this.db != null) {
-            this.db.close();
-            
-            //if (!this.persistent) {
-                this.destroy();
-            //}
-            
-            this.db = null;
+        if (!this.isClosed()) {
+            this._close();
+        }
+
+        if (!this.persistent) {
+            this.destroy();
         }
     }
+
+    abstract protected void _close() throws IOException;
     
     protected void destroy() throws IOException {
-        // we want to DESTROY it too!
-        //factory.destroy(this.directory.toFile(), this.options);
-
         this.size = 0;
         this.keyByteSize = 0L;
         this.valueByteSize = 0L;
@@ -143,22 +165,13 @@ public class AbstractRocksBigCollection<K> implements Closeable {
         }
     }
 
-    public void checkIfClosed() {
-        if (this.db == null) {
-            throw new IllegalStateException("BigMap rocksdb database is closed!");
+    public void clear() {
+        try {
+            this.close();
+            this.open();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-    }
-    
-    public long getKeyByteSize() {
-        return this.keyByteSize;
-    }
-
-    public int size() {
-        return this.size;
-    }
-
-    public boolean isEmpty() {
-        return this.size <= 0;
     }
 
     public void _entryAdded(long keyByteSize, long valueByteSize) {
@@ -171,35 +184,6 @@ public class AbstractRocksBigCollection<K> implements Closeable {
         this.size--;
         this.keyByteSize -= keyByteSize;
         this.valueByteSize -= valueByteSize;
-    }
-
-    public void clear() {
-        this.checkIfClosed();
-        try {
-            this.close();
-            this.destroy();
-            this.open();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    protected K firstKey() {
-        this.checkIfClosed();
-
-        final RocksIterator it = this.db.newIterator();
-        it.seekToFirst();
-
-        if (!it.isValid()) {
-            throw new NoSuchElementException();
-        }
-
-        byte[] keyBytes = it.key();
-        if (keyBytes != null) {
-            return this.keyCodec.deserialize(keyBytes);
-        }
-
-        return null;
     }
 
 }

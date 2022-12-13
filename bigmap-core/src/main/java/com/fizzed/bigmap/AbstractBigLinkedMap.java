@@ -44,6 +44,21 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
+    public long getKeyByteSize() {
+        return this.dataMap.getKeyByteSize();
+    }
+
+    @Override
+    public long getValueByteSize() {
+        return this.dataMap.getValueByteSize();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.dataMap.isClosed();
+    }
+
+    @Override
     public void checkIfClosed() {
         this.dataMap.checkIfClosed();
     }
@@ -51,6 +66,11 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
     @Override
     public ByteCodec<K> getKeyCodec() {
         return this.dataMap.getKeyCodec();
+    }
+
+    @Override
+    public Comparator<K> getKeyComparator() {
+        return this.dataMap.getKeyComparator();
     }
 
     @Override

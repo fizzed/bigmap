@@ -22,6 +22,11 @@ import static com.fizzed.bigmap.BigMapHelper.sizeOf;
 public interface BigSortedMap<K,V> extends BigMap<K,V>, SortedMap<K,V> {
 
     @Override
+    default Comparator<? super K> comparator() {
+        return this.getKeyComparator();
+    }
+
+    @Override
     default Set<K> keySet() {
         return BigMap.super.keySet();
     }
@@ -34,6 +39,31 @@ public interface BigSortedMap<K,V> extends BigMap<K,V>, SortedMap<K,V> {
     @Override
     default Collection<V> values() {
         return BigMap.super.values();
+    }
+
+    @Override
+    default SortedMap<K,V> subMap(K fromKey, K toKey) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default SortedMap<K,V> headMap(K toKey) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default SortedMap<K,V> tailMap(K fromKey) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default K firstKey() {
+        return this.keySet().iterator().next();
+    }
+
+    @Override
+    default K lastKey() {
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.rocksdb;
+package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.bigmap.*;
-import org.rocksdb.BuiltinComparator;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.Options;
+import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Objects;
 
-public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferBigMap<K,V>, BigSortedMap<K,V> {
+public class LevelBigMap2<K,V> extends AbstractBigMap<K,V> implements ByteBufferBigMap<K,V>, BigSortedMap<K,V> {
 
     protected Options options;
-    protected RocksDB db;
+    protected DB db;
 
-    protected RocksBigMap(
+    protected LevelBigMap2(
             Path directory,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
@@ -46,15 +47,13 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
     protected void _open() {
         this.options = new Options();
         //this.options.compressionType(CompressionType.NONE);
-        this.options.setCreateIfMissing(true);
-        this.options.setComparator(BuiltinComparator.BYTEWISE_COMPARATOR);
-        // wow, this comparator causes a massive memory leak
-        //this.options.setComparator(new RocksJavaComparator(this.keyCodec, this.keyComparator));
-        this.options.setDisableAutoCompactions(true);
+        this.options.createIfMissing(true);
+        this.options.comparator(new LevelJavaComparator(this.keyCodec, this.keyComparator));
+        //this.options.cacheSize(this.cacheSize);
 
         try {
             // build database, initialize stats we track
-            this.db = RocksDB.open(this.options, this.directory.toAbsolutePath().toString());
+            this.db = factory.open(this.directory.toFile(), this.options);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +76,7 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
         try {
             return this.db.get(keyBytes);
         }
-        catch (RocksDBException e) {
+        catch (DBException e) {
             throw new BigMapDataException(e);
         }
     }
@@ -91,7 +90,7 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
 
             return oldValueBytes;
         }
-        catch (RocksDBException e) {
+        catch (DBException e) {
             throw new BigMapDataException(e);
         }
     }
@@ -101,7 +100,7 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
         try {
             return this.db.get(keyBytes) != null;
         }
-        catch (RocksDBException e) {
+        catch (DBException e) {
             throw new BigMapDataException(e);
         }
     }
@@ -115,14 +114,14 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
 
             return valueBytes;
         }
-        catch (RocksDBException e) {
+        catch (DBException e) {
             throw new BigMapDataException(e);
         }
     }
 
     @Override
     public Iterator<KeyValueBytes> _forwardIterator() {
-        return RocksForwardIterator.build(this.db);
+        return LevelForwardIterator.build(this.db);
     }
 
 }

@@ -26,7 +26,20 @@ public interface BigMap<K,V> extends Map<K,V>, Closeable {
 
     ByteCodec<K> getKeyCodec();
 
+    Comparator<K> getKeyComparator();
+
     ByteCodec<V> getValueCodec();
+
+    long getKeyByteSize();
+
+    long getValueByteSize();
+
+    boolean isClosed();
+
+    @Override
+    default boolean isEmpty() {
+        return this.size() <= 0;
+    }
 
     @Override
     default boolean containsValue(Object value) {
