@@ -26,6 +26,7 @@
         <module>bigmap-core</module>
         <module>bigmap-leveldb</module>
         <module>bigmap-rocksdb</module>
+        <module>bigmap-integration-tests</module>
         <module>bigmap-demo</module>
     </modules>
 

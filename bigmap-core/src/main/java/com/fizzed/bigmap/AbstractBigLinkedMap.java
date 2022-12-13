@@ -16,21 +16,25 @@
 package com.fizzed.bigmap;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
 
+    final private Path directory;
     final private BigMap<K,V> dataMap;
     final private BigSortedMap<Integer,K> insertOrderToKeyMap;  // for iterating in the order inserted
     final private BigMap<K,Integer> keyToInsertOrderMap;        // for deleting from insertOrder map?   should we care?
     final private AtomicInteger insertCounter = new AtomicInteger(0);
 
     public AbstractBigLinkedMap(
+            Path directory,
             BigMap<K,V> dataMap,
             BigSortedMap<Integer,K> insertOrderToKeyMap,
             BigMap<K,Integer> keyToInsertOrderMap) {
 
+        this.directory = directory;
         this.dataMap = dataMap;
         this.insertOrderToKeyMap = insertOrderToKeyMap;
         this.keyToInsertOrderMap = keyToInsertOrderMap;
@@ -41,6 +45,11 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
         this.dataMap.close();
         this.insertOrderToKeyMap.close();
         this.keyToInsertOrderMap.close();
+    }
+
+    @Override
+    public Path getDirectory() {
+        return this.directory;
     }
 
     @Override

@@ -75,7 +75,7 @@ public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
         final RocksBigMap<Integer,K> insertOrderToKeyMap = new RocksBigMap<>(i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
         final RocksBigMap<K,Integer> keyToInsertOrderMap = new RocksBigMap<>(k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
 
-        return new RocksBigLinkedMap<>(dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        return new RocksBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
     }
 
 }

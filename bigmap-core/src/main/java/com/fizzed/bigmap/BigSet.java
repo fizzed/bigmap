@@ -17,6 +17,7 @@ package com.fizzed.bigmap;
 
 import java.io.Closeable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
 
 public interface BigSet<V> extends Set<V>, Closeable {
@@ -24,6 +25,8 @@ public interface BigSet<V> extends Set<V>, Closeable {
     void checkIfClosed();
 
     ByteCodec<V> getValueCodec();
+
+    Comparator<V> getValueComparator();
 
     @Override
     default boolean containsAll(Collection<?> c) {

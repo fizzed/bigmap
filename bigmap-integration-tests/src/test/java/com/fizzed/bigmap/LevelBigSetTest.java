@@ -15,18 +15,17 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.leveldb.LevelBigMap2Builder;
+import com.fizzed.bigmap.leveldb.LevelBigSetBuilder;
 
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.Set;
 
-public class LevelBigMapTest extends AbstractBigMapTest {
+public class LevelBigSetTest extends AbstractBigSetTest {
 
     @Override
-    public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {
-        return new LevelBigMap2Builder()
+    public <V> Set<V> newSet(Class<V> valueType) {
+        return new LevelBigSetBuilder()
             .setScratchDirectory(Paths.get("target"))
-            .setKeyType(keyType)
             .setValueType(valueType)
             .build();
     }

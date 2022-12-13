@@ -53,6 +53,7 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         this.open();
     }
 
+    @Override
     public Path getDirectory() {
         return this.directory;
     }
@@ -61,14 +62,17 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         return persistent;
     }
 
+    @Override
     public ByteCodec<K> getKeyCodec() {
         return this.keyCodec;
     }
 
+    @Override
     public Comparator<K> getKeyComparator() {
         return this.keyComparator;
     }
 
+    @Override
     public ByteCodec<V> getValueCodec() {
         return this.valueCodec;
     }
@@ -165,6 +169,7 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         }
     }
 
+    @Override
     public void clear() {
         try {
             this.close();

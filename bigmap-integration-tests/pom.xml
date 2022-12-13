@@ -2,8 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.fizzed</groupId>
-    <artifactId>bigmap-demo</artifactId>
-    <name>bigmap-demo</name>
+    <artifactId>bigmap-integration-tests</artifactId>
+    <name>bigmap-integration-tests</name>
     <packaging>jar</packaging>
     
     <parent>
@@ -67,23 +67,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fizzed</groupId>
-            <artifactId>crux-util</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core-java11</artifactId>
             <version>6.4.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- for testing MVStore as an alternative engine -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2-mvstore</artifactId>
-            <version>2.1.214</version>
             <scope>test</scope>
         </dependency>
         

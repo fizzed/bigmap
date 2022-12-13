@@ -16,11 +16,14 @@
 package com.fizzed.bigmap;
 
 import java.io.Closeable;
+import java.nio.file.Path;
 import java.util.*;
 
 import static com.fizzed.bigmap.BigMapHelper.sizeOf;
 
 public interface BigMap<K,V> extends Map<K,V>, Closeable {
+
+    Path getDirectory();
 
     void checkIfClosed();
 

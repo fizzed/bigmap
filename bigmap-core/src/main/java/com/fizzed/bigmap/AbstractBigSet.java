@@ -16,6 +16,7 @@
 package com.fizzed.bigmap;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Iterator;
 
 public class AbstractBigSet<V> implements BigSet<V> {
@@ -41,6 +42,11 @@ public class AbstractBigSet<V> implements BigSet<V> {
     @Override
     public ByteCodec<V> getValueCodec() {
         return this.map.getKeyCodec();
+    }
+
+    @Override
+    public Comparator<V> getValueComparator() {
+        return this.map.getKeyComparator();
     }
 
     @Override

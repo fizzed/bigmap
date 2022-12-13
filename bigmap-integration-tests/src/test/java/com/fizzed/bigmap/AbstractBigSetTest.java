@@ -15,14 +15,9 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.leveldb.LevelBigSet;
-import com.fizzed.bigmap.leveldb.LevelBigSetBuilder;
 import org.junit.Test;
-
-import java.nio.file.Paths;
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;

@@ -17,14 +17,17 @@ package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.AbstractBigLinkedMap;
 
+import java.nio.file.Path;
+
 public class RocksBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
 
     protected RocksBigLinkedMap(
+            Path directory,
             RocksBigMap<K,V> dataMap,
             RocksBigMap<Integer,K> insertOrderToKeyMap,
             RocksBigMap<K,Integer> keyToInsertOrderMap) {
         
-        super(dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        super(directory, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
     }
 
 }
