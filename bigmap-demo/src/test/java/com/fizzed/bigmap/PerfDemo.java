@@ -45,9 +45,9 @@ public class PerfDemo {
 
 //        String type = "LevelBigMap";
 //        String type = "RocksBigLinkedMap";
-        String type = "RocksBigMap";
+//        String type = "RocksBigMap";
 //        String type = "MVStoreMap";
-//        String type = "TokyoCabinetMap";
+        String type = "TokyoCabinetMap";
         int mapCount = 30;
         int entryCountPerMap = 3000000;
 
@@ -208,14 +208,8 @@ public class PerfDemo {
             case "TokyoCabinetMap": {
                 Path dir = Paths.get("target", "tokyocabinet-" + UUID.randomUUID());
                 Files.createDirectories(dir);
-                // HASHMAP
-                /*HDB db = new HDB();
-                // open the database
-                if (!db.open(dir.resolve("casket.tch").toString(), HDB.OWRITER | HDB.OCREAT)){
-                    int ecode = db.ecode();
-                    throw new RuntimeException("TokyoCabinet open error: " + db.errmsg(ecode));
-                }*/
                 // BTREEMAP
+                tokyocabinet.Loader.load();
                 tokyocabinet.BDB db = new tokyocabinet.BDB();
                 // open the database
                 if (!db.open(dir.resolve("casket.tcb").toString(), HDB.OWRITER | HDB.OCREAT)){

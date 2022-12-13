@@ -86,6 +86,14 @@
             <version>2.1.214</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- for testing MVStore as an alternative engine -->
+        <dependency>
+            <groupId>com.fizzed</groupId>
+            <artifactId>tokyocabinet-linux-x64</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
         
     </dependencies>
     
