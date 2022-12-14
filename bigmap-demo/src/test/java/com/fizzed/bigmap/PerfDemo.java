@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
-import tokyocabinet.HDB;
-import tokyocabinet.TDB;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -45,12 +43,14 @@ public class PerfDemo {
         // config options
         //
 
-        String type = "TokyoBigMap";
+//        String type = "TokyoBigMap";
 //        String type = "LevelBigMap";
 //        String type = "RocksBigLinkedMap";
 //        String type = "RocksBigMap";
 //        String type = "MVStoreMap";
 //        String type = "TokyoCabinetMap";
+//        String type = "KyotoCabinetMap";
+        String type = "TkrzwCabinetMap";
         int mapCount = 10;
         int entryCountPerMap = 3000000;
 
@@ -200,6 +200,7 @@ public class PerfDemo {
                         return new org.h2.mvstore.MVStore.Builder()
                             .fileName(filename)
                             .cacheSize(5)
+                            .compress()
                             .open();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -208,6 +209,53 @@ public class PerfDemo {
                 Map<String,Item> map =  mvstore.openMap("data-" + identifier);
                 return new OffheapMap<>(Paths.get(mvstore.getFileStore().getFileName()).getParent(), map);
             }
+            case "TkrzwCabinetMap": {
+                Path dir = Paths.get("target", "tkrzw-" + UUID.randomUUID());
+                Files.createDirectories(dir);
+                // BTREEMAP
+                tkrzw.DBM dbm = new tkrzw.DBM();
+                // open the database
+                tkrzw.Status status = dbm.open(dir.resolve("casket.tkt").toString(), true, "max_cached_pages=1");
+                if (!status.isOK()) {
+                    throw new RuntimeException(status.getMessage());
+                }
+                return new OffheapMap<String,Item>(dir, null) {
+                    @Override
+                    public Item get(Object key) {
+                        byte[] b = dbm.get(stringByteCodec.serialize((String)key));
+                        return itemByteCodec.deserialize(b);
+                    }
+                    @Override
+                    public Item put(String key, Item value) {
+                        dbm.set(stringByteCodec.serialize(key), itemByteCodec.serialize(value));
+                        return null;
+                    }
+                };
+            }
+            /*case "KyotoCabinetMap": {
+                Path dir = Paths.get("target", "kyotocabinet-" + UUID.randomUUID());
+                Files.createDirectories(dir);
+                // BTREEMAP
+                kyotocabinet.Loader.load();
+                kyotocabinet.DB db = new kyotocabinet.DB();
+                db.
+                // open the database
+                if (!db.open(dir.resolve("casket.kct").toString(), kyotocabinet.DB.OWRITER | kyotocabinet.DB.OCREATE)) {
+                    throw new RuntimeException("kyotocabinet open error: " + db.error());
+                }
+                return new OffheapMap<String,Item>(dir, null) {
+                    @Override
+                    public Item get(Object key) {
+                        byte[] b = db.get(stringByteCodec.serialize((String)key));
+                        return itemByteCodec.deserialize(b);
+                    }
+                    @Override
+                    public Item put(String key, Item value) {
+                        db.set(stringByteCodec.serialize(key), itemByteCodec.serialize(value));
+                        return null;
+                    }
+                };
+            }*/
             // tokyo cobinet
             // wget http://fallabs.com/tokyocabinet/tokyocabinet-1.4.48.tar.gz
             // ./configure --prefix=/usr

@@ -84,7 +84,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- for testing MVStore as an alternative engine -->
+        <!-- for testing MVStore as an alternative key-value engine -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2-mvstore</artifactId>
@@ -92,10 +92,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- for testing MVStore as an alternative engine -->
+        <!-- for testing Tkrzw as an alternative key-value engine -->
         <dependency>
             <groupId>com.fizzed</groupId>
-            <artifactId>tokyocabinet-linux-x64</artifactId>
+            <artifactId>tkrzw-linux-x64</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
