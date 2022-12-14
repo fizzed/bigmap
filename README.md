@@ -76,6 +76,7 @@ All tests performed with Azul JDK 11, Linux x64, with -Xmx128m settings for JVM.
 
 JNI-based library. Small dependency, most efficient use of memory, and highest performance.
 
+```
 Performance test: type=TokyoCabinetMap, maps=10, entriesPerMap=3000, totalEntries=30000
 Max openFiles=52, heap=75 (MB), rss=222 (MB)
 Map put throughput: 281514 entries per second
@@ -105,11 +106,13 @@ Max openFiles=73, heap=81 (MB), rss=639 (MB)
 Map put throughput: 807945 entries per second
 Map get throughput: 164839 entries per second
 Total disk used: 19618 (MB)
+```
 
 ### RocksDB
 
 JNI-based library.
 
+```
 Performance test: type=RocksBigMap, maps=10, entriesPerMap=3000, totalEntries=30000
 Max openFiles=103, heap=74 (MB), rss=227 (MB)
 Map put throughput: 155633 entries per second
@@ -133,11 +136,13 @@ Max openFiles=444, heap=81 (MB), rss=722 (MB)
 Map put throughput: 160107 entries per second
 Map get throughput: 103470 entries per second
 Total disk used: 4611 (MB)
+```
 
 ### LevelDB (Java version)
 
 Pure Java library.
 
+```
 Performance test: type=LevelBigMap, maps=10, entriesPerMap=3000, totalEntries=30000
 Max openFiles=68, heap=76 (MB), rss=229 (MB)
 Map put throughput: 222263 entries per second
@@ -156,11 +161,13 @@ Max openFiles=71, heap=223 (MB), rss=6766 (MB)
 Map put throughput: 189189 entries per second
 Map get throughput: 250558 entries per second
 Total disk used: 6307 (MB)
+```
 
 ### MVStore (H2 DB engine)
 
 Pure Java library.
 
+```
 Performance test: type=MVStoreMap, maps=10, entriesPerMap=3000, totalEntries=30000
 Max openFiles=39, heap=64 (MB), rss=299 (MB)
 Map put throughput: 77023 entries per second
@@ -178,7 +185,7 @@ Max openFiles=40, heap=104 (MB), rss=354 (MB)
 Map put throughput: 216259 entries per second
 Map get throughput: 12201 entries per second
 Total disk used: 24135 (MB)
-
+```
 
 ## License
 
