@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
+
+import com.fizzed.bigmap.BigMap;
+import com.fizzed.bigmap.BigSortedMap;
+import com.fizzed.bigmap.ByteCodec;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,6 +42,13 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
         this.dataMap = dataMap;
         this.insertOrderToKeyMap = insertOrderToKeyMap;
         this.keyToInsertOrderMap = keyToInsertOrderMap;
+    }
+
+    @Override
+    public void open() {
+        this.dataMap.open();
+        this.insertOrderToKeyMap.open();
+        this.keyToInsertOrderMap.open();
     }
 
     @Override

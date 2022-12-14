@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
+
+import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
 import java.util.Comparator;

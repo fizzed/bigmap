@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
+
+import com.fizzed.bigmap.BigMap;
 
 import javax.print.attribute.UnmodifiableSetException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-public class BigMapKeySet<K,V> implements Set<K> {
+public class BigMapEntrySet<K,V> implements Set<Entry<K,V>> {
 
     private final BigMap<K,V> map;
 
-    public BigMapKeySet(BigMap<K,V> map) {
+    public BigMapEntrySet(BigMap<K,V> map) {
         this.map = map;
     }
 
@@ -40,13 +42,8 @@ public class BigMapKeySet<K,V> implements Set<K> {
     }
 
     @Override
-    public boolean remove(Object key) {
-        return this.map.remove(key) != null;
-    }
-
-    @Override
-    public boolean contains(Object key) {
-        return this.map.containsKey(key);
+    public boolean contains(Object o) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -54,20 +51,18 @@ public class BigMapKeySet<K,V> implements Set<K> {
         this.map.clear();
     }
 
-    public Iterator<K> iterator() {
+    public Iterator<Entry<K,V>> iterator() {
         final Iterator<Entry<K,V>> iterator = this.map.forwardIterator();
 
-        return new Iterator<K>() {
+        return new Iterator<Entry<K,V>>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
             @Override
-            public K next() {
-                final Entry<K,V> entry = iterator.next();
-
-                return entry.getKey();
+            public Entry<K,V> next() {
+                return iterator.next();
             }
         };
     }
@@ -83,17 +78,22 @@ public class BigMapKeySet<K,V> implements Set<K> {
     }
 
     @Override
-    public boolean add(K e) {
+    public boolean add(Entry<K,V> e) {
+        throw new UnmodifiableSetException();
+    }
+
+    @Override
+    public boolean remove(Object o) {
         throw new UnmodifiableSetException();
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean addAll(Collection<? extends K> c) {
+    public boolean addAll(Collection<? extends Entry<K,V>> c) {
         throw new UnmodifiableSetException();
     }
 

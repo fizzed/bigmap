@@ -16,6 +16,8 @@
 package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.BigMapHelper;
 
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -71,7 +73,9 @@ public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
         final LevelBigMap<Integer,K> insertOrderToKeyMap = new LevelBigMap<>(i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
         final LevelBigMap<K,Integer> keyToInsertOrderMap = new LevelBigMap<>(k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
 
-        return new LevelBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        final LevelBigLinkedMap<K,V> map = new LevelBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        map.open();
+        return map;
     }
 
 }

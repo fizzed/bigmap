@@ -15,6 +15,8 @@
  */
 package com.fizzed.bigmap;
 
+import com.fizzed.bigmap.impl.None;
+
 import java.nio.charset.StandardCharsets;
 
 public class ByteCodecs {
@@ -45,13 +47,14 @@ public class ByteCodecs {
             return (ByteCodec<T>)noneCodec();
         }
         else {
-            return new FSTByteCodec(type);
+            return new SerializableByteCodec<>();
+            //return new FSTByteCodec(type);
         }
     }
     
-    static public <T> ByteCodec<T> fstObjectCodec() {
+    /*static public <T> ByteCodec<T> fstObjectCodec() {
         return new FSTByteCodec<>();
-    }
+    }*/
     
     static public ByteCodec<String> utf8StringCodec() {
         return new ByteCodec<String>() {

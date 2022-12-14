@@ -16,6 +16,9 @@
 package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMap;
+import com.fizzed.bigmap.impl.ByteArrayBigMap;
+import com.fizzed.bigmap.impl.KeyValueBytes;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
@@ -27,7 +30,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferBigMap<K,V>, BigSortedMap<K,V> {
+public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBigMap<K,V>, BigSortedMap<K,V> {
 
     protected Options options;
     protected DB db;

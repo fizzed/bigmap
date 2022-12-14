@@ -17,8 +17,6 @@ package com.fizzed.bigmap;
 
 import java.util.*;
 
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
-
 public interface BigSortedMap<K,V> extends BigMap<K,V>, SortedMap<K,V> {
 
     @Override

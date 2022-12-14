@@ -1,6 +1,6 @@
 package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.KeyValueBytes;
+import com.fizzed.bigmap.impl.KeyValueBytes;
 import tokyocabinet.BDB;
 import tokyocabinet.BDBCUR;
 

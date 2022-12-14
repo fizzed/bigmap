@@ -16,6 +16,9 @@
 package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMap;
+import com.fizzed.bigmap.impl.ByteArrayBigMap;
+import com.fizzed.bigmap.impl.KeyValueBytes;
 import tokyocabinet.BDB;
 import tokyocabinet.HDB;
 
@@ -26,12 +29,14 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferBigMap<K,V>, BigSortedMap<K,V> {
+public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBigMap<K,V>, BigSortedMap<K,V> {
 
     protected BDB db;
+    protected final String name;
 
     protected TokyoBigMap(
             Path directory,
+            String name,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
@@ -39,6 +44,8 @@ public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
         super(directory, false, keyCodec, keyComparator, valueCodec);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
+
+        this.name = name;
     }
 
     @Override
@@ -50,7 +57,7 @@ public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferB
             throw new RuntimeException(e);
         }
         // build database, initialize stats we track
-        if (!this.db.open(this.directory.resolve("data.tcb").toAbsolutePath().toString(), HDB.OWRITER | HDB.OCREAT)){
+        if (!this.db.open(this.directory.resolve(this.name + ".tcb").toAbsolutePath().toString(), HDB.OWRITER | HDB.OCREAT)){
             int ecode = db.ecode();
             throw new RuntimeException("TokyoCabinet open error: " + this.db.errmsg(ecode));
         }

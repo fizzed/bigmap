@@ -21,6 +21,11 @@
 
         <dependency>
             <groupId>com.fizzed</groupId>
+            <artifactId>bigmap-tokyocabinet</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fizzed</groupId>
             <artifactId>bigmap-leveldb</artifactId>
         </dependency>
 

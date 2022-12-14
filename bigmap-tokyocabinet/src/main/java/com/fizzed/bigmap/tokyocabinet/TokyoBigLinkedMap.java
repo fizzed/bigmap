@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.leveldb;
+package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.impl.AbstractBigSet;
-import com.fizzed.bigmap.BigSortedSet;
-import com.fizzed.bigmap.impl.None;
+import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
 
-public class LevelBigSet<V> extends AbstractBigSet<V> implements BigSortedSet<V> {
+import java.nio.file.Path;
 
-    protected LevelBigSet(
-            LevelBigMap<V, None> map) {
+public class TokyoBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
+
+    protected TokyoBigLinkedMap(
+            Path directory,
+            TokyoBigMap<K,V> dataMap,
+            TokyoBigMap<Integer,K> insertOrderToKeyMap,
+            TokyoBigMap<K,Integer> keyToInsertOrderMap) {
         
-        super(map);
+        super(directory, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
     }
 
 }

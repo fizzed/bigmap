@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
+
+import com.fizzed.bigmap.BigMap;
+import com.fizzed.bigmap.BigSet;
+import com.fizzed.bigmap.ByteCodec;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -21,7 +25,7 @@ import java.util.Iterator;
 
 public class AbstractBigSet<V> implements BigSet<V> {
 
-    final private BigMap<V,None> map;
+    final private BigMap<V, None> map;
 
     public AbstractBigSet(
             BigMap<V,None> map) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.rocksdb;
+package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.*;
 import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
@@ -23,39 +23,39 @@ import com.fizzed.bigmap.impl.None;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-public class RocksBigSetBuilder<V> extends AbstractBigMapBuilder {
+public class TokyoBigSetBuilder<V> extends AbstractBigMapBuilder {
 
-    public RocksBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
+    public TokyoBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
         return this;
     }
     
-    public <V2> RocksBigSetBuilder<V2> setValueType(Class<V2> valueType) {
+    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType) {
         super._setKeyType(valueType);
-        return (RocksBigSetBuilder<V2>)this;
+        return (TokyoBigSetBuilder<V2>)this;
     }
 
-    public <V2> RocksBigSetBuilder<V2> setValueType(Class<V2> valueType, Comparator<V2> valueComparator) {
+    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType, Comparator<V2> valueComparator) {
         super._setKeyType(valueType, valueComparator);
-        return (RocksBigSetBuilder<V2>)this;
+        return (TokyoBigSetBuilder<V2>)this;
     }
 
-    public <V2> RocksBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
+    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
         super._setKeyType(valueType, valueCodec);
-        return (RocksBigSetBuilder<V2>)this;
+        return (TokyoBigSetBuilder<V2>)this;
     }
 
-    public <V2> RocksBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec, Comparator<V2> valueComparator) {
+    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec, Comparator<V2> valueComparator) {
         super._setKeyType(valueType, valueCodec, valueComparator);
-        return (RocksBigSetBuilder<V2>)this;
+        return (TokyoBigSetBuilder<V2>)this;
     }
     
-    public RocksBigSet<V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "rocksbigset");
+    public TokyoBigSet<V> build() {
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "tokyobigset");
 
-        final RocksBigMap<V, None> map = new RocksBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+        final TokyoBigMap<V, None> map = new TokyoBigMap<>(dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
         map.open();
-        return new RocksBigSet<>(map);
+        return new TokyoBigSet<>(map);
     }
 
 }

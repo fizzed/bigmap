@@ -15,8 +15,8 @@
  */
 package com.fizzed.bigmap.leveldb;
 
-import com.fizzed.bigmap.AbstractBigMapBuilder;
-import com.fizzed.bigmap.BigMapHelper;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
@@ -62,7 +62,9 @@ public class LevelBigMapBuilder<K,V> extends AbstractBigMapBuilder {
     public LevelBigMap<K,V> build() {
         final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "levelbigmap");
 
-        return new LevelBigMap<>(dir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final LevelBigMap<K,V> map = new LevelBigMap<>(dir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        map.open();
+        return map;
     }
 
 }

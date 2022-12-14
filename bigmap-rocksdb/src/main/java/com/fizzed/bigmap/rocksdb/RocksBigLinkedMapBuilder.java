@@ -16,13 +16,11 @@
 package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.BigMapHelper;
 
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.Objects;
-
-import static com.fizzed.bigmap.ByteCodecs.autoCodec;
-import static com.fizzed.bigmap.Comparators.autoComparator;
 
 public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
 
@@ -75,7 +73,9 @@ public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
         final RocksBigMap<Integer,K> insertOrderToKeyMap = new RocksBigMap<>(i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
         final RocksBigMap<K,Integer> keyToInsertOrderMap = new RocksBigMap<>(k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
 
-        return new RocksBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        final RocksBigLinkedMap<K,V> map = new RocksBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        map.open();
+        return map;
     }
 
 }

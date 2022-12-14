@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.leveldb;
+package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.impl.AbstractBigSet;
 import com.fizzed.bigmap.BigSortedSet;
 import com.fizzed.bigmap.impl.None;
 
-public class LevelBigSet<V> extends AbstractBigSet<V> implements BigSortedSet<V> {
+public class TokyoBigSet<V> extends AbstractBigSet<V> implements BigSortedSet<V> {
 
-    protected LevelBigSet(
-            LevelBigMap<V, None> map) {
+    protected TokyoBigSet(
+            TokyoBigMap<V,None> map) {
         
         super(map);
     }

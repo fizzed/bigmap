@@ -15,7 +15,7 @@
  */
 package com.fizzed.bigmap.leveldb;
 
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
+import static com.fizzed.bigmap.impl.BigMapHelper.sizeOf;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Objects;

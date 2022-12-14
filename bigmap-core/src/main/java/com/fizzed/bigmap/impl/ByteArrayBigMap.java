@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
+
+import com.fizzed.bigmap.BigMap;
 
 import java.util.*;
 
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
+import static com.fizzed.bigmap.impl.BigMapHelper.sizeOf;
 
-public interface ByteBufferBigMap<K,V> extends BigMap<K,V> {
+public interface ByteArrayBigMap<K,V> extends BigMap<K,V> {
 
     @Override
     default V get(Object key) {
@@ -114,22 +116,22 @@ public interface ByteBufferBigMap<K,V> extends BigMap<K,V> {
                 return new Entry<K,V>() {
                     @Override
                     public K getKey() {
-                        return ByteBufferBigMap.this.getKeyCodec().deserialize(kvb.getKey());
+                        return ByteArrayBigMap.this.getKeyCodec().deserialize(kvb.getKey());
                     }
 
                     @Override
                     public V getValue() {
-                        return ByteBufferBigMap.this.getValueCodec().deserialize(kvb.getValue());
+                        return ByteArrayBigMap.this.getValueCodec().deserialize(kvb.getValue());
                     }
 
                     @Override
                     public V setValue(V value) {
-                        final byte[] valueBytes = ByteBufferBigMap.this.getValueCodec().serialize(value);
+                        final byte[] valueBytes = ByteArrayBigMap.this.getValueCodec().serialize(value);
 
-                        final byte[] oldValueBytes = ByteBufferBigMap.this._put(kvb.getKey(), valueBytes);
+                        final byte[] oldValueBytes = ByteArrayBigMap.this._put(kvb.getKey(), valueBytes);
 
                         if (oldValueBytes != null) {
-                            return ByteBufferBigMap.this.getValueCodec().deserialize(oldValueBytes);
+                            return ByteArrayBigMap.this.getValueCodec().deserialize(oldValueBytes);
                         }
 
                         return null;

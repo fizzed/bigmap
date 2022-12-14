@@ -1,4 +1,4 @@
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
 
 public class KeyValueBytes {
 

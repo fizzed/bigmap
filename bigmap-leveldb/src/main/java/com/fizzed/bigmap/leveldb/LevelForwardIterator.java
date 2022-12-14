@@ -1,6 +1,6 @@
 package com.fizzed.bigmap.leveldb;
 
-import com.fizzed.bigmap.KeyValueBytes;
+import com.fizzed.bigmap.impl.KeyValueBytes;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 

@@ -1,6 +1,6 @@
 package com.fizzed.bigmap.rocksdb;
 
-import com.fizzed.bigmap.KeyValueBytes;
+import com.fizzed.bigmap.impl.KeyValueBytes;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
 

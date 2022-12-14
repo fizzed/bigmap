@@ -18,6 +18,7 @@ package com.fizzed.bigmap;
 import com.fizzed.bigmap.leveldb.LevelBigMapBuilder;
 import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
 import com.fizzed.bigmap.rocksdb.RocksBigMapBuilder;
+import com.fizzed.bigmap.tokyocabinet.TokyoBigMapBuilder;
 import com.fizzed.crux.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +44,14 @@ public class PerfDemo {
         // config options
         //
 
+        String type = "TokyoBigMap";
 //        String type = "LevelBigMap";
 //        String type = "RocksBigLinkedMap";
 //        String type = "RocksBigMap";
 //        String type = "MVStoreMap";
-        String type = "TokyoCabinetMap";
-        int mapCount = 30;
-        int entryCountPerMap = 3000000;
+//        String type = "TokyoCabinetMap";
+        int mapCount = 10;
+        int entryCountPerMap = 300000;
 
         //
         //
@@ -120,8 +122,6 @@ public class PerfDemo {
 
         log.info("======================================================================");
         log.info("Performance test: type={}, maps={}, entriesPerMap={}, totalEntries={}", type, mapCount, entryCountPerMap, entryPutCount);
-        logMemory("Final");
-
         log.info("Max openFiles={}, heap={} (MB), rss={} (MB)", maxOpenFiles, maxHeapMb, maxRssMb);
         log.info("Map put throughput: {} entries per second", (long)((double)entryPutCount / entryPutTimer.elapsedSeconds()));
         log.info("Map get throughput: {} entries per second", (long)((double)entryGetCount / entryGetTimer.elapsedSeconds()));
@@ -161,25 +161,32 @@ public class PerfDemo {
     static public Map<String,Item> buildMap(String type, int identifier) throws Exception {
         final ByteCodec<String> stringByteCodec = ByteCodecs.utf8StringCodec();
         final ByteCodec<Item> itemByteCodec = ByteCodecs.autoCodec(Item.class);
+//        final ByteCodec<Item> itemByteCodec = new FSTByteCodec<>();
 
         switch (type) {
+            case "TokyoBigMap":
+                return new TokyoBigMapBuilder()
+                    .setScratchDirectory(Paths.get("target"))
+                    .setKeyType(String.class, stringByteCodec)
+                    .setValueType(Item.class, itemByteCodec)
+                    .build();
             case "RocksBigMap":
                 return new RocksBigMapBuilder()
                     .setScratchDirectory(Paths.get("target"))
-                    .setKeyType(String.class)
-                    .setValueType(Item.class)
+                    .setKeyType(String.class, stringByteCodec)
+                    .setValueType(Item.class, itemByteCodec)
                     .build();
             case "RocksBigLinkedMap":
                 return new RocksBigLinkedMapBuilder()
                     .setScratchDirectory(Paths.get("target"))
-                    .setKeyType(String.class)
-                    .setValueType(Item.class)
+                    .setKeyType(String.class, stringByteCodec)
+                    .setValueType(Item.class, itemByteCodec)
                     .build();
             case "LevelBigMap":
                 return new LevelBigMapBuilder()
                     .setScratchDirectory(Paths.get("target"))
-                    .setKeyType(String.class)
-                    .setValueType(Item.class)
+                    .setKeyType(String.class, stringByteCodec)
+                    .setValueType(Item.class, itemByteCodec)
                     .build();
             case "MVStoreMap": {
                 org.h2.mvstore.MVStore mvstore = (org.h2.mvstore.MVStore) ENGINE_STATICS.computeIfAbsent("mvstore", k -> {
@@ -205,7 +212,7 @@ public class PerfDemo {
             // make -j4
             // sudo make install
             // wget http://fallabs.com/tokyocabinet/javapkg/tokyocabinet-java-1.24.tar.gz
-            case "TokyoCabinetMap": {
+            /*case "TokyoCabinetMap": {
                 Path dir = Paths.get("target", "tokyocabinet-" + UUID.randomUUID());
                 Files.createDirectories(dir);
                 // BTREEMAP
@@ -228,7 +235,7 @@ public class PerfDemo {
                         return null;
                     }
                 };
-            }
+            }*/
 
         }
 

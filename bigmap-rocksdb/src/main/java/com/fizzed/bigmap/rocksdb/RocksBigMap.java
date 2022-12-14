@@ -16,17 +16,19 @@
 package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMap;
+import com.fizzed.bigmap.impl.ByteArrayBigMap;
+import com.fizzed.bigmap.impl.KeyValueBytes;
 import org.rocksdb.BuiltinComparator;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteBufferBigMap<K,V>, BigSortedMap<K,V> {
+public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBigMap<K,V>, BigSortedMap<K,V> {
 
     protected Options options;
     protected RocksDB db;

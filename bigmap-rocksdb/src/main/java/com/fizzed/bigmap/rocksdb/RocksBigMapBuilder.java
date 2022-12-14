@@ -16,14 +16,11 @@
 package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.BigMapHelper;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.Objects;
-
-import static com.fizzed.bigmap.ByteCodecs.autoCodec;
-import static com.fizzed.bigmap.Comparators.autoComparator;
 
 public class RocksBigMapBuilder<K,V> extends AbstractBigMapBuilder {
 
@@ -65,7 +62,9 @@ public class RocksBigMapBuilder<K,V> extends AbstractBigMapBuilder {
     public RocksBigMap<K,V> build() {
         final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "rocksbigmap");
 
-        return new RocksBigMap<>(dir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final RocksBigMap<K,V> map = new RocksBigMap<>(dir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        map.open();
+        return map;
     }
 
 }

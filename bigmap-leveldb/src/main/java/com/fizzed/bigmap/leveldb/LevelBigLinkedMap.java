@@ -15,7 +15,7 @@
  */
 package com.fizzed.bigmap.leveldb;
 
-import com.fizzed.bigmap.AbstractBigLinkedMap;
+import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
 
 import java.nio.file.Path;
 

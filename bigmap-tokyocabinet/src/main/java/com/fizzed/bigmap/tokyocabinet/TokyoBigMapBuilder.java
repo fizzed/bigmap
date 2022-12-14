@@ -15,8 +15,8 @@
  */
 package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.AbstractBigMapBuilder;
-import com.fizzed.bigmap.BigMapHelper;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
@@ -60,9 +60,11 @@ public class TokyoBigMapBuilder<K,V> extends AbstractBigMapBuilder {
     }
     
     public TokyoBigMap<K,V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "rocksbigmap");
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "tokyobigmap");
 
-        return new TokyoBigMap<>(dir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final TokyoBigMap<K,V> map = new TokyoBigMap<>(dir, "data", (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        map.open();
+        return map;
     }
 
 }

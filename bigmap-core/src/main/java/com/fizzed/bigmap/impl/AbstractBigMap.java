@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap;
+package com.fizzed.bigmap.impl;
+
+import com.fizzed.bigmap.BigMap;
+import com.fizzed.bigmap.BigMapDataException;
+import com.fizzed.bigmap.ByteCodec;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -50,7 +54,6 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
         this.valueCodec = valueCodec;
-        this.open();
     }
 
     @Override
@@ -99,7 +102,8 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         }
     }
 
-    protected void open() {
+    @Override
+    public void open() {
         try {
             this.close();
         } catch (IOException e) {

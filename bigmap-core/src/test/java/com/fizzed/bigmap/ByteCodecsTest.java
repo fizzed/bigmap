@@ -19,13 +19,15 @@ import com.fizzed.crux.util.Base16;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
-public class CodecsTest {
+public class ByteCodecsTest {
  
     @Test
     public void autoCodec() {
@@ -88,6 +90,37 @@ public class CodecsTest {
         assertThat(c.deserialize(Base16.decode("7FFF")), is((short)Short.MAX_VALUE));
         assertThat(c.serialize(Short.MIN_VALUE), is(Base16.decode("8000")));
         assertThat(c.deserialize(Base16.decode("8000")), is((short)Short.MIN_VALUE));
+    }
+
+    @Test
+    public void byteCodec() {
+        ByteCodec<Byte> c = ByteCodecs.autoCodec(Byte.class);
+
+        assertThat(c.serialize((byte)0), is(Base16.decode("00")));
+        assertThat(c.deserialize(Base16.decode("00")), is((byte)0));
+        assertThat(c.serialize((byte)1), is(Base16.decode("01")));
+        assertThat(c.deserialize(Base16.decode("01")), is((byte)1));
+        assertThat(c.serialize((byte)-1), is(Base16.decode("FF")));
+    }
+
+    @Test
+    public void byteArrayCodec() {
+        ByteCodec<byte[]> c = ByteCodecs.autoCodec(byte[].class);
+
+        final byte[] bytes1 = Base16.decode("0001020304050607");
+
+        assertThat(c.serialize(bytes1), is(Base16.decode("0001020304050607")));
+        assertThat(c.deserialize(Base16.decode("0001020304050607")), is(bytes1));
+    }
+
+    @Test
+    public void serializableCodec() {
+        ByteCodec<Instant> c = new SerializableByteCodec<>();
+
+        final Instant i1 = Instant.parse("2022-11-01T01:02:03.456Z");
+
+        assertThat(c.serialize(i1), is(Base16.decode("aced00057372000d6a6176612e74696d652e536572955d84ba1b2248b20c00007870770d02000000006360700b1b2e020078")));
+        assertThat(c.deserialize(Base16.decode("aced00057372000d6a6176612e74696d652e536572955d84ba1b2248b20c00007870770d02000000006360700b1b2e020078")), is(i1));
     }
     
 }

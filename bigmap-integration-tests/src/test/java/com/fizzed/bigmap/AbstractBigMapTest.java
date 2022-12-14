@@ -15,19 +15,13 @@
  */
 package com.fizzed.bigmap;
 
-import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static com.fizzed.bigmap.BigMapHelper.*;
-import static java.util.stream.Collectors.toList;
+import static com.fizzed.bigmap.impl.BigMapHelper.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;

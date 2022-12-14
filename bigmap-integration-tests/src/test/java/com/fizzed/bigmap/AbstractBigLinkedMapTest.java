@@ -20,8 +20,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.*;
 
-import static com.fizzed.bigmap.BigMapHelper.*;
-import static java.util.stream.Collectors.toList;
+import static com.fizzed.bigmap.impl.BigMapHelper.*;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;

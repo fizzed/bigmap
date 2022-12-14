@@ -15,9 +15,9 @@
  */
 package com.fizzed.bigmap.rocksdb;
 
-import com.fizzed.bigmap.AbstractBigSet;
+import com.fizzed.bigmap.impl.AbstractBigSet;
 import com.fizzed.bigmap.BigSortedSet;
-import com.fizzed.bigmap.None;
+import com.fizzed.bigmap.impl.None;
 
 public class RocksBigSet<V> extends AbstractBigSet<V> implements BigSortedSet<V> {
 
