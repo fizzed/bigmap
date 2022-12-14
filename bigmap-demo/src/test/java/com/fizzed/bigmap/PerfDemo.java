@@ -43,14 +43,14 @@ public class PerfDemo {
         // config options
         //
 
-//        String type = "TokyoBigMap";
+        String type = "TokyoBigMap";
 //        String type = "LevelBigMap";
 //        String type = "RocksBigLinkedMap";
 //        String type = "RocksBigMap";
 //        String type = "MVStoreMap";
 //        String type = "TokyoCabinetMap";
 //        String type = "KyotoCabinetMap";
-        String type = "TkrzwCabinetMap";
+//        String type = "TkrzwCabinetMap";
         int mapCount = 10;
         int entryCountPerMap = 3000000;
 
