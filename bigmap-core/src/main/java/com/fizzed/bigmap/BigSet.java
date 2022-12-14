@@ -16,17 +16,26 @@
 package com.fizzed.bigmap;
 
 import java.io.Closeable;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 
 public interface BigSet<V> extends Set<V>, Closeable {
 
+    Path getDirectory();
+
+    void open();
+
     void checkIfClosed();
 
     ByteCodec<V> getValueCodec();
 
     Comparator<V> getValueComparator();
+
+    long getValueByteSize();
+
+    boolean isClosed();
 
     @Override
     default boolean containsAll(Collection<?> c) {

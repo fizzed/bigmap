@@ -20,10 +20,11 @@ import com.fizzed.bigmap.BigSet;
 import com.fizzed.bigmap.ByteCodec;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class AbstractBigSet<V> implements BigSet<V> {
+abstract public class AbstractBigSet<V> implements BigSet<V> {
 
     final private BigMap<V, None> map;
 
@@ -39,6 +40,16 @@ public class AbstractBigSet<V> implements BigSet<V> {
     }
 
     @Override
+    public Path getDirectory() {
+        return this.map.getDirectory();
+    }
+
+    @Override
+    public void open() {
+        this.map.open();
+    }
+
+    @Override
     public void checkIfClosed() {
         this.map.checkIfClosed();
     }
@@ -51,6 +62,16 @@ public class AbstractBigSet<V> implements BigSet<V> {
     @Override
     public Comparator<V> getValueComparator() {
         return this.map.getKeyComparator();
+    }
+
+    @Override
+    public long getValueByteSize() {
+        return this.map.getKeyByteSize();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.map.isClosed();
     }
 
     @Override

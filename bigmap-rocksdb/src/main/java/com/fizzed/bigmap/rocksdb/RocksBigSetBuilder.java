@@ -53,9 +53,13 @@ public class RocksBigSetBuilder<V> extends AbstractBigMapBuilder {
     public RocksBigSet<V> build() {
         final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "rocksbigset");
 
-        final RocksBigMap<V, None> map = new RocksBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
-        map.open();
-        return new RocksBigSet<>(map);
+        final RocksBigMap<V,None> map = new RocksBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+
+        final RocksBigSet<V> set = new RocksBigSet<>(map);
+
+        set.open();
+
+        return set;
     }
 
 }

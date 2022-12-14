@@ -53,9 +53,13 @@ public class LevelBigSetBuilder<V> extends AbstractBigMapBuilder {
     public LevelBigSet<V> build() {
         final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "levelbigset");
 
-        final LevelBigMap<V, None> map = new LevelBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
-        map.open();
-        return new LevelBigSet<>(map);
+        final LevelBigMap<V,None> map = new LevelBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+
+        final LevelBigSet<V> set = new LevelBigSet<>(map);
+
+        set.open();
+
+        return set;
     }
 
 }

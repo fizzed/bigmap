@@ -53,9 +53,13 @@ public class TokyoBigSetBuilder<V> extends AbstractBigMapBuilder {
     public TokyoBigSet<V> build() {
         final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "tokyobigset");
 
-        final TokyoBigMap<V, None> map = new TokyoBigMap<>(dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
-        map.open();
-        return new TokyoBigSet<>(map);
+        final TokyoBigMap<V,None> map = new TokyoBigMap<>(dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+
+        final TokyoBigSet<V> set = new TokyoBigSet<>(map);
+
+        set.open();
+
+        return set;
     }
 
 }
