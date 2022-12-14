@@ -15,6 +15,7 @@
  */
 package com.fizzed.bigmap;
 
+import com.fizzed.bigmap.kryo.KryoByteCodec;
 import com.fizzed.bigmap.leveldb.LevelBigMapBuilder;
 import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
 import com.fizzed.bigmap.rocksdb.RocksBigMapBuilder;
@@ -51,7 +52,7 @@ public class PerfDemo {
 //        String type = "MVStoreMap";
 //        String type = "TokyoCabinetMap";
         int mapCount = 10;
-        int entryCountPerMap = 300000;
+        int entryCountPerMap = 3000000;
 
         //
         //
@@ -160,7 +161,8 @@ public class PerfDemo {
 
     static public Map<String,Item> buildMap(String type, int identifier) throws Exception {
         final ByteCodec<String> stringByteCodec = ByteCodecs.utf8StringCodec();
-        final ByteCodec<Item> itemByteCodec = ByteCodecs.autoCodec(Item.class);
+//        final ByteCodec<Item> itemByteCodec = ByteCodecs.autoCodec(Item.class);
+        final ByteCodec<Item> itemByteCodec = new KryoByteCodec<>(Item.class);
 //        final ByteCodec<Item> itemByteCodec = new FSTByteCodec<>();
 
         switch (type) {

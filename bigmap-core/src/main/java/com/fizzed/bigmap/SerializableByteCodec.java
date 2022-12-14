@@ -24,6 +24,7 @@ public class SerializableByteCodec<K> implements ByteCodec<K> {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             ObjectOutputStream out = new ObjectOutputStream(bos);
             out.writeObject(value);
+            out.flush();
             return bos.toByteArray();
         }
         catch (IOException e) {

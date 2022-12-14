@@ -13,12 +13,6 @@
     </parent>
 
     <dependencies>
-
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
-            <optional>true</optional>
-        </dependency>
         
         <!-- testing -->
 

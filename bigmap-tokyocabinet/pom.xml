@@ -24,11 +24,6 @@
             <artifactId>tokyocabinet-linux-x64</artifactId>
         </dependency>
         
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
-        </dependency>
-        
         <!-- testing -->
 
         <dependency>

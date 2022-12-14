@@ -21,6 +21,11 @@
 
         <dependency>
             <groupId>com.fizzed</groupId>
+            <artifactId>bigmap-kryo</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fizzed</groupId>
             <artifactId>bigmap-tokyocabinet</artifactId>
         </dependency>
 
@@ -32,11 +37,6 @@
         <dependency>
             <groupId>com.fizzed</groupId>
             <artifactId>bigmap-rocksdb</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
         </dependency>
         
         <!-- testing -->
