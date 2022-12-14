@@ -15,74 +15,47 @@
  */
 package com.fizzed.bigmap.leveldb;
 
+import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.BigMapHelper;
+import com.fizzed.bigmap.impl.None;
+
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
-import com.fizzed.bigmap.ByteCodec;
-import static com.fizzed.bigmap.ByteCodecs.autoCodec;
-import static com.fizzed.bigmap.Comparators.autoComparator;
 import java.util.Comparator;
-import java.util.Objects;
 
-public class LevelBigSetBuilder<K> {
- 
-    protected boolean persistent;
-    protected boolean counts;
-    protected Path scratchDirectory;
-    protected long cacheSize;
-    protected ByteCodec<?> keyCodec;
-    protected Comparator<?> keyComparator;
-    
-    public LevelBigSetBuilder() {
-        this.counts = true;
-        this.cacheSize = 30 * 1048576L;  // 30 MB by default
-    }
-    
-    public LevelBigSetBuilder<K> setPersistent(boolean persistent) {
-        this.persistent = persistent;
+public class LevelBigSetBuilder<V> extends AbstractBigMapBuilder {
+
+    public LevelBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
+        super._setScratchDirectory(scratchDirectory);
         return this;
     }
     
-    public LevelBigSetBuilder<K> setCounts(boolean counts) {
-        this.counts = counts;
-        return this;
-    }
-    
-    public LevelBigSetBuilder<K> setScratchDirectory(Path scratchDirectory) {
-        this.scratchDirectory = scratchDirectory;
-        return this;
+    public <V2> LevelBigSetBuilder<V2> setValueType(Class<V2> valueType) {
+        super._setKeyType(valueType);
+        return (LevelBigSetBuilder<V2>)this;
     }
 
-    public LevelBigSetBuilder<K> setCacheSize(long cacheSize) {
-        this.cacheSize = cacheSize;
-        return this;
-    }
-    
-    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType) {
-        return this.setKeyType(keyType, autoCodec(keyType));
-    }
-    
-    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType, Comparator<N> keyComparator) {
-        return this.setKeyType(keyType, autoCodec(keyType), keyComparator);
+    public <V2> LevelBigSetBuilder<V2> setValueType(Class<V2> valueType, Comparator<V2> valueComparator) {
+        super._setKeyType(valueType, valueComparator);
+        return (LevelBigSetBuilder<V2>)this;
     }
 
-    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec) {
-        return this.setKeyType(keyType, keyCodec, autoComparator(keyType));
+    public <V2> LevelBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
+        super._setKeyType(valueType, valueCodec);
+        return (LevelBigSetBuilder<V2>)this;
     }
 
-    public <N> LevelBigSetBuilder<N> setKeyType(Class<N> keyType, ByteCodec<N> keyCodec, Comparator<N> keyComparator) {
-        Objects.requireNonNull(keyType, "keyType was null");
-        Objects.requireNonNull(keyCodec, "keyCodec was null");
-        Objects.requireNonNull(keyComparator, "keyComparator was null");
-        this.keyCodec = keyCodec;
-        this.keyComparator = keyComparator;
-        return (LevelBigSetBuilder<N>)this;
+    public <V2> LevelBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec, Comparator<V2> valueComparator) {
+        super._setKeyType(valueType, valueCodec, valueComparator);
+        return (LevelBigSetBuilder<V2>)this;
     }
     
-    public LevelBigSet<K> build() {
-        final Path dir = LevelBigMapHelper.prepFolderDirectoryPath(this.scratchDirectory, this.persistent, "levelbigset");
+    public LevelBigSet<V> build() {
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "levelbigset");
 
-        return new LevelBigSet(this.persistent, this.counts, dir, this.cacheSize, this.keyCodec, this.keyComparator);
+        final LevelBigMap<V, None> map = new LevelBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+        map.open();
+        return new LevelBigSet<>(map);
     }
-    
+
 }

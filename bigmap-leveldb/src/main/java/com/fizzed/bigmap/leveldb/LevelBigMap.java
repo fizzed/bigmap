@@ -15,393 +15,116 @@
  */
 package com.fizzed.bigmap.leveldb;
 
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
-import com.fizzed.bigmap.BigMapNonScalableException;
+import com.fizzed.bigmap.*;
+import com.fizzed.bigmap.impl.AbstractBigMap;
+import com.fizzed.bigmap.impl.ByteArrayBigMap;
+import com.fizzed.bigmap.impl.KeyValueBytes;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.Options;
+import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
-import java.util.*;
-import javax.print.attribute.UnmodifiableSetException;
-import org.iq80.leveldb.DBIterator;
-import com.fizzed.bigmap.ByteCodec;
-import org.iq80.leveldb.WriteOptions;
-
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Objects;
 
-public class LevelBigMap<K,V> extends AbstractLevelBigCollection<K> implements SortedMap<K,V> {
+public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBigMap<K,V>, BigSortedMap<K,V> {
 
-    protected final ByteCodec<V> valueCodec;
-    
+    protected Options options;
+    protected DB db;
+
     protected LevelBigMap(
-            boolean persistent,
-            boolean counts,
             Path directory,
-            long cacheSize,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
-        super(persistent, counts, directory, cacheSize, keyCodec, keyComparator);
+        super(directory, false, keyCodec, keyComparator, valueCodec);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
-        
-        this.valueCodec = valueCodec;
-    }
-    
-    public long getValueByteSize() {
-        return this.valueByteSize;
-    }
-    
-    @Override
-    public boolean containsKey(Object key) {
-        this.checkIfClosed();
-        
-        byte[] keyBytes = this.keyCodec.serialize((K)key);
-
-        byte[] valueBytes = this.db.get(keyBytes);
-        
-        // skip deserialization!
-        return valueBytes != null;
     }
 
     @Override
-    public boolean containsValue(Object value) {
-        this.checkIfClosed();
-        
-        throw new BigMapNonScalableException("Poor performance for checking if map contains a value. Method unsupported.");
+    protected void _open() {
+        this.options = new Options();
+        //this.options.compressionType(CompressionType.NONE);
+        this.options.createIfMissing(true);
+        //this.options.comparator(new LevelJavaComparator(this.keyCodec, this.keyComparator));
+        //this.options.cacheSize(this.cacheSize);
+
+        try {
+            // build database, initialize stats we track
+            this.db = factory.open(this.directory.toFile(), this.options);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public V get(Object key) {
-        this.checkIfClosed();
-        
-        byte[] keyBytes = this.keyCodec.serialize((K)key);
-
-        byte[] valueBytes = this.db.get(keyBytes);
-
-        return this.valueCodec.deserialize(valueBytes);
+    protected void _close() throws IOException {
+        if (this.db != null) {
+            this.db.close();
+        }
     }
 
     @Override
-    public V put(K key, V value) {
-        this.checkIfClosed();
-        
-        byte[] keyBytes = this.keyCodec.serialize(key);
-        
-        return this.putValue(keyBytes, value);
-    }
-
-    protected V putKey(K key, byte[] valueBytes) {
-        byte[] keyBytes = this.keyCodec.serialize(key);
-        
-        byte[] oldValueBytes = this.putBytes(keyBytes, valueBytes);
-        
-        return this.valueCodec.deserialize(oldValueBytes);
-    }
-
-    protected V putValue(byte[] keyBytes, V value) {
-        byte[] valueBytes = this.valueCodec.serialize(value);
-       
-        byte[] oldValueBytes = this.putBytes(keyBytes, valueBytes);
-        
-        return this.valueCodec.deserialize(oldValueBytes);
+    public boolean isClosed() {
+        return this.db == null;
     }
 
     @Override
-    public V remove(Object key) {
-        this.checkIfClosed();
+    public byte[] _get(byte[] keyBytes) {
+        try {
+            return this.db.get(keyBytes);
+        }
+        catch (DBException e) {
+            throw new BigMapDataException(e);
+        }
+    }
 
-        byte[] keyBytes = this.keyCodec.serialize((K)key);
+    @Override
+    public byte[] _put(byte[] keyBytes, byte[] valueBytes) {
+        try {
+            byte[] oldValueBytes = this.db.get(keyBytes);
 
-        byte[] valueBytes = this.db.get(keyBytes);
-        
-        if (valueBytes != null) {
-            // remove the key, then deduct its info
+            this.db.put(keyBytes, valueBytes);
+
+            return oldValueBytes;
+        }
+        catch (DBException e) {
+            throw new BigMapDataException(e);
+        }
+    }
+
+    @Override
+    public boolean _containsKey(byte[] keyBytes) {
+        try {
+            return this.db.get(keyBytes) != null;
+        }
+        catch (DBException e) {
+            throw new BigMapDataException(e);
+        }
+    }
+
+    @Override
+    public byte[] _remove(byte[] keyBytes) {
+        byte[] valueBytes = this._get(keyBytes);
+
+        try {
             this.db.delete(keyBytes);
-            this.size--;
-            this.keyByteSize -= sizeOf(keyBytes);
-            this.valueByteSize -= sizeOf(valueBytes);
-        }
 
-        return this.valueCodec.deserialize(valueBytes);
+            return valueBytes;
+        }
+        catch (DBException e) {
+            throw new BigMapDataException(e);
+        }
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
-        if (m != null) {
-            m.forEach((k, v) -> {
-                this.put(k, v);
-            });
-        }
-    }
-    
-    @Override
-    public Comparator<? super K> comparator() {
-        return this.keyComparator;
+    public Iterator<KeyValueBytes> _forwardIterator() {
+        return LevelForwardIterator.build(this.db);
     }
 
-    @Override
-    public SortedMap<K, V> subMap(K fromKey, K toKey) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public SortedMap<K, V> headMap(K toKey) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public SortedMap<K, V> tailMap(K fromKey) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public K firstKey() {
-        this.checkIfClosed();
-
-        if (this.isEmpty()) {
-            throw new NoSuchElementException("Map is empty");
-        }
-
-        DBIterator it = this.db.iterator();
-        it.seekToFirst();
-        Entry<byte[], byte[]> firstEntry = it.next();
-        if (firstEntry != null) {
-            return this.keyCodec.deserialize(firstEntry.getKey());
-        }
-        return null;
-    }
-
-    @Override
-    public K lastKey() {
-        throw new UnsupportedOperationException();
-        /*this.checkIfClosed();
-
-        DBIterator it = this.db.iterator();
-        it.seekToLast();
-        Entry<byte[],byte[]> lastEntry = it.prev();
-        if (lastEntry != null) {
-            return this.keyCodec.deserialize(lastEntry.getKey());
-        }
-        return null;*/
-    }
-
-    @Override
-    public Set<K> keySet() {
-        this.checkIfClosed();
-        
-        return new LevelBigSet<>(this);
-    }
-
-    @Override
-    public Collection<V> values() {
-        this.checkIfClosed();
-        
-        return new ValueCollectionView();
-    }
-
-    @Override
-    public Set<Entry<K,V>> entrySet() {
-        this.checkIfClosed();
-        
-        return new EntrySetView();
-    }
-    
-    class EntryView implements Entry<K,V> {
-
-        private final byte[] keyBytes;
-        private final byte[] valueBytes;
-
-        public EntryView(byte[] keyBytes, byte[] valueBytes) {
-            this.keyBytes = keyBytes;
-            this.valueBytes = valueBytes;
-        }
-        
-        @Override
-        public K getKey() {
-            return LevelBigMap.this.keyCodec.deserialize(keyBytes);
-        }
-
-        @Override
-        public V getValue() {
-            return LevelBigMap.this.valueCodec.deserialize(valueBytes);
-        }
-
-        @Override
-        public V setValue(V value) {
-            return LevelBigMap.this.putValue(keyBytes, value);
-        }
-        
-    }
-    
-    class ValueCollectionView implements Collection<V> {
-
-        @Override
-        public int size() {
-            return LevelBigMap.this.size();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return LevelBigMap.this.isEmpty();
-        }
-
-        @Override
-        public boolean contains(Object o) {
-            throw new BigMapNonScalableException("Checking if a value exists is a bad performance decision");
-        }
-
-        @Override
-        public Iterator<V> iterator() {
-            final DBIterator it = LevelBigMap.this.db.iterator();
-            it.seekToFirst();
-            return new Iterator<V>() {
-                @Override
-                public boolean hasNext() {
-                    return it.hasNext();
-                }
-
-                @Override
-                public V next() {
-                    // NOTE: this throws a NoSuchElementException is no element exists
-                    Entry<byte[],byte[]> next = it.next();
-                    if (next != null) {
-                        return LevelBigMap.this.valueCodec.deserialize(next.getValue());
-                    }
-                    return null;
-                }
-            };
-        }
-
-        @Override
-        public Object[] toArray() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public <T> T[] toArray(T[] a) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean add(V e) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends V> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public void clear() {
-            LevelBigMap.this.clear();
-        }
-        
-    }
-    
-    class EntrySetView implements Set<Entry<K,V>> {
-        @Override
-        public int size() {
-            return LevelBigMap.this.size();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return LevelBigMap.this.isEmpty();
-        }
-
-        @Override
-        public boolean contains(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public Iterator<Entry<K,V>> iterator() {
-            final DBIterator it = LevelBigMap.this.db.iterator();
-            it.seekToFirst();
-
-            return new Iterator<Entry<K, V>>() {
-                @Override
-                public boolean hasNext() {
-                    return it.hasNext();
-                }
-
-                @Override
-                public Entry<K,V> next() {
-                    Entry<byte[],byte[]> next = it.next();
-                    if (next != null) {
-                        return new EntryView(next.getKey(), next.getValue());
-                    }
-                    return null;
-                }
-            };
-        }
-
-        @Override
-        public Object[] toArray() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public <T> T[] toArray(T[] a) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean add(Entry<K,V> e) {
-            throw new UnmodifiableSetException();
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnmodifiableSetException();
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends Entry<K,V>> c) {
-            throw new UnmodifiableSetException();
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            throw new UnmodifiableSetException();
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            throw new UnmodifiableSetException();
-        }
-
-        @Override
-        public void clear() {
-            LevelBigMap.this.clear();
-        }
-                
-    }
-    
 }

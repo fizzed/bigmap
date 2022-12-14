@@ -15,6 +15,8 @@
  */
 package com.fizzed.bigmap;
 
+import com.fizzed.bigmap.impl.None;
+
 import java.nio.charset.StandardCharsets;
 
 public class ByteCodecs {
@@ -22,6 +24,7 @@ public class ByteCodecs {
     static public final byte[] ZERO_BYTES = new byte[0];
 
     static public <T> ByteCodec<T> autoCodec(Class<T> type) {
+
         if (String.class.isAssignableFrom(type)) {
             return (ByteCodec<T>)utf8StringCodec();
         }
@@ -34,14 +37,24 @@ public class ByteCodecs {
         else if (Short.class.isAssignableFrom(type)) {
             return (ByteCodec<T>)shortCodec();
         }
+        else if (Byte.class.isAssignableFrom(type)) {
+            return (ByteCodec<T>)byteCodec();
+        }
+        else if (byte[].class.isAssignableFrom(type)) {
+            return (ByteCodec<T>)byteArrayCodec();
+        }
+        else if (None.class.isAssignableFrom(type)) {
+            return (ByteCodec<T>)noneCodec();
+        }
         else {
-            return new FSTByteCodec(type);
+            return new SerializableByteCodec<>();
+            //return new FSTByteCodec(type);
         }
     }
     
-    static public <T> ByteCodec<T> fstObjectCodec() {
+    /*static public <T> ByteCodec<T> fstObjectCodec() {
         return new FSTByteCodec<>();
-    }
+    }*/
     
     static public ByteCodec<String> utf8StringCodec() {
         return new ByteCodec<String>() {
@@ -173,6 +186,30 @@ public class ByteCodecs {
             }
         };
     }
+
+    static public ByteCodec<Byte> byteCodec() {
+        return new ByteCodec<Byte>() {
+            @Override
+            public byte[] serialize(Byte value) {
+                if (value == null) {
+                    return ZERO_BYTES;
+                }
+                long v = value;
+                return new byte[] {(byte)(v)};
+            }
+
+            @Override
+            public Byte deserialize(byte[] bytes) {
+                if (bytes == null) {
+                    return null;
+                }
+                if (bytes.length != 1) {
+                    throw new IllegalArgumentException("Byte array did not contain 1 byte");
+                }
+                return Byte.valueOf((byte)(bytes[0] & 0xff));
+            }
+        };
+    }
     
     static public ByteCodec<byte[]> byteArrayCodec() {
         return new ByteCodec<byte[]>() {
@@ -187,34 +224,19 @@ public class ByteCodecs {
             }
         };
     }
- 
-//    static public ByteCodec<Long> longs() {
-//        return new ByteCodec<Long>() {
-//            @Override
-//            public byte[] serialize(Long value) {
-//                if (value == null) {
-//                    return ZERO_BYTES;
-//                }
-//                long v = value;
-//                return new byte[] {
-//                    (byte) v,
-//                    (byte) (v >> 8),
-//                    (byte) (v >> 16),
-//                    (byte) (v >> 24),
-//                    (byte) (v >> 32),
-//                    (byte) (v >> 40),
-//                    (byte) (v >> 48),
-//                    (byte) (v >> 56)};
-//            }
-//
-//            @Override
-//            public Long deserialize(byte[] bytes) {
-//                if (bytes == null) {
-//                    return null;
-//                }
-//                
-//                         }
-//        };
-//    }
-    
+
+    static public ByteCodec<None> noneCodec() {
+        return new ByteCodec<None>() {
+            @Override
+            public byte[] serialize(None value) {
+                return ZERO_BYTES;
+            }
+
+            @Override
+            public None deserialize(byte[] bytes) {
+                return None.NONE;
+            }
+        };
+    }
+
 }

@@ -13,12 +13,6 @@
     </parent>
 
     <dependencies>
-
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
-            <optional>true</optional>
-        </dependency>
         
         <!-- testing -->
 
@@ -64,7 +58,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

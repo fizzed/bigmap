@@ -15,8 +15,9 @@
  */
 package com.fizzed.bigmap.leveldb;
 
-import static com.fizzed.bigmap.BigMapHelper.sizeOf;
+import static com.fizzed.bigmap.impl.BigMapHelper.sizeOf;
 import java.util.Comparator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
@@ -191,6 +192,10 @@ public class AbstractLevelBigCollection<K> implements Closeable {
     
     protected boolean containsKey(Object key) {
         this.checkIfClosed();
+
+        if (key == null) {
+            return false;   // this will always be false
+        }
         
         byte[] keyBytes = this.keyCodec.serialize((K)key);
 
@@ -202,8 +207,13 @@ public class AbstractLevelBigCollection<K> implements Closeable {
 
     protected K firstKey() {
         this.checkIfClosed();
-        
+
+        if (this.isEmpty()) {
+            throw new NoSuchElementException("Map is empty");
+        }
+
         DBIterator it = this.db.iterator();
+        it.seekToFirst();
         Entry<byte[], byte[]> firstEntry = it.next();
         if (firstEntry != null) {
             return this.keyCodec.deserialize(firstEntry.getKey());
