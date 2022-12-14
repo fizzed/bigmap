@@ -96,7 +96,7 @@
         <dependency>
             <groupId>com.fizzed</groupId>
             <artifactId>tkrzw-linux-x64</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
             <scope>test</scope>
         </dependency>
         
