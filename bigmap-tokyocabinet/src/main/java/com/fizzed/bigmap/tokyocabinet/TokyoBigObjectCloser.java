@@ -13,24 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.rocksdb;
+package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
+import com.fizzed.bigmap.impl.AbstractBigObjectCloser;
+import tokyocabinet.BDB;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class RocksBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
+public class TokyoBigObjectCloser extends AbstractBigObjectCloser {
 
-    protected RocksBigLinkedMap(
+    private final BDB bdb;
+
+    public TokyoBigObjectCloser(
             UUID id,
-            Path directory,
             boolean persistent,
-            RocksBigMap<K,V> dataMap,
-            RocksBigMap<Integer,K> insertOrderToKeyMap,
-            RocksBigMap<K,Integer> keyToInsertOrderMap) {
+            Path directory,
+            BDB bdb) {
         
-        super(id, directory, persistent, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        super(id, persistent, directory);
+        this.bdb = bdb;
+    }
+
+    @Override
+    public void doClose() throws IOException {
+        this.bdb.close();
     }
 
 }

@@ -16,8 +16,11 @@
 package com.fizzed.bigmap;
 
 import org.junit.Test;
+import org.junit.rules.Stopwatch;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -436,14 +439,13 @@ abstract public class AbstractBigMapTest {
         assertThat(toValueList(map), hasItems("0", "1", "2", "3", "5", "123456789"));
     }
 
-    /*
     @Test
     public void byteSizeTracking() {
-        final LevelBigMap<String,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(String.class)
-            .setValueType(String.class)
-            .build();
+        final Map<String,String> _map = this.newMap(String.class, String.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        final BigMap<String,String> map = (BigMap<String,String>)_map;
 
         map.put("1", "123456789");
         map.put("2", "-10");
@@ -462,15 +464,21 @@ abstract public class AbstractBigMapTest {
 
         assertThat(map.getKeyByteSize(), is(1L));
         assertThat(map.getValueByteSize(), is(9L));
+
+        map.clear();
+
+        assertThat(map.size(), is(0));
+        assertThat(map.getKeyByteSize(), is(0L));
+        assertThat(map.getValueByteSize(), is(0L));
     }
 
     @Test
-    public void clearWithDisk() throws IOException {
-        final LevelBigMap<String,String> map = new LevelBigMapBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(String.class)
-            .setValueType(String.class)
-            .build();
+    public void close() throws IOException {
+        final Map<String,String> _map = this.newMap(String.class, String.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        final BigMap<String,String> map = (BigMap<String,String>)_map;
 
         map.put("1", "123456789");
         map.put("2", "-10");
@@ -481,23 +489,82 @@ abstract public class AbstractBigMapTest {
 
         Path directory = map.getDirectory();
 
-        assertThat(Files.list(directory).count(), is(4L));
+        assertThat(Files.exists(directory), is(true));
+        assertThat(Files.list(directory).count(), greaterThan(0L));
         Path firstFile = Files.list(directory).findFirst().orElse(null);
 
-        map.clear();
+        map.close();
 
-        assertThat(map, aMapWithSize(0));
-        assertThat(map.getKeyByteSize(), is(0L));
-        assertThat(map.getValueByteSize(), is(0L));
+        // the directory and everything should be cleaned up now
+        assertThat(Files.exists(directory), is(false));
+        assertThat(map.isClosed(), is(true));
 
-        map.put("2", "1");
-        map.put("3", "5");
+        // map.close() should be able to succeed again and not throw an exception
+        map.close();
 
-        assertThat(map, aMapWithSize(2));
-        assertThat(map.getKeyByteSize(), is(2L));
-        assertThat(map.getValueByteSize(), is(2L));
+        try {
+            map.checkIfClosed();
+            fail();
+        } catch (Exception e) {
+            // expected
+        }
     }
 
+    @Test
+    public void closeRemovesFromRegistry() throws IOException {
+        final Map<String,String> _map = this.newMap(String.class, String.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        final BigMap<String,String> map = (BigMap<String,String>)_map;
+
+        UUID id = map.getId();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
+
+        map.close();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
+
+        // we should be able to re-open it again
+        map.open();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
+
+        map.close();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
+    }
+
+    @Test
+    public void dereferenceAutomaticallyGarbageCollectsFromRegistry() throws Exception {
+        Map<String,String> _map = this.newMap(String.class, String.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        BigMap<String,String> map = (BigMap<String,String>)_map;
+
+        UUID id = map.getId();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
+
+        _map = null;
+        map = null;
+        System.gc();
+
+        // wait for garbage collector to run
+        final long now = System.currentTimeMillis();
+        while (BigObjectRegistry.getDefault().isRegistered(id)) {
+            if (System.currentTimeMillis() - now > 10000L) {
+                fail("Garbage not collected within 10secs");
+            }
+            Thread.sleep(100L);
+        }
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
+    }
+
+    /*
     static public class CustomKey implements Serializable {
 
         Long a;

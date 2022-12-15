@@ -15,14 +15,26 @@
  */
 package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.BigObjectRegistry;
+import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.UUID;
 
-public class TokyoBigMapBuilder<K,V> extends AbstractBigMapBuilder {
+public class TokyoBigMapBuilder<K,V> extends AbstractBigObjectBuilder {
+
+    public TokyoBigMapBuilder<K,V> registerForGarbageMonitoring() {
+        super._registerForGarbageMonitoring();
+        return this;
+    }
+
+    public TokyoBigMapBuilder<K,V> registerForGarbageMonitoring(BigObjectRegistry registry) {
+        super._registerForGarbageMonitoring(registry);
+        return this;
+    }
 
     public TokyoBigMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
@@ -60,9 +72,11 @@ public class TokyoBigMapBuilder<K,V> extends AbstractBigMapBuilder {
     }
     
     public TokyoBigMap<K,V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "tokyobigmap");
+        final UUID id = UUID.randomUUID();
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigmap-tokyo");
 
-        final TokyoBigMap<K,V> map = new TokyoBigMap<>(dir, "data", (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final TokyoBigMap<K,V> map = new TokyoBigMap<>(id, dir, "data", (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        map.setListener(this.registry);
         map.open();
         return map;
     }

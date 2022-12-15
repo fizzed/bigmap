@@ -15,16 +15,17 @@
  */
 package com.fizzed.bigmap.impl;
 
+import com.fizzed.bigmap.BigObjectRegistry;
 import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
 
-import static com.fizzed.bigmap.ByteCodecs.autoCodec;
+import static com.fizzed.bigmap.ByteCodecs.resolveCodec;
 import static com.fizzed.bigmap.Comparators.autoComparator;
 
-public class AbstractBigMapBuilder {
+public class AbstractBigObjectBuilder {
 
     protected Path scratchDirectory;
     protected Class<?> keyClass;
@@ -32,8 +33,18 @@ public class AbstractBigMapBuilder {
     protected ByteCodec<?> keyCodec;
     protected Comparator<?> keyComparator;
     protected ByteCodec<?> valueCodec;
+    protected BigObjectRegistry registry;
 
-    public AbstractBigMapBuilder() {
+    public AbstractBigObjectBuilder() {
+        this.scratchDirectory = BigMapHelper.resolveTempDirectory();
+    }
+
+    protected void _registerForGarbageMonitoring() {
+        this._registerForGarbageMonitoring(BigObjectRegistry.getDefault());
+    }
+
+    protected void _registerForGarbageMonitoring(BigObjectRegistry registry) {
+        this.registry = registry;
     }
 
     protected void _setScratchDirectory(Path scratchDirectory) {
@@ -41,11 +52,11 @@ public class AbstractBigMapBuilder {
     }
 
     protected void _setKeyType(Class<?> keyType) {
-        this._setKeyType(keyType, autoCodec(keyType));
+        this._setKeyType(keyType, resolveCodec(keyType));
     }
 
     protected void _setKeyType(Class<?> keyType, Comparator<?> keyComparator) {
-        this._setKeyType(keyType, autoCodec(keyType), keyComparator);
+        this._setKeyType(keyType, resolveCodec(keyType), keyComparator);
     }
 
     protected void _setKeyType(Class<?> keyType, ByteCodec<?> keyCodec) {
@@ -62,7 +73,7 @@ public class AbstractBigMapBuilder {
     }
 
     protected void _setValueType(Class<?> valueType) {
-        this._setValueType(valueType, autoCodec(valueType));
+        this._setValueType(valueType, resolveCodec(valueType));
     }
 
     protected void _setValueType(Class<?> valueType, ByteCodec<?> valueCodec) {

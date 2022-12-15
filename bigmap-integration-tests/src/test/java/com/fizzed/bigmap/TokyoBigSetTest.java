@@ -28,6 +28,7 @@ public class TokyoBigSetTest extends AbstractBigSetTest {
         return new TokyoBigSetBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

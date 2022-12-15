@@ -24,11 +24,11 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.UUID;
 
 public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBigMap<K,V>, BigSortedMap<K,V> {
 
@@ -36,12 +36,13 @@ public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
     protected DB db;
 
     protected LevelBigMap(
+            UUID id,
             Path directory,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
-        super(directory, false, keyCodec, keyComparator, valueCodec);
+        super(id, directory, false, keyCodec, keyComparator, valueCodec);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
     }
@@ -60,18 +61,8 @@ public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
 
-    @Override
-    protected void _close() throws IOException {
-        if (this.db != null) {
-            this.db.close();
-        }
-    }
-
-    @Override
-    public boolean isClosed() {
-        return this.db == null;
+        this.closer = new LevelBigObjectCloser(this.id, this.persistent, this.directory, this.db);
     }
 
     @Override

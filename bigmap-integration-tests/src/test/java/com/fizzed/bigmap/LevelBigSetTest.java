@@ -27,6 +27,7 @@ public class LevelBigSetTest extends AbstractBigSetTest {
         return new LevelBigSetBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

@@ -18,16 +18,19 @@ package com.fizzed.bigmap.leveldb;
 import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
 
 import java.nio.file.Path;
+import java.util.UUID;
 
 public class LevelBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
 
     protected LevelBigLinkedMap(
+            UUID id,
             Path directory,
+            boolean persistent,
             LevelBigMap<K,V> dataMap,
             LevelBigMap<Integer,K> insertOrderToKeyMap,
             LevelBigMap<K,Integer> keyToInsertOrderMap) {
         
-        super(directory, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        super(id, directory, persistent, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
     }
 
 }

@@ -16,13 +16,24 @@
 package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.UUID;
 
-public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
+public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigObjectBuilder {
+
+    public RocksBigLinkedMapBuilder<K,V> registerForGarbageMonitoring() {
+        super._registerForGarbageMonitoring();
+        return this;
+    }
+
+    public RocksBigLinkedMapBuilder<K,V> registerForGarbageMonitoring(BigObjectRegistry registry) {
+        super._registerForGarbageMonitoring(registry);
+        return this;
+    }
 
     public RocksBigLinkedMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
@@ -60,7 +71,8 @@ public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
     }
     
     public RocksBigLinkedMap<K,V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "rocksbiglinkedmap");
+        final UUID id = UUID.randomUUID();
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "biglinkedmap-rocks");
 
         // we need 3 subdir paths
         final Path dataDir = dir.resolve("data");
@@ -69,11 +81,12 @@ public class RocksBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
 
         final ByteCodec<Integer> integerByteCodec = ByteCodecs.integerCodec();
         final Comparator<Integer> integerComparator = Comparators.autoComparator(Integer.class);
-        final RocksBigMap<K,V> dataMap = new RocksBigMap<>(dataDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
-        final RocksBigMap<Integer,K> insertOrderToKeyMap = new RocksBigMap<>(i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
-        final RocksBigMap<K,Integer> keyToInsertOrderMap = new RocksBigMap<>(k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
+        final RocksBigMap<K,V> dataMap = new RocksBigMap<>(UUID.randomUUID(), dataDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final RocksBigMap<Integer,K> insertOrderToKeyMap = new RocksBigMap<>(UUID.randomUUID(), i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
+        final RocksBigMap<K,Integer> keyToInsertOrderMap = new RocksBigMap<>(UUID.randomUUID(), k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
 
-        final RocksBigLinkedMap<K,V> map = new RocksBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        final RocksBigLinkedMap<K,V> map = new RocksBigLinkedMap<>(id, dir, false, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        map.setListener(this.registry);
         map.open();
         return map;
     }

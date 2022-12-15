@@ -13,14 +13,13 @@
     </parent>
 
     <dependencies>
-        
-        <!-- testing -->
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>test</scope>
         </dependency>
+
+        <!-- testing -->
 
         <dependency>
             <groupId>com.fizzed</groupId>

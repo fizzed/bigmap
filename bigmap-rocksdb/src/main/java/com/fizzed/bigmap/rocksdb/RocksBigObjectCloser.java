@@ -15,22 +15,30 @@
  */
 package com.fizzed.bigmap.rocksdb;
 
-import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
+import com.fizzed.bigmap.impl.AbstractBigObjectCloser;
+import org.rocksdb.RocksDB;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class RocksBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
+public class RocksBigObjectCloser extends AbstractBigObjectCloser {
 
-    protected RocksBigLinkedMap(
+    private final RocksDB db;
+
+    public RocksBigObjectCloser(
             UUID id,
-            Path directory,
             boolean persistent,
-            RocksBigMap<K,V> dataMap,
-            RocksBigMap<Integer,K> insertOrderToKeyMap,
-            RocksBigMap<K,Integer> keyToInsertOrderMap) {
+            Path directory,
+            RocksDB db) {
         
-        super(id, directory, persistent, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        super(id, persistent, directory);
+        this.db = db;
+    }
+
+    @Override
+    public void doClose() throws IOException {
+        this.db.close();
     }
 
 }

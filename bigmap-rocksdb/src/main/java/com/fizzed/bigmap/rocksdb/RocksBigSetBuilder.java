@@ -16,14 +16,25 @@
 package com.fizzed.bigmap.rocksdb;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.impl.None;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.UUID;
 
-public class RocksBigSetBuilder<V> extends AbstractBigMapBuilder {
+public class RocksBigSetBuilder<V> extends AbstractBigObjectBuilder {
+
+    public RocksBigSetBuilder<V> registerForGarbageMonitoring() {
+        super._registerForGarbageMonitoring();
+        return this;
+    }
+
+    public RocksBigSetBuilder<V> registerForGarbageMonitoring(BigObjectRegistry registry) {
+        super._registerForGarbageMonitoring(registry);
+        return this;
+    }
 
     public RocksBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
@@ -51,14 +62,14 @@ public class RocksBigSetBuilder<V> extends AbstractBigMapBuilder {
     }
     
     public RocksBigSet<V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "rocksbigset");
+        final UUID id = UUID.randomUUID();
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigset-rocks");
 
-        final RocksBigMap<V,None> map = new RocksBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+        final RocksBigMap<V,None> map = new RocksBigMap<>(id, dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
 
         final RocksBigSet<V> set = new RocksBigSet<>(map);
-
+        set.setListener(this.registry);
         set.open();
-
         return set;
     }
 

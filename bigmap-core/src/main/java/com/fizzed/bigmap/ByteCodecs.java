@@ -18,13 +18,17 @@ package com.fizzed.bigmap;
 import com.fizzed.bigmap.impl.None;
 
 import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 
 public class ByteCodecs {
     
     static public final byte[] ZERO_BYTES = new byte[0];
 
-    static public <T> ByteCodec<T> autoCodec(Class<T> type) {
+    static public <T> ByteCodec<T> resolveCodec(Class<T> type) {
+        return resolveCodec(type, () -> new SerializableByteCodec<>());
+    }
 
+    static public <T> ByteCodec<T> resolveCodec(Class<T> type, Supplier<ByteCodec<T>> fallbackCodecSupplier) {
         if (String.class.isAssignableFrom(type)) {
             return (ByteCodec<T>)utf8StringCodec();
         }
@@ -46,15 +50,11 @@ public class ByteCodecs {
         else if (None.class.isAssignableFrom(type)) {
             return (ByteCodec<T>)noneCodec();
         }
-        else {
-            return new SerializableByteCodec<>();
-            //return new FSTByteCodec(type);
+        else if (fallbackCodecSupplier != null) {
+            return fallbackCodecSupplier.get();
         }
+        return null;
     }
-    
-    /*static public <T> ByteCodec<T> fstObjectCodec() {
-        return new FSTByteCodec<>();
-    }*/
     
     static public ByteCodec<String> utf8StringCodec() {
         return new ByteCodec<String>() {

@@ -1,7 +1,10 @@
 package com.fizzed.bigmap.tokyocabinet;
 
+import com.fizzed.bigmap.BigMap;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -40,6 +43,22 @@ public class TokyoBigMapTest {
 
         assertThat(removed1, is("2"));
         assertThat(map.size(), is(1));
+    }
+
+    @Test
+    public void close() throws IOException {
+        final BigMap<String,String> map = new TokyoBigMapBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setKeyType(String.class)
+            .setValueType(String.class)
+            .build();
+
+        map.put("a", "1");
+
+        map.close();
+
+        assertThat(map.isClosed(), is(true));
+        assertThat(Files.exists(map.getDirectory()), is(false));
     }
 
 }

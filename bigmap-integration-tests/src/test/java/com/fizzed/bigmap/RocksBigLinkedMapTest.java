@@ -28,6 +28,7 @@ public class RocksBigLinkedMapTest extends AbstractBigLinkedMapTest {
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(keyType)
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

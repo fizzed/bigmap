@@ -15,9 +15,7 @@
  */
 package com.fizzed.bigmap.impl;
 
-import com.fizzed.bigmap.BigMap;
-import com.fizzed.bigmap.BigSortedMap;
-import com.fizzed.bigmap.ByteCodec;
+import com.fizzed.bigmap.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,36 +24,45 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
 
-    final private Path directory;
-    final private BigMap<K,V> dataMap;
-    final private BigSortedMap<Integer,K> insertOrderToKeyMap;  // for iterating in the order inserted
-    final private BigMap<K,Integer> keyToInsertOrderMap;        // for deleting from insertOrder map?   should we care?
-    final private AtomicInteger insertCounter = new AtomicInteger(0);
+    protected final UUID id;
+    protected final Path directory;
+    protected final boolean persistent;
+    protected final BigMap<K,V> dataMap;
+    protected final BigSortedMap<Integer,K> insertOrderToKeyMap;  // for iterating in the order inserted
+    protected final BigMap<K,Integer> keyToInsertOrderMap;        // for deleting from insertOrder map?   should we care?
+    protected final AtomicInteger insertCounter = new AtomicInteger(0);
+    protected BigObjectListener listener;
+    protected BigObjectCloser closer;
 
     public AbstractBigLinkedMap(
+            UUID id,
             Path directory,
+            boolean persistent,
             BigMap<K,V> dataMap,
             BigSortedMap<Integer,K> insertOrderToKeyMap,
             BigMap<K,Integer> keyToInsertOrderMap) {
 
+        this.id = id;
         this.directory = directory;
+        this.persistent = persistent;
         this.dataMap = dataMap;
         this.insertOrderToKeyMap = insertOrderToKeyMap;
         this.keyToInsertOrderMap = keyToInsertOrderMap;
     }
 
     @Override
-    public void open() {
-        this.dataMap.open();
-        this.insertOrderToKeyMap.open();
-        this.keyToInsertOrderMap.open();
+    public BigObjectListener getListener() {
+        return this.listener;
     }
 
     @Override
-    public void close() throws IOException {
-        this.dataMap.close();
-        this.insertOrderToKeyMap.close();
-        this.keyToInsertOrderMap.close();
+    public void setListener(BigObjectListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public UUID getId() {
+        return this.id;
     }
 
     @Override
@@ -64,23 +71,51 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
+    public boolean isPersistent() {
+        return this.persistent;
+    }
+
+    @Override
+    public void open() {
+        this.dataMap.open();
+        this.insertOrderToKeyMap.open();
+        this.keyToInsertOrderMap.open();
+        this.closer = new BigLinkedMapCloser(this.id, this.persistent, this.directory, this.dataMap, this.insertOrderToKeyMap, this.keyToInsertOrderMap);
+
+        if (this.listener != null) {
+            this.listener.onOpened(this);
+        }
+    }
+
+    @Override
+    final public void close() throws IOException {
+        if (this.closer != null) {
+            this.closer.close();
+        }
+
+        if (this.listener != null) {
+            this.listener.onClosed(this);
+        }
+    }
+
+    @Override
+    final public BigObjectCloser getCloser() {
+        return this.closer;
+    }
+
+    @Override
+    final public boolean isClosed() {
+        return this.closer == null || this.closer.isClosed();
+    }
+
+    @Override
     public long getKeyByteSize() {
-        return this.dataMap.getKeyByteSize();
+        return this.dataMap.getKeyByteSize() + this.insertOrderToKeyMap.getKeyByteSize() + this.keyToInsertOrderMap.getKeyByteSize();
     }
 
     @Override
     public long getValueByteSize() {
-        return this.dataMap.getValueByteSize();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return this.dataMap.isClosed();
-    }
-
-    @Override
-    public void checkIfClosed() {
-        this.dataMap.checkIfClosed();
+        return this.dataMap.getValueByteSize() + this.insertOrderToKeyMap.getValueByteSize() + this.keyToInsertOrderMap.getValueByteSize();
     }
 
     @Override

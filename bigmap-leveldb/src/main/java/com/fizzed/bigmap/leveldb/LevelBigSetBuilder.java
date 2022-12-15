@@ -16,14 +16,25 @@
 package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.impl.None;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.UUID;
 
-public class LevelBigSetBuilder<V> extends AbstractBigMapBuilder {
+public class LevelBigSetBuilder<V> extends AbstractBigObjectBuilder {
+
+    public LevelBigSetBuilder<V> registerForGarbageMonitoring() {
+        super._registerForGarbageMonitoring();
+        return this;
+    }
+
+    public LevelBigSetBuilder<V> registerForGarbageMonitoring(BigObjectRegistry registry) {
+        super._registerForGarbageMonitoring(registry);
+        return this;
+    }
 
     public LevelBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
@@ -51,14 +62,14 @@ public class LevelBigSetBuilder<V> extends AbstractBigMapBuilder {
     }
     
     public LevelBigSet<V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "levelbigset");
+        final UUID id = UUID.randomUUID();
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigset-level");
 
-        final LevelBigMap<V,None> map = new LevelBigMap<>(dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+        final LevelBigMap<V,None> map = new LevelBigMap<>(id, dir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
 
         final LevelBigSet<V> set = new LevelBigSet<>(map);
-
+        set.setListener(this.registry);
         set.open();
-
         return set;
     }
 

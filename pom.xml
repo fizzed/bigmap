@@ -79,7 +79,7 @@
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>tokyocabinet-linux-x64</artifactId>
-                <version>0.0.5</version>
+                <version>0.0.7-SNAPSHOT</version>
             </dependency>
 
             <!-- pure java leveldb for bigmap-leveldb only -->

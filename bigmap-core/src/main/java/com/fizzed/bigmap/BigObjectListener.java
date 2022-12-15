@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fizzed.bigmap.rocksdb;
+package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
-
+import java.io.Closeable;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class RocksBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
+public interface BigObjectListener {
 
-    protected RocksBigLinkedMap(
-            UUID id,
-            Path directory,
-            boolean persistent,
-            RocksBigMap<K,V> dataMap,
-            RocksBigMap<Integer,K> insertOrderToKeyMap,
-            RocksBigMap<K,Integer> keyToInsertOrderMap) {
-        
-        super(id, directory, persistent, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
-    }
+    void onOpened(BigObject bigObject);
+
+    void onClosed(BigObject bigObject);
 
 }

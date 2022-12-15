@@ -18,16 +18,19 @@ package com.fizzed.bigmap.tokyocabinet;
 import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
 
 import java.nio.file.Path;
+import java.util.UUID;
 
 public class TokyoBigLinkedMap<K,V> extends AbstractBigLinkedMap<K,V> {
 
     protected TokyoBigLinkedMap(
+            UUID id,
             Path directory,
+            boolean persistent,
             TokyoBigMap<K,V> dataMap,
             TokyoBigMap<Integer,K> insertOrderToKeyMap,
             TokyoBigMap<K,Integer> keyToInsertOrderMap) {
         
-        super(directory, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        super(id, directory, persistent, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
     }
 
 }

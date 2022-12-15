@@ -28,6 +28,7 @@ public class LevelBigLinkedMapTest extends AbstractBigLinkedMapTest {
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(keyType)
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

@@ -15,19 +15,20 @@
  */
 package com.fizzed.bigmap.impl;
 
-import com.fizzed.bigmap.BigMap;
-import com.fizzed.bigmap.BigMapDataException;
-import com.fizzed.bigmap.ByteCodec;
+import com.fizzed.bigmap.*;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.UUID;
 
 abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
 
+    protected final UUID id;
     protected final Path directory;
     protected final boolean persistent;
     protected final ByteCodec<K> keyCodec;
@@ -36,19 +37,23 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
     protected int size;
     protected long keyByteSize;
     protected long valueByteSize;
+    protected BigObjectListener listener;
+    protected BigObjectCloser closer;
 
-    @SuppressWarnings("OverridableMethodCallInConstructor")
     public AbstractBigMap(
+            UUID id,
             Path directory,
             boolean persistent,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
+        Objects.requireNonNull(id, "id was null");
         Objects.requireNonNull(directory, "directory was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
         Objects.requireNonNull(keyComparator, "keyComparator was null");
 
+        this.id = id;
         this.directory = directory;
         this.persistent = persistent;
         this.keyCodec = keyCodec;
@@ -57,12 +62,31 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
+    public BigObjectListener getListener() {
+        return this.listener;
+    }
+
+    @Override
+    public void setListener(BigObjectListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public UUID getId() { return this.id; }
+
+    @Override
     public Path getDirectory() {
         return this.directory;
     }
 
+    @Override
     public boolean isPersistent() {
-        return persistent;
+        return this.persistent;
+    }
+
+    @Override
+    final public boolean isClosed() {
+        return this.closer == null || this.closer.isClosed();
     }
 
     @Override
@@ -96,13 +120,6 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
-    public void checkIfClosed() {
-        if (this.isClosed()) {
-            throw new IllegalStateException("Underlying database is closed. Unable to perform map operations.");
-        }
-    }
-
-    @Override
     public void open() {
         try {
             this.close();
@@ -123,6 +140,10 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         } catch (Exception e) {
             throw new BigMapDataException(e);
         }
+
+        if (this.listener != null) {
+            this.listener.onOpened(this);
+        }
     }
 
     abstract protected void _open();
@@ -139,37 +160,29 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
 //        }
 //    }
 
-    @Override
-    public void close() throws IOException {
-        if (!this.isClosed()) {
-            this._close();
-        }
 
-        if (!this.persistent) {
-            this.destroy();
+    /*@Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if (this.listener == null && !this.isClosed()) {
+            System.out.println("UH OH - BigMap @ " + this.directory + " was not closed and is being garbage collected!");
         }
+    }*/
+
+    @Override
+    final public BigObjectCloser getCloser() {
+        return this.closer;
     }
 
-    abstract protected void _close() throws IOException;
-    
-    protected void destroy() throws IOException {
-        this.size = 0;
-        this.keyByteSize = 0L;
-        this.valueByteSize = 0L;
-        
-        // remove existing database...
-        try {
-            if (Files.exists(this.directory)) {
-                Files.list(this.directory).forEach(file -> {
-                    try {
-                        Files.delete(file);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException("Unable to delete existing database file!", e);
-                    }
-                });
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException("Unable to list existing database directory!", e);
+    @Override
+    final public void close() throws IOException {
+        if (this.closer != null) {
+            this.closer.close();
+            this.closer = null;
+        }
+
+        if (this.listener != null) {
+            this.listener.onClosed(this);
         }
     }
 
