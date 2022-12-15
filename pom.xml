@@ -25,6 +25,7 @@
     <modules>
         <module>bigmap-core</module>
         <module>bigmap-kryo</module>
+        <module>bigmap-jackson</module>
         <module>bigmap-leveldb</module>
         <module>bigmap-rocksdb</module>
         <module>bigmap-tokyocabinet</module>
