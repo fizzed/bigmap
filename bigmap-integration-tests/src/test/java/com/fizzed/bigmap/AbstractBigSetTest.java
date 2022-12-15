@@ -16,13 +16,17 @@
 package com.fizzed.bigmap;
 
 import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeThat;
 
 abstract public class AbstractBigSetTest {
 
@@ -106,6 +110,25 @@ abstract public class AbstractBigSetTest {
         removed = set.remove("a");      // non-existent
 
         assertThat(removed, is(true));
+    }
+
+    @Test
+    public void clear() throws IOException {
+        final Set<String> set = this.newSet(String.class);
+
+        set.add("1");
+        set.add("2");
+        set.add("0");
+
+        assertThat(set, hasSize(3));
+
+        set.clear();
+
+        assertThat(set, hasSize(0));
+
+        set.add("1");
+
+        assertThat(set, hasSize(1));
     }
 
     /*@Test
@@ -203,5 +226,119 @@ abstract public class AbstractBigSetTest {
 
         assertThat(it.hasNext(), is(false));
     }
-    
+
+    @Test
+    public void byteSizeTracking() {
+        final Set<String> _set = this.newSet(String.class);
+
+        assumeThat(_set, instanceOf(BigSet.class));
+
+        final BigSet<String> set = (BigSet<String>)_set;
+
+        set.add("1");
+        set.add("2");
+
+        assertThat(set.getValueByteSize(), is(2L));
+
+        // replace value updates bytes
+        set.add("2");
+
+        assertThat(set.getValueByteSize(), is(2L));
+
+        // remove value updates
+        set.remove("2");
+
+        assertThat(set.getValueByteSize(), is(1L));
+    }
+
+    @Test
+    public void close() throws IOException {
+        final Set<String> _set = this.newSet(String.class);
+
+        assumeThat(_set, instanceOf(BigSet.class));
+
+        final BigSet<String> set = (BigSet<String>)_set;
+
+        set.add("1");
+        set.add("2");
+
+        assertThat(set, hasSize(2));
+
+        Path directory = set.getDirectory();
+
+        assertThat(Files.exists(directory), is(true));
+        assertThat(Files.list(directory).count(), greaterThan(0L));
+        Path firstFile = Files.list(directory).findFirst().orElse(null);
+
+        set.close();
+
+        // the directory and everything should be cleaned up now
+        assertThat(Files.exists(directory), is(false));
+        assertThat(set.isClosed(), is(true));
+
+        // map.close() should be able to succeed again and not throw an exception
+        set.close();
+
+        try {
+            set.checkIfClosed();
+            fail();
+        } catch (Exception e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void closeRemovesFromRegistry() throws IOException {
+        final Set<String> _set = this.newSet(String.class);
+
+        assumeThat(_set, instanceOf(BigSet.class));
+
+        final BigSet<String> set = (BigSet<String>)_set;
+
+        UUID id = set.getId();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
+
+        set.close();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
+
+        // we should be able to re-open it again
+        set.open();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
+
+        set.close();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
+    }
+
+    @Test
+    public void dereferenceAutomaticallyGarbageCollectsFromRegistry() throws Exception {
+        Set<String> _set = this.newSet(String.class);
+
+        assumeThat(_set, instanceOf(BigSet.class));
+
+        BigSet<String> set = (BigSet<String>)_set;
+
+        UUID id = set.getId();
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
+
+        _set = null;
+        set = null;
+        System.gc();
+
+        // wait for garbage collector to run
+        final long now = System.currentTimeMillis();
+        while (BigObjectRegistry.getDefault().isRegistered(id)) {
+            if (System.currentTimeMillis() - now > 10000L) {
+                fail("Garbage not collected within 10secs");
+            }
+            Thread.sleep(100L);
+        }
+
+        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
+    }
+
 }

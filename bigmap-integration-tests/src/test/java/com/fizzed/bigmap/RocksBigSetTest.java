@@ -29,6 +29,7 @@ public class RocksBigSetTest extends AbstractBigSetTest {
         return new RocksBigSetBuilder()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

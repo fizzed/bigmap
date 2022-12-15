@@ -23,13 +23,7 @@ import java.io.Closeable;
 import java.nio.file.Path;
 import java.util.*;
 
-public interface BigMap<K,V> extends Map<K,V>, Closeable {
-
-    Path getDirectory();
-
-    void open();
-
-    void checkIfClosed();
+public interface BigMap<K,V> extends Map<K,V>, BigObject {
 
     ByteCodec<K> getKeyCodec();
 
@@ -40,8 +34,6 @@ public interface BigMap<K,V> extends Map<K,V>, Closeable {
     long getKeyByteSize();
 
     long getValueByteSize();
-
-    boolean isClosed();
 
     @Override
     default boolean isEmpty() {

@@ -35,133 +35,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class PerfDemo {
-    static private final Logger log = LoggerFactory.getLogger(PerfDemo.class);
-
-    static public void main(String[] args) throws Exception {
-        //
-        // config options
-        //
-
-        String type = "TokyoBigMap";
-//        String type = "LevelBigMap";
-//        String type = "RocksBigLinkedMap";
-//        String type = "RocksBigMap";
-//        String type = "MVStoreMap";
-//        String type = "TokyoCabinetMap";
-//        String type = "KyotoCabinetMap";
-//        String type = "TkrzwCabinetMap";
-        int mapCount = 10;
-        int entryCountPerMap = 3000000;
-
-        //
-        //
-        //
-        logMemory("At startup");
-
-        final List<Map<String,Item>> maps = new ArrayList<>(mapCount);
-        for (int i = 0; i < mapCount; i++) {
-            maps.add(buildMap(type, i));
-        }
-
-        logMemory("After " + mapCount + " maps created");
-
-        log.info("======================================================================");
-        log.info("Writing maps...");
-        final StopWatch entryPutTimer = StopWatch.timeMillis();
-        long entryPutCount = 0;
-
-        for (int j = 0; j < mapCount; j++) {
-            Map<String,Item> map = maps.get(j);
-            for (int i = 0; i < entryCountPerMap; i++) {
-                if (i % 25000 == 0) {
-                    logMemory("Putting map " + (j+1) + "/" + mapCount + ", entry " + (i+1) + "/" + entryCountPerMap);
-                }
-                Item item = new Item();
-                item.a = (long) i;
-                item.b = "This is sooooo cool dude! " + i;
-                item.c = "Look mom no hands " + i;
-                item.d = "Woooo baby! " + i;
-                item.e = "Woza! " + i;
-                item.g = "Blah blah aljlfjalfrjsd;lfjsdlfjsdlafjsdlfjsdlfjsdlfjsldafjlsdfjsdlfjsdlfjsdalfjsdlfjsdlfjdsjf" + i;
-                item.h = i;
-
-                map.put(i + "", item);
-                entryPutCount++;
-            }
-        }
-        entryPutTimer.stop();
-
-        log.info("======================================================================");
-        logMemory("After maps created");
-        log.info("Put {} entries across {} maps (in {})", entryPutCount, mapCount, entryPutTimer);
-        
-        // cleanup garbage to make reading harder
-        log.info("======================================================================");
-        log.info("Collecting garbage...");
-        System.gc();
-        logMemory("After GC called");
-
-        // intensive read back now
-        final StopWatch entryGetTimer = StopWatch.timeMillis();
-        int entryGetCount = 0;
-
-        log.info("======================================================================");
-        log.info("Reading pseudo-randomized entries...");
-        for (int j = 0; j < mapCount; j++) {
-            Map<String, Item> map = maps.get(j);
-            for (int i = 0; i < entryCountPerMap; i += 100) {
-                map.get(i + "");
-                entryGetCount++;
-            }
-        }
-        entryGetTimer.stop();
-
-        logMemory("After maps pseudo-randomized read");
-        log.info("Get {} entries across {} maps (in {})", entryGetCount, mapCount, entryGetTimer);
-
-
-        log.info("======================================================================");
-        log.info("Performance test: type={}, maps={}, entriesPerMap={}, totalEntries={}", type, mapCount, entryCountPerMap, entryPutCount);
-        log.info("Max openFiles={}, heap={} (MB), rss={} (MB)", maxOpenFiles, maxHeapMb, maxRssMb);
-        log.info("Map put throughput: {} entries per second", (long)((double)entryPutCount / entryPutTimer.elapsedSeconds()));
-        log.info("Map get throughput: {} entries per second", (long)((double)entryGetCount / entryGetTimer.elapsedSeconds()));
-
-        // calculate total disk size used
-        long totalDiskUsed = 0L;
-        for (int j = 0; j < mapCount; j++) {
-            Map<String, Item> map = maps.get(j);
-            // can we get a directory we'll use to calculate disk space?
-            Path directory = null;
-            if (map instanceof BigMap) {
-                directory = ((BigMap)map).getDirectory();
-            } else if (map instanceof OffheapMap) {
-                directory = ((OffheapMap)map).getDirectory();
-            }
-            if (directory != null) {
-                //log.info("Calculating disk space used in {}", directory);
-                totalDiskUsed += Files.walk(directory)
-                    .filter(p -> Files.isRegularFile(p))
-                    .mapToLong(p -> { try { return Files.size(p); } catch (IOException e) { throw new UncheckedIOException(e); }})
-                    .sum();
-            }
-        }
-
-        if (totalDiskUsed > 0L) {
-            log.info("Total disk used: {} (MB)", (long)((double)totalDiskUsed / (1024*1024)));
-        }
-
-
-        log.info("======================================================================");
-        log.info("Will sleep now...");
-        Thread.sleep(10000000L);
-    }
+public class AbstractPerf {
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     static Map<String,Object> ENGINE_STATICS = new HashMap<>();
 
     static public Map<String,Item> buildMap(String type, int identifier) throws Exception {
         final ByteCodec<String> stringByteCodec = ByteCodecs.utf8StringCodec();
-//        final ByteCodec<Item> itemByteCodec = ByteCodecs.autoCodec(Item.class);
+//        final ByteCodec<Item> itemByteCodec = ByteCodecs.resolveCodec(Item.class);
         final ByteCodec<Item> itemByteCodec = new KryoByteCodec<>(Item.class);
 //        final ByteCodec<Item> itemByteCodec = new FSTByteCodec<>();
 
@@ -307,12 +188,12 @@ public class PerfDemo {
 //    static private MVStore MVSTORE = n
 
     static OperatingSystem SYSTEM = new SystemInfo().getOperatingSystem();
-    static int processId = 0;
-    static long maxOpenFiles = 0;
-    static long maxRssMb = 0;
-    static long maxHeapMb = 0;
+    int processId = 0;
+    long maxOpenFiles = 0;
+    long maxRssMb = 0;
+    long maxHeapMb = 0;
 
-    static public void logMemory(String identifier) {
+    public void logMemory(String identifier) {
         OSProcess process = SYSTEM.getCurrentProcess();
         long openFiles = process.getOpenFiles();
         int threadCount = process.getThreadCount();

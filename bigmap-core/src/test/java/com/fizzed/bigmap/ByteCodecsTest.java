@@ -21,6 +21,7 @@ import com.google.common.primitives.Longs;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -30,13 +31,13 @@ import org.junit.Test;
 public class ByteCodecsTest {
  
     @Test
-    public void autoCodec() {
-        assertThat(ByteCodecs.autoCodec(String.class), is(not(nullValue())));
+    public void resolveCodec() {
+        assertThat(ByteCodecs.resolveCodec(String.class), is(not(nullValue())));
     }
     
     @Test
     public void utf8StringCodec() {
-        ByteCodec<String> c = ByteCodecs.autoCodec(String.class);
+        ByteCodec<String> c = ByteCodecs.resolveCodec(String.class);
         
         assertThat(c.serialize("a"), is("a".getBytes(StandardCharsets.UTF_8)));
         assertThat(c.deserialize("a".getBytes(StandardCharsets.UTF_8)), is("a"));
@@ -46,7 +47,7 @@ public class ByteCodecsTest {
     
     @Test
     public void integerCodec() {
-        ByteCodec<Integer> c = ByteCodecs.autoCodec(Integer.class);
+        ByteCodec<Integer> c = ByteCodecs.resolveCodec(Integer.class);
         
         assertThat(c.serialize(0), is(Ints.toByteArray(0)));
         assertThat(c.deserialize(Ints.toByteArray(0)), is(0));
@@ -62,7 +63,7 @@ public class ByteCodecsTest {
     
     @Test
     public void longCodec() {
-        ByteCodec<Long> c = ByteCodecs.autoCodec(Long.class);
+        ByteCodec<Long> c = ByteCodecs.resolveCodec(Long.class);
         
         assertThat(c.serialize(0L), is(Longs.toByteArray(0L)));
         assertThat(c.deserialize(Longs.toByteArray(0L)), is(0L));
@@ -78,7 +79,7 @@ public class ByteCodecsTest {
     
     @Test
     public void shortCodec() {
-        ByteCodec<Short> c = ByteCodecs.autoCodec(Short.class);
+        ByteCodec<Short> c = ByteCodecs.resolveCodec(Short.class);
         
         assertThat(c.serialize((short)0), is(Base16.decode("0000")));
         assertThat(c.deserialize(Base16.decode("0000")), is((short)0));
@@ -94,7 +95,7 @@ public class ByteCodecsTest {
 
     @Test
     public void byteCodec() {
-        ByteCodec<Byte> c = ByteCodecs.autoCodec(Byte.class);
+        ByteCodec<Byte> c = ByteCodecs.resolveCodec(Byte.class);
 
         assertThat(c.serialize((byte)0), is(Base16.decode("00")));
         assertThat(c.deserialize(Base16.decode("00")), is((byte)0));
@@ -105,7 +106,7 @@ public class ByteCodecsTest {
 
     @Test
     public void byteArrayCodec() {
-        ByteCodec<byte[]> c = ByteCodecs.autoCodec(byte[].class);
+        ByteCodec<byte[]> c = ByteCodecs.resolveCodec(byte[].class);
 
         final byte[] bytes1 = Base16.decode("0001020304050607");
 
@@ -115,7 +116,10 @@ public class ByteCodecsTest {
 
     @Test
     public void serializableCodec() {
-        ByteCodec<Instant> c = new SerializableByteCodec<>();
+        // this should be the fallback serializable codec
+        ByteCodec<Instant> c = ByteCodecs.resolveCodec(Instant.class);
+
+        assertThat(c, instanceOf(SerializableByteCodec.class));
 
         final Instant i1 = Instant.parse("2022-11-01T01:02:03.456Z");
 

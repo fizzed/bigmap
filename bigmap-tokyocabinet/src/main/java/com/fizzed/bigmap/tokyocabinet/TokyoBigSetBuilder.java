@@ -16,14 +16,25 @@
 package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.impl.None;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.UUID;
 
-public class TokyoBigSetBuilder<V> extends AbstractBigMapBuilder {
+public class TokyoBigSetBuilder<V> extends AbstractBigObjectBuilder {
+
+    public TokyoBigSetBuilder<V> registerForGarbageMonitoring() {
+        super._registerForGarbageMonitoring();
+        return this;
+    }
+
+    public TokyoBigSetBuilder<V> registerForGarbageMonitoring(BigObjectRegistry registry) {
+        super._registerForGarbageMonitoring(registry);
+        return this;
+    }
 
     public TokyoBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
@@ -51,14 +62,14 @@ public class TokyoBigSetBuilder<V> extends AbstractBigMapBuilder {
     }
     
     public TokyoBigSet<V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "tokyobigset");
+        final UUID id = UUID.randomUUID();
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigset-tokyo");
 
-        final TokyoBigMap<V,None> map = new TokyoBigMap<>(dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+        final TokyoBigMap<V,None> map = new TokyoBigMap<>(id, dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
 
         final TokyoBigSet<V> set = new TokyoBigSet<>(map);
-
+        set.setListener(this.registry);
         set.open();
-
         return set;
     }
 

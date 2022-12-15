@@ -16,13 +16,24 @@
 package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
+import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.UUID;
 
-public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
+public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigObjectBuilder {
+
+    public LevelBigLinkedMapBuilder<K,V> registerForGarbageMonitoring() {
+        super._registerForGarbageMonitoring();
+        return this;
+    }
+
+    public LevelBigLinkedMapBuilder<K,V> registerForGarbageMonitoring(BigObjectRegistry registry) {
+        super._registerForGarbageMonitoring(registry);
+        return this;
+    }
 
     public LevelBigLinkedMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
         super._setScratchDirectory(scratchDirectory);
@@ -60,7 +71,8 @@ public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
     }
     
     public LevelBigLinkedMap<K,V> build() {
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, "levelbiglinkedmap");
+        final UUID id = UUID.randomUUID();
+        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "biglinkedmap-level");
 
         // we need 3 subdir paths
         final Path dataDir = dir.resolve("data");
@@ -69,11 +81,12 @@ public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder {
 
         final ByteCodec<Integer> integerByteCodec = ByteCodecs.integerCodec();
         final Comparator<Integer> integerComparator = Comparators.autoComparator(Integer.class);
-        final LevelBigMap<K,V> dataMap = new LevelBigMap<>(dataDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
-        final LevelBigMap<Integer,K> insertOrderToKeyMap = new LevelBigMap<>(i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
-        final LevelBigMap<K,Integer> keyToInsertOrderMap = new LevelBigMap<>(k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
+        final LevelBigMap<K,V> dataMap = new LevelBigMap<>(UUID.randomUUID(), dataDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final LevelBigMap<Integer,K> insertOrderToKeyMap = new LevelBigMap<>(UUID.randomUUID(), i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
+        final LevelBigMap<K,Integer> keyToInsertOrderMap = new LevelBigMap<>(UUID.randomUUID(), k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
 
-        final LevelBigLinkedMap<K,V> map = new LevelBigLinkedMap<>(dir, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        final LevelBigLinkedMap<K,V> map = new LevelBigLinkedMap<>(id, dir, false, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        map.setListener(this.registry);
         map.open();
         return map;
     }

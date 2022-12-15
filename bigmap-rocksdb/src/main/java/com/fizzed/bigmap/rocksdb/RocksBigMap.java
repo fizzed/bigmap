@@ -24,7 +24,6 @@ import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -34,12 +33,13 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
     protected RocksDB db;
 
     protected RocksBigMap(
+            UUID id,
             Path directory,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
-        super(directory, false, keyCodec, keyComparator, valueCodec);
+        super(id, directory, false, keyCodec, keyComparator, valueCodec);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
     }
@@ -60,18 +60,8 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
 
-    @Override
-    protected void _close() throws IOException {
-        if (this.db != null) {
-            this.db.close();
-        }
-    }
-
-    @Override
-    public boolean isClosed() {
-        return this.db == null;
+        this.closer = new RocksBigObjectCloser(this.id, this.persistent, this.directory, this.db);
     }
 
     @Override

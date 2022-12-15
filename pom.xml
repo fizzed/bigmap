@@ -25,6 +25,7 @@
     <modules>
         <module>bigmap-core</module>
         <module>bigmap-kryo</module>
+        <module>bigmap-jackson</module>
         <module>bigmap-leveldb</module>
         <module>bigmap-rocksdb</module>
         <module>bigmap-tokyocabinet</module>
@@ -65,21 +66,12 @@
                 <artifactId>bigmap-tokyocabinet</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            
-            <!-- much faster generic object serialization than jvm, optional -->
-            <!-- this does not work on Java 17 though
-            <dependency>
-                <groupId>de.ruedigermoeller</groupId>
-                <artifactId>fst</artifactId>
-                <version>2.57</version>
-            </dependency>
-            -->
 
             <!-- tokyocabinet impl -->
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>tokyocabinet-linux-x64</artifactId>
-                <version>0.0.5</version>
+                <version>0.0.7</version>
             </dependency>
 
             <!-- pure java leveldb for bigmap-leveldb only -->

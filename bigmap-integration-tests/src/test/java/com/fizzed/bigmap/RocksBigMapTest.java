@@ -28,6 +28,7 @@ public class RocksBigMapTest extends AbstractBigMapTest {
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(keyType)
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

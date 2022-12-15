@@ -29,6 +29,7 @@ public class TokyoBigMapTest extends AbstractBigMapTest {
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(keyType)
             .setValueType(valueType)
+            .registerForGarbageMonitoring()
             .build();
     }
 

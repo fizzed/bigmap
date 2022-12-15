@@ -15,18 +15,18 @@
  */
 package com.fizzed.bigmap.impl;
 
-import com.fizzed.bigmap.BigMap;
-import com.fizzed.bigmap.BigSet;
-import com.fizzed.bigmap.ByteCodec;
+import com.fizzed.bigmap.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.UUID;
 
 abstract public class AbstractBigSet<V> implements BigSet<V> {
 
-    final private BigMap<V, None> map;
+    final private BigMap<V,None> map;
+    protected BigObjectListener listener;
 
     public AbstractBigSet(
             BigMap<V,None> map) {
@@ -35,8 +35,17 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
     }
 
     @Override
-    public void close() throws IOException {
-        this.map.close();
+    public BigObjectListener getListener() {
+        return this.listener;
+    }
+
+    @Override
+    public void setListener(BigObjectListener listener) {
+        this.listener = listener;
+    }
+
+    public UUID getId() {
+        return this.map.getId();
     }
 
     @Override
@@ -45,13 +54,36 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
     }
 
     @Override
-    public void open() {
-        this.map.open();
+    public boolean isPersistent() {
+        return this.map.isPersistent();
     }
 
     @Override
-    public void checkIfClosed() {
-        this.map.checkIfClosed();
+    final public BigObjectCloser getCloser() {
+        return this.map.getCloser();
+    }
+
+    @Override
+    final public boolean isClosed() {
+        return this.map.isClosed();
+    }
+
+    @Override
+    public void open() {
+        this.map.open();
+
+        if (this.listener != null) {
+            this.listener.onOpened(this);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.map.close();
+
+        if (this.listener != null) {
+            this.listener.onClosed(this);
+        }
     }
 
     @Override
@@ -67,11 +99,6 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
     @Override
     public long getValueByteSize() {
         return this.map.getKeyByteSize();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return this.map.isClosed();
     }
 
     @Override
