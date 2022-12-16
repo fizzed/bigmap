@@ -1,8 +1,8 @@
 package com.fizzed.bigmap.kryo;
 
-import com.esotericsoftware.kryo.kryo5.Kryo;
-import com.esotericsoftware.kryo.kryo5.io.Input;
-import com.esotericsoftware.kryo.kryo5.io.Output;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.fizzed.bigmap.ByteCodec;
 
 import static com.fizzed.bigmap.ByteCodecs.ZERO_BYTES;
@@ -12,12 +12,19 @@ public class KryoByteCodec<K> implements ByteCodec<K> {
     private final Kryo kryo;
     private final Class<K> type;
 
+    static public Kryo buildDefaultKryo() {
+        Kryo kryo = new Kryo();
+        kryo.setRegistrationRequired(false);
+        return kryo;
+    }
+
     public KryoByteCodec(Class<K> type) {
-        // NOTE: kryo is apparently not thread-safe, and is also expensive to create
-        this.kryo = new Kryo();
-        this.kryo.setRegistrationRequired(false);
+        this(type, buildDefaultKryo());
+    }
+
+    public KryoByteCodec(Class<K> type, Kryo kryo) {
+        this.kryo = kryo;
         this.type = type;
-        this.kryo.register(type);
     }
 
     @Override

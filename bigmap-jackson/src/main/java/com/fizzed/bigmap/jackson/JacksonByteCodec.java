@@ -13,7 +13,11 @@ public class JacksonByteCodec<K> implements ByteCodec<K> {
     private final ObjectMapper objectMapper;
     private final Class<K> type;
 
-    public JacksonByteCodec(ObjectMapper objectMapper, Class<K> type) {
+    public JacksonByteCodec(Class<K> type) {
+        this(type, new ObjectMapper());
+    }
+
+    public JacksonByteCodec(Class<K> type, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.type = type;
     }

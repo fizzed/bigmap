@@ -16,7 +16,6 @@
 package com.fizzed.bigmap;
 
 import org.junit.Test;
-import org.junit.rules.Stopwatch;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -437,6 +436,86 @@ abstract public class AbstractBigMapTest {
         map.put(0L, "0");
 
         assertThat(toValueList(map), hasItems("0", "1", "2", "3", "5", "123456789"));
+    }
+
+    @Test
+    public void getMutable() {
+        final Map<String,String> _map = this.newMap(String.class, String.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        final BigMap<String,String> map = (BigMap<String,String>)_map;
+
+        // case 1: key does not exist, value not changed in try-with-resources block
+        try (MutableValue<String> mv = map.getMutable("a")) {
+            assertThat(mv.get(), is(nullValue()));
+            assertThat(mv.isPresent(), is(false));
+        }
+
+        assertThat(map.containsKey("a"), is(false));
+        assertThat(map.get("a"), is(nullValue()));
+
+        // case 2: key exists, value changed to null (essentially a delete)
+        map.put("a", "1");
+
+        try (MutableValue<String> mv = map.getMutable("a")) {
+            assertThat(mv.get(), is("1"));
+            assertThat(mv.isPresent(), is(true));
+
+            // let's modify the value to null (to delete it)
+            mv.set(null);
+
+            // value should not have been persisted back yet
+            assertThat(map.get("a"), is("1"));
+        }
+
+        // the new value should have been persisted back now
+        assertThat(map.containsKey("a"), is(false));
+        assertThat(map.get("a"), is(nullValue()));
+
+        // case 3: key exists, with a value, then its changed to something else
+        map.put("a", "1");
+
+        try (MutableValue<String> mv = map.getMutable("a")) {
+            assertThat(mv.get(), is("1"));
+            assertThat(mv.isPresent(), is(true));
+
+            // let's modify the value
+            mv.set("2");
+
+            // value should not have been persisted back yet
+            assertThat(map.get("a"), is("1"));
+        }
+
+        // the new value should have been persisted back now
+        assertThat(map.get("a"), is("2"));
+    }
+
+    @Test
+    public void getMutableWithComplexObject() {
+        final Map<String,Properties> _map = this.newMap(String.class, Properties.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        final BigMap<String,Properties> map = (BigMap<String,Properties>)_map;
+
+        // case 3: key exists, with a value, then its changed to something else
+        map.put("a", new Properties());
+
+        try (MutableValue<Properties> mv = map.getMutable("a")) {
+            assertThat(mv.get(), is(not(nullValue())));
+            assertThat(mv.isPresent(), is(true));
+            assertThat(mv.get().containsKey("b"), is(false));
+
+            mv.get().setProperty("b", "hello");
+
+            // value should not have been persisted back yet
+            assertThat(map.get("a").containsKey("b"), is(false));
+        }
+
+        // the new value should have been persisted back now
+        assertThat(map.get("a").containsKey("b"), is(true));
+        assertThat(map.get("a").getProperty("b"), is("hello"));
     }
 
     @Test

@@ -55,7 +55,7 @@ public class JacksonByteCodecTest {
 
     @Test
     public void nullsAndEmptyStrings() {
-        final JacksonByteCodec<String> byteCodec = new JacksonByteCodec<>(OM1, String.class);
+        final JacksonByteCodec<String> byteCodec = new JacksonByteCodec<>(String.class, OM1);
 
         assertThat(byteCodec.serialize(null), is(ByteCodecs.ZERO_BYTES));
         assertThat(byteCodec.serialize(""), is(new byte[] {(byte)34, (byte)34}));
@@ -67,7 +67,7 @@ public class JacksonByteCodecTest {
 
     @Test
     public void serializableObjects() {
-        final JacksonByteCodec<Instant> byteCodec = new JacksonByteCodec<>(OM2, Instant.class);
+        final JacksonByteCodec<Instant> byteCodec = new JacksonByteCodec<>(Instant.class, OM2);
 
         final Instant i1 = Instant.parse("2022-11-05T01:02:03.456Z");
 
@@ -79,7 +79,7 @@ public class JacksonByteCodecTest {
 
     @Test
     public void nonSerializableObjects() {
-        final JacksonByteCodec<Widget> byteCodec = new JacksonByteCodec<>(OM2, Widget.class);
+        final JacksonByteCodec<Widget> byteCodec = new JacksonByteCodec<>(Widget.class, OM2);
 
         final Widget w1 = new Widget()
             .setS("a")
