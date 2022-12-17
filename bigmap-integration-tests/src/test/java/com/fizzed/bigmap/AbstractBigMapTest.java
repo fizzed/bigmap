@@ -563,8 +563,6 @@ abstract public class AbstractBigMapTest {
         map.put("2", "-10");
 
         assertThat(map, aMapWithSize(2));
-        assertThat(map.getKeyByteSize(), is(2L));
-        assertThat(map.getValueByteSize(), is(12L));
 
         Path directory = map.getDirectory();
 

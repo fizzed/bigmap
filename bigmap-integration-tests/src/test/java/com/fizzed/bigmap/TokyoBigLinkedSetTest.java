@@ -15,30 +15,20 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
-import org.junit.Ignore;
-import org.junit.Test;
+import com.fizzed.bigmap.tokyocabinet.TokyoBigLinkedSetBuilder;
 
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Set;
 
-public class JavaLinkedHashMapTest extends AbstractBigLinkedMapTest {
+public class TokyoBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override
-    public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {
-        return new LinkedHashMap<>();
-    }
-
-    @Test
-    @Ignore("nulls are technically allowed with a java hashmap")
-    public void putNullKey() {
-        super.putNullKey();
-    }
-
-    @Test  @Ignore("nulls are technically allowed with a java hashmap")
-    public void putNullValue() {
-        super.putNullKey();
+    public <V> Set<V> newSet(Class<V> valueType) {
+        return new TokyoBigLinkedSetBuilder()
+            .setScratchDirectory(Paths.get("target"))
+            .setValueType(valueType)
+            .registerForGarbageMonitoring()
+            .build();
     }
 
 }

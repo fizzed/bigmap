@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static com.fizzed.bigmap.impl.BigMapHelper.*;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
@@ -131,42 +132,6 @@ abstract public class AbstractBigSetTest {
         assertThat(set, hasSize(1));
     }
 
-    /*@Test
-    public void first() {
-        final Set<Long> set = this.newSet(Long.class);
-        
-        set.add(5L);
-        set.add(1L);
-        set.add(2L);
-        
-        assertThat(set.first(), is(1L));
-    }*/
-    
-    /*@Test
-    public void ordering() {
-        LevelBigSet<Long> set = new LevelBigSetBuilder()
-            .setScratchDirectory(Paths.get("target"))
-            .setKeyType(Long.class)
-            .build();
-
-        set.add(123456789L);
-        set.add(-10L);
-        set.add(5L);
-        set.add(1L);
-        set.add(3L);
-        set.add(2L);
-
-        List<Long> values = set.stream()
-            .collect(toList());
-
-        assertThat(values.get(0), is(-10L));
-        assertThat(values.get(1), is(1L));
-        assertThat(values.get(2), is(2L));
-        assertThat(values.get(3), is(3L));
-        assertThat(values.get(4), is(5L));
-        assertThat(values.get(5), is(123456789L));
-    }*/
-    
     @Test
     public void iterator() {
         final Set<String> set = this.newSet(String.class);
@@ -177,12 +142,7 @@ abstract public class AbstractBigSetTest {
         set.add("2");
 
         Iterator<String> it = set.iterator();
-
-        assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("1"));
-        assertThat(it.next(), is("2"));
-        assertThat(it.next(), is("3"));
-        assertThat(it.next(), is("4"));
+        assertThat(toIteratedList(it, 4), containsInAnyOrder("1", "2", "3", "4"));
         assertThat(it.hasNext(), is(false));
         
         try {
@@ -198,9 +158,7 @@ abstract public class AbstractBigSetTest {
         it = set.iterator();
 
         assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("2"));
-        assertThat(it.next(), is("3"));
-        assertThat(it.next(), is("4"));
+        assertThat(toIteratedList(it, 3), containsInAnyOrder("2", "3", "4"));
         assertThat(it.hasNext(), is(false));
 
         set.remove("3");
@@ -208,8 +166,7 @@ abstract public class AbstractBigSetTest {
         it = set.iterator();
 
         assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("2"));
-        assertThat(it.next(), is("4"));
+        assertThat(toIteratedList(it, 2), containsInAnyOrder("4", "2"));
         assertThat(it.hasNext(), is(false));
 
         set.remove("4");
@@ -217,7 +174,7 @@ abstract public class AbstractBigSetTest {
         it = set.iterator();
 
         assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("2"));
+        assertThat(toIteratedList(it, 1), containsInAnyOrder("2"));
         assertThat(it.hasNext(), is(false));
 
         set.remove("2");
@@ -225,6 +182,24 @@ abstract public class AbstractBigSetTest {
         it = set.iterator();
 
         assertThat(it.hasNext(), is(false));
+    }
+
+    @Test
+    public void sortedSetOrdered() {
+        final Set<Long> _set = this.newSet(Long.class);
+
+        assumeThat(_set, instanceOf(SortedSet.class));
+
+        final SortedSet<Long> set = (SortedSet<Long>)_set;
+
+        set.add(123456789L);
+        set.add(-10L);
+        set.add(5L);
+        set.add(1L);
+        set.add(3L);
+        set.add(2L);
+
+        assertThat(toValueList(set), hasItems(-10L, 1L, 2L, 3L, 5L, 123456789L));
     }
 
     @Test
@@ -268,7 +243,6 @@ abstract public class AbstractBigSetTest {
 
         assertThat(Files.exists(directory), is(true));
         assertThat(Files.list(directory).count(), greaterThan(0L));
-        Path firstFile = Files.list(directory).findFirst().orElse(null);
 
         set.close();
 

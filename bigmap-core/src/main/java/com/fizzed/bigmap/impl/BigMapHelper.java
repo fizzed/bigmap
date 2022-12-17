@@ -36,6 +36,10 @@ public class BigMapHelper {
         return map.values().stream().collect(toList());
     }
 
+    static public <V> List<V> toValueList(Set<V> set) {
+        return set.stream().collect(toList());
+    }
+
     static public <V> List<V> toIteratedList(Iterator<V> it, int count) {
         List<V> items = new ArrayList<>();
         for (int i = 0; i < count; i++) {

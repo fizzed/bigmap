@@ -30,40 +30,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
 
-abstract public class AbstractBigLinkedMapTest {
-
-    abstract public <K,V> Map<K,V> newMap(Class<K> keyType, Class<V> valueType);
+abstract public class AbstractBigLinkedMapTest extends AbstractBigMapTest {
 
     @Test
-    public void putAndGet() {
-        final Map<String,String> map = this.newMap(String.class, String.class);
-
-        map.put("a", "1");
-
-        assertThat(map, hasKey("a"));
-        assertThat(map.get("a"), is("1"));
-        assertThat(map.size(), is(1));
-        assertThat(map.isEmpty(), is(false));
-
-        map.remove("a");
-
-        assertThat(map.get("a"), is(nullValue()));
-        assertThat(map.size(), is(0));
-        assertThat(map.isEmpty(), is(true));
-
-        String removed = map.put("b", "2");
-
-        assertThat(removed, is(nullValue()));
-        assertThat(map.size(), is(1));
-
-        String removed1 = map.put("b", "3");
-
-        assertThat(removed1, is("2"));
-        assertThat(map.size(), is(1));
-    }
-
-    @Test
-    public void ordering() {
+    public void putOrdered() {
         final Map<Long,String> map = this.newMap(Long.class, String.class);
 
         map.put(5L, "5");
@@ -80,7 +50,7 @@ abstract public class AbstractBigLinkedMapTest {
     }
 
     @Test
-    public void remove() throws IOException {
+    public void removeOrdered() throws IOException {
         final Map<Integer,String> map = this.newMap(Integer.class, String.class);
 
         map.put(4, "4");
@@ -132,26 +102,7 @@ abstract public class AbstractBigLinkedMapTest {
     }
 
     @Test
-    public void clear() throws IOException {
-        final Map<String,String> map = this.newMap(String.class, String.class);
-
-        map.put("1", "123456789");
-        map.put("2", "-10");
-
-        assertThat(map, aMapWithSize(2));
-
-        map.clear();
-
-        assertThat(map, aMapWithSize(0));
-
-        map.put("2", "1");
-        map.put("3", "5");
-
-        assertThat(map, aMapWithSize(2));
-    }
-
-    @Test
-    public void entrySet() {
+    public void entrySetOrdered() {
         final Map<Integer,String> map = this.newMap(Integer.class, String.class);
 
         map.put(3, "3");
@@ -179,7 +130,7 @@ abstract public class AbstractBigLinkedMapTest {
     }
 
     @Test
-    public void values() {
+    public void valuesOrdered() {
         final Map<Integer,String> map = this.newMap(Integer.class, String.class);
 
         map.put(2, "2");
@@ -198,9 +149,7 @@ abstract public class AbstractBigLinkedMapTest {
         Iterator<String> it = values.iterator();
 
         assertThat(it.hasNext(), is(true));
-        assertThat(it.next(), is("2"));
-        assertThat(it.next(), is("1"));
-        assertThat(it.next(), is("0"));
+        assertThat(toIteratedList(it, 3), hasItems("2", "1", "0"));
         assertThat(it.hasNext(), is(false));
 
         try {
@@ -226,7 +175,7 @@ abstract public class AbstractBigLinkedMapTest {
     }
 
     @Test
-    public void keySet() {
+    public void keySetOrdered() {
         final Map<Integer,String> map = this.newMap(Integer.class, String.class);
 
         map.put(3, "3");
@@ -293,96 +242,6 @@ abstract public class AbstractBigLinkedMapTest {
 
         assertThat(map.getKeyByteSize(), is(0L));
         assertThat(map.getValueByteSize(), is(0L));
-    }
-
-    @Test
-    public void close() throws IOException {
-        final Map<String,String> _map = this.newMap(String.class, String.class);
-
-        assumeThat(_map, instanceOf(BigMap.class));
-
-        final BigMap<String,String> map = (BigMap<String,String>)_map;
-
-        map.put("1", "123456789");
-        map.put("2", "-10");
-
-        assertThat(map, aMapWithSize(2));
-
-        Path directory = map.getDirectory();
-
-        assertThat(Files.exists(directory), is(true));
-        assertThat(Files.list(directory).count(), greaterThan(0L));
-        Path firstFile = Files.list(directory).findFirst().orElse(null);
-
-        map.close();
-
-        // the directory and everything should be cleaned up now
-        assertThat(Files.exists(directory), is(false));
-        assertThat(map.isClosed(), is(true));
-
-        // map.close() should be able to succeed again and not throw an exception
-        map.close();
-
-        try {
-            map.checkIfClosed();
-            fail();
-        } catch (Exception e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void closeRemovesFromRegistry() throws IOException {
-        final Map<String,String> _map = this.newMap(String.class, String.class);
-
-        assumeThat(_map, instanceOf(BigMap.class));
-
-        final BigMap<String,String> map = (BigMap<String,String>)_map;
-
-        UUID id = map.getId();
-
-        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
-
-        map.close();
-
-        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
-
-        // we should be able to re-open it again
-        map.open();
-
-        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
-
-        map.close();
-
-        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
-    }
-
-    @Test
-    public void dereferenceAutomaticallyGarbageCollectsFromRegistry() throws Exception {
-        Map<String,String> _map = this.newMap(String.class, String.class);
-
-        assumeThat(_map, instanceOf(BigMap.class));
-
-        BigMap<String,String> map = (BigMap<String,String>)_map;
-
-        UUID id = map.getId();
-
-        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(true));
-
-        _map = null;
-        map = null;
-        System.gc();
-
-        // wait for garbage collector to run
-        final long now = System.currentTimeMillis();
-        while (BigObjectRegistry.getDefault().isRegistered(id)) {
-            if (System.currentTimeMillis() - now > 10000L) {
-                fail("Garbage not collected within 10secs");
-            }
-            Thread.sleep(100L);
-        }
-
-        assertThat(BigObjectRegistry.getDefault().isRegistered(id), is(false));
     }
 
 }
