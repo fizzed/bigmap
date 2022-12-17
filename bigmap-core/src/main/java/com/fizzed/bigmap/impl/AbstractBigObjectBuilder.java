@@ -66,7 +66,7 @@ public class AbstractBigObjectBuilder {
     protected void _setKeyType(Class<?> keyType, ByteCodec<?> keyCodec, Comparator<?> keyComparator) {
         Objects.requireNonNull(keyType, "keyType was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
-        Objects.requireNonNull(keyComparator, "keyComparator was null");
+        //Objects.requireNonNull(keyComparator, "keyComparator was null");
         this.keyClass = keyType;
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;

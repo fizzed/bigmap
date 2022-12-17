@@ -71,6 +71,22 @@ abstract public class AbstractBigSetTest {
     }
 
     @Test
+    public void addAndContainsWithComplexObject() {
+        final Set<TestIdentifier> set = this.newSet(TestIdentifier.class);
+
+        set.add(new TestIdentifier("a", "b"));
+        set.add(new TestIdentifier("c", "d"));
+
+        assertThat(set, hasSize(2));
+        assertThat(set.contains(new TestIdentifier("a", "b")), is(true));
+
+        set.remove(new TestIdentifier("a", "b"));
+
+        assertThat(set.contains(new TestIdentifier("a", "b")), is(false));
+        assertThat(set.size(), is(1));
+    }
+
+    @Test
     public void size() {
         final Set<String> set = this.newSet(String.class);
 

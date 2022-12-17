@@ -35,8 +35,9 @@ public class Comparators {
                 }
             };
         }
-        throw new IllegalArgumentException("Only classes that implement Comparable are valid. "
-            + "Either supply a custom comparator or implement Comparable on your class!");
+        return null;
+//        throw new IllegalArgumentException("Only classes that implement Comparable are valid. "
+//            + "Either supply a custom comparator or implement Comparable on your class!");
     }
     
 }

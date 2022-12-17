@@ -51,7 +51,7 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         Objects.requireNonNull(id, "id was null");
         Objects.requireNonNull(directory, "directory was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
-        Objects.requireNonNull(keyComparator, "keyComparator was null");
+        //Objects.requireNonNull(keyComparator, "keyComparator was null");
 
         this.id = id;
         this.directory = directory;

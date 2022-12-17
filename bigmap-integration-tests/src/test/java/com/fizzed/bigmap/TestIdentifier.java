@@ -15,22 +15,34 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.rocksdb.RocksBigSetBuilder;
-import org.junit.Ignore;
-import org.junit.Test;
+import java.io.Serializable;
 
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
+public class TestIdentifier implements Serializable {
 
-public class JavaHashSetTest extends AbstractBigSetTest {
+    private String domain;
+    private String name;
 
-    @Override
-    public <V> Set<V> newSet(Class<V> valueType) {
-        return new HashSet<>();
+    public TestIdentifier(String domain, String name) {
+        this.domain = domain;
+        this.name = name;
     }
 
-    @Test @Ignore
-    public void addAndContainsWithComplexObject() { }
+    public String getDomain() {
+        return domain;
+    }
+
+    public TestIdentifier setDomain(String domain) {
+        this.domain = domain;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public TestIdentifier setName(String name) {
+        this.name = name;
+        return this;
+    }
 
 }

@@ -112,6 +112,22 @@ abstract public class AbstractBigMapTest {
     }
 
     @Test
+    public void putAndGetWithComplexObject() {
+        final Map<TestIdentifier,String> map = this.newMap(TestIdentifier.class, String.class);
+
+        map.put(new TestIdentifier("a", "b"), "1");
+        map.put(new TestIdentifier("c", "d"), "2");
+
+        assertThat(map, aMapWithSize(2));
+        assertThat(map.get(new TestIdentifier("a", "b")), is("1"));
+
+        map.remove(new TestIdentifier("a", "b"));
+
+        assertThat(map.get(new TestIdentifier("a", "b")), is(nullValue()));
+        assertThat(map.size(), is(1));
+    }
+
+    @Test
     public void containsKey() throws IOException {
         final Map<String,String> map = this.newMap(String.class, String.class);
 
