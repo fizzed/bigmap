@@ -16,63 +16,18 @@
 package com.fizzed.bigmap.leveldb;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.UUID;
 
-public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigObjectBuilder {
+public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigMapBuilder<K,V,LevelBigLinkedMapBuilder<K,V>> {
 
-    public LevelBigLinkedMapBuilder<K,V> registerForGarbageMonitoring() {
-        super._registerForGarbageMonitoring();
-        return this;
-    }
-
-    public LevelBigLinkedMapBuilder<K,V> registerForGarbageMonitoring(BigObjectRegistry registry) {
-        super._registerForGarbageMonitoring(registry);
-        return this;
-    }
-
-    public LevelBigLinkedMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
-        super._setScratchDirectory(scratchDirectory);
-        return this;
-    }
-    
-    public <K2> LevelBigLinkedMapBuilder<K2,V> setKeyType(Class<K2> keyType) {
-        super._setKeyType(keyType);
-        return (LevelBigLinkedMapBuilder<K2,V>)this;
-    }
-
-    public <K2> LevelBigLinkedMapBuilder<K2,V> setKeyType(Class<K2> keyType, Comparator<K2> keyComparator) {
-        super._setKeyType(keyType, keyComparator);
-        return (LevelBigLinkedMapBuilder<K2,V>)this;
-    }
-
-    public <K2> LevelBigLinkedMapBuilder<K2,V> setKeyType(Class<K2> keyType, ByteCodec<K2> keyCodec) {
-        super._setKeyType(keyType, keyCodec);
-        return (LevelBigLinkedMapBuilder<K2,V>)this;
-    }
-
-    public <K2> LevelBigLinkedMapBuilder<K2,V> setKeyType(Class<K2> keyType, ByteCodec<K2> keyCodec, Comparator<K2> keyComparator) {
-        super._setKeyType(keyType, keyCodec, keyComparator);
-        return (LevelBigLinkedMapBuilder<K2,V>)this;
-    }
-
-    public <V2> LevelBigLinkedMapBuilder<K,V2> setValueType(Class<V2> valueType) {
-        super._setValueType(valueType);
-        return (LevelBigLinkedMapBuilder<K,V2>)this;
-    }
-
-    public <V2> LevelBigLinkedMapBuilder<K,V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
-        super._setValueType(valueType, valueCodec);
-        return (LevelBigLinkedMapBuilder<K,V2>)this;
-    }
-    
     public LevelBigLinkedMap<K,V> build() {
         final UUID id = UUID.randomUUID();
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "biglinkedmap-level");
+        final Path dir = BigMapHelper.resolveScratchPath(this.scratchDirectory, false, id, "biglinkedmap-level");
 
         // we need 3 subdir paths
         final Path dataDir = dir.resolve("data");
@@ -81,9 +36,9 @@ public class LevelBigLinkedMapBuilder<K,V> extends AbstractBigObjectBuilder {
 
         final ByteCodec<Integer> integerByteCodec = ByteCodecs.integerCodec();
         final Comparator<Integer> integerComparator = Comparators.autoComparator(Integer.class);
-        final LevelBigMap<K,V> dataMap = new LevelBigMap<>(UUID.randomUUID(), dataDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
-        final LevelBigMap<Integer,K> insertOrderToKeyMap = new LevelBigMap<>(UUID.randomUUID(), i2kDir, integerByteCodec, integerComparator, (ByteCodec<K>)this.keyCodec);
-        final LevelBigMap<K,Integer> keyToInsertOrderMap = new LevelBigMap<>(UUID.randomUUID(), k2iDir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, integerByteCodec);
+        final LevelBigMap<K,V> dataMap = new LevelBigMap<>(UUID.randomUUID(), dataDir, this.keyCodec, this.keyComparator, this.valueCodec);
+        final LevelBigMap<Integer,K> insertOrderToKeyMap = new LevelBigMap<>(UUID.randomUUID(), i2kDir, integerByteCodec, integerComparator, this.keyCodec);
+        final LevelBigMap<K,Integer> keyToInsertOrderMap = new LevelBigMap<>(UUID.randomUUID(), k2iDir, this.keyCodec, this.keyComparator, integerByteCodec);
 
         final LevelBigLinkedMap<K,V> map = new LevelBigLinkedMap<>(id, dir, false, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
         map.setListener(this.registry);

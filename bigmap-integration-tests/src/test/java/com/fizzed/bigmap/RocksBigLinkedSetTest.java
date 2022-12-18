@@ -24,10 +24,10 @@ public class RocksBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override
     public <V> Set<V> newSet(Class<V> valueType) {
-        return new RocksBigLinkedSetBuilder()
+        return new RocksBigLinkedSetBuilder<V>()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
-            .registerForGarbageMonitoring()
+            .autoCloseObjects()
             .build();
     }
 

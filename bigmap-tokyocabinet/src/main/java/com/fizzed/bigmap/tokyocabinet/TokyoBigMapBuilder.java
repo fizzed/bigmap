@@ -15,67 +15,22 @@
  */
 package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.BigObjectRegistry;
-import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
-import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 
-public class TokyoBigMapBuilder<K,V> extends AbstractBigObjectBuilder {
+public class TokyoBigMapBuilder<K,V> extends AbstractBigMapBuilder<K,V,TokyoBigMapBuilder<K,V>> {
 
-    public TokyoBigMapBuilder<K,V> registerForGarbageMonitoring() {
-        super._registerForGarbageMonitoring();
-        return this;
-    }
-
-    public TokyoBigMapBuilder<K,V> registerForGarbageMonitoring(BigObjectRegistry registry) {
-        super._registerForGarbageMonitoring(registry);
-        return this;
-    }
-
-    public TokyoBigMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
-        super._setScratchDirectory(scratchDirectory);
-        return this;
-    }
-
-    public <K2> TokyoBigMapBuilder<K2,V> setKeyType(Class<K2> keyType) {
-        super._setKeyType(keyType);
-        return (TokyoBigMapBuilder<K2,V>)this;
-    }
-
-    public <K2> TokyoBigMapBuilder<K2,V> setKeyType(Class<K2> keyType, Comparator<K2> keyComparator) {
-        super._setKeyType(keyType, keyComparator);
-        return (TokyoBigMapBuilder<K2,V>)this;
-    }
-
-    public <K2> TokyoBigMapBuilder<K2,V> setKeyType(Class<K2> keyType, ByteCodec<K2> keyCodec) {
-        super._setKeyType(keyType, keyCodec);
-        return (TokyoBigMapBuilder<K2,V>)this;
-    }
-
-    public <K2> TokyoBigMapBuilder<K2,V> setKeyType(Class<K2> keyType, ByteCodec<K2> keyCodec, Comparator<K2> keyComparator) {
-        super._setKeyType(keyType, keyCodec, keyComparator);
-        return (TokyoBigMapBuilder<K2,V>)this;
-    }
-
-    public <V2> TokyoBigMapBuilder<K,V2> setValueType(Class<V2> valueType) {
-        super._setValueType(valueType);
-        return (TokyoBigMapBuilder<K,V2>)this;
-    }
-
-    public <V2> TokyoBigMapBuilder<K,V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
-        super._setValueType(valueType, valueCodec);
-        return (TokyoBigMapBuilder<K,V2>)this;
-    }
-    
     public TokyoBigMap<K,V> build() {
         final UUID id = UUID.randomUUID();
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigmap-tokyo");
+        final Path path = BigMapHelper.resolveScratchPath(this.scratchDirectory, false, id, "bigmap-tokyo");
+        // take the path, append the map name, then the extension tokyo needs
+        final Path file = BigMapHelper.appendFileName(path, this.name, ".tcb");
 
-        final TokyoBigMap<K,V> map = new TokyoBigMap<>(id, dir, "data", (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final TokyoBigMap<K,V> map = new TokyoBigMap<>(id, file, this.keyCodec, this.keyComparator, this.valueCodec);
         map.setListener(this.registry);
         map.open();
         return map;

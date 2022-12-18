@@ -31,14 +31,14 @@ public class BigObjectRegistry implements BigObjectListener {
     private final ConcurrentHashMap<UUID, BigObjectWeakReference> weakReferenceMap;      // weak references to BigObjects
     private final ConcurrentHashMap<UUID,BigObjectCloser> closers;                      // strong references to closers
     private final ReferenceQueue<BigObject> referenceQueue;
-    private final GarbageMonitorThread garbageMonitorThread;
+    private final HeapMonitorThread garbageMonitorThread;
     private final ShutdownHookThread shutdownHookThread;
 
     private BigObjectRegistry() {
         this.weakReferenceMap = new ConcurrentHashMap<>();
         this.closers = new ConcurrentHashMap<>();
         this.referenceQueue = new ReferenceQueue<>();
-        this.garbageMonitorThread = new GarbageMonitorThread();
+        this.garbageMonitorThread = new HeapMonitorThread();
         this.shutdownHookThread = new ShutdownHookThread();
         Runtime.getRuntime().addShutdownHook(this.shutdownHookThread);
 
@@ -73,14 +73,14 @@ public class BigObjectRegistry implements BigObjectListener {
         this.unregister(bigObject);
     }
 
-    public class GarbageMonitorThread extends Thread {
+    public class HeapMonitorThread extends Thread {
 
-        public GarbageMonitorThread() {
-            this.setName("BigObjectGarbageMonitor");
+        public HeapMonitorThread() {
+            this.setName("BigObjectHeapMonitor");
         }
 
         public void run() {
-            log.debug("BigObject garbage monitor running...");
+            log.debug("BigObject heap monitor running...");
             while (true) {
                 try {
                     final Reference<? extends BigObject> _ref = BigObjectRegistry.this.referenceQueue.remove();
@@ -92,17 +92,16 @@ public class BigObjectRegistry implements BigObjectListener {
                         final BigObjectCloser closer = BigObjectRegistry.this.closers.remove(ref.getId());
                         BigObjectRegistry.this.weakReferenceMap.remove(ref.getId());
                         if (closer != null) {
-                            log.info("Will try to close big object {} via automatic garbage collection (persistent={}, directory={})", id, closer.isPersistent(), closer.getDirectory());
+                            log.info("Auto closing big object {} (persistent={}, path={})", id, closer.isPersistent(), closer.getPath());
                             try {
                                 closer.close();
-                                log.info("Successfully closed big object {}", id);
                             } catch (Throwable t) {
                                 log.error("Unable to cleanly close big object " + id, t);
                             }
                         }
                     }
                 } catch (InterruptedException e) {
-                    log.warn("BigObjectGarbageMonitor interrupted!", e);
+                    log.warn("BigObjectHeapMonitor interrupted!", e);
                 }
             }
         }
@@ -122,10 +121,9 @@ public class BigObjectRegistry implements BigObjectListener {
                 final UUID id = entry.getKey();
                 final BigObjectCloser closer = entry.getValue();
 
-                log.info("Will try to close big object {} (persistent={}, directory={})", id, closer.isPersistent(), closer.getDirectory());
+                log.info("Auto closing big object {} (persistent={}, path={})", id, closer.isPersistent(), closer.getPath());
                 try {
                     closer.close();
-                    log.info("Successfully closed big object {}", id);
                 } catch (Throwable t) {
                     log.error("Unable to cleanly close big object " + id, t);
                 }

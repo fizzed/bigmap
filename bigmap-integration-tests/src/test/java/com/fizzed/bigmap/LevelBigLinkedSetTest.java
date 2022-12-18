@@ -24,10 +24,10 @@ public class LevelBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override
     public <V> Set<V> newSet(Class<V> valueType) {
-        return new LevelBigLinkedSetBuilder()
+        return new LevelBigLinkedSetBuilder<V>()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
-            .registerForGarbageMonitoring()
+            .autoCloseObjects()
             .build();
     }
 

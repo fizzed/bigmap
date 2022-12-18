@@ -580,16 +580,12 @@ abstract public class AbstractBigMapTest {
 
         assertThat(map, aMapWithSize(2));
 
-        Path directory = map.getDirectory();
-
-        assertThat(Files.exists(directory), is(true));
-        assertThat(Files.list(directory).count(), greaterThan(0L));
-        Path firstFile = Files.list(directory).findFirst().orElse(null);
+        assertThat(Files.exists(map.getPath()), is(true));
 
         map.close();
 
         // the directory and everything should be cleaned up now
-        assertThat(Files.exists(directory), is(false));
+        assertThat(Files.exists(map.getPath()), is(false));
         assertThat(map.isClosed(), is(true));
 
         // map.close() should be able to succeed again and not throw an exception

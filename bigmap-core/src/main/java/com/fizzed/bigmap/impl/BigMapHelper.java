@@ -100,7 +100,7 @@ public class BigMapHelper {
         return Paths.get(System.getProperty("java.io.tmpdir"));
     }
 
-    static public Path resolveScratchDirectory(Path scratchDirectory, boolean persistent, UUID id, String nonPersistentPrefixName) {
+    static public Path resolveScratchPath(Path scratchDirectory, boolean persistent, UUID id, String nonPersistentPrefixName) {
         Objects.requireNonNull(id, "id was null");
 
         final Path resolvedScratchDir = scratchDirectory != null ? scratchDirectory : Paths.get(".");
@@ -117,6 +117,22 @@ public class BigMapHelper {
         }
 
         return directory;
+    }
+
+    static public Path appendFileName(Path path, String... names) {
+        String fileName = path.getFileName().toString();
+        if (names != null && names.length > 0) {
+            for (int i = 0; i < names.length; i++) {
+                String name = names[i];
+                if (name != null) {
+                    if (fileName != null && !name.startsWith(".") && !name.startsWith("-")) {
+                        fileName += "-";
+                    }
+                    fileName += name;
+                }
+            }
+        }
+        return path.resolveSibling(fileName);
     }
     
 }

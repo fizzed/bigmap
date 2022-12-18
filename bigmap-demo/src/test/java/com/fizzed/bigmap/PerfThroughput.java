@@ -15,24 +15,12 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.kryo.KryoByteCodec;
-import com.fizzed.bigmap.leveldb.LevelBigMapBuilder;
-import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
-import com.fizzed.bigmap.rocksdb.RocksBigMapBuilder;
-import com.fizzed.bigmap.tokyocabinet.TokyoBigMapBuilder;
 import com.fizzed.crux.util.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import oshi.SystemInfo;
-import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class PerfThroughput extends AbstractPerf {
@@ -137,7 +125,7 @@ public class PerfThroughput extends AbstractPerf {
             // can we get a directory we'll use to calculate disk space?
             Path directory = null;
             if (map instanceof BigMap) {
-                directory = ((BigMap)map).getDirectory();
+                directory = ((BigMap)map).getPath();
             } else if (map instanceof OffheapMap) {
                 directory = ((OffheapMap)map).getDirectory();
             }

@@ -24,11 +24,11 @@ public class RocksBigLinkedMapTest extends AbstractBigLinkedMapTest {
 
     @Override
     public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {
-        return new RocksBigLinkedMapBuilder()
+        return new RocksBigLinkedMapBuilder<K,V>()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(keyType)
             .setValueType(valueType)
-            .registerForGarbageMonitoring()
+            .autoCloseObjects()
             .build();
     }
 

@@ -15,7 +15,6 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.rocksdb.RocksBigMapBuilder;
 import com.fizzed.bigmap.tokyocabinet.TokyoBigMapBuilder;
 
 import java.nio.file.Paths;
@@ -25,11 +24,11 @@ public class TokyoBigMapTest extends AbstractBigMapTest {
 
     @Override
     public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {
-        return new TokyoBigMapBuilder()
+        return new TokyoBigMapBuilder<K,V>()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(keyType)
             .setValueType(valueType)
-            .registerForGarbageMonitoring()
+            .autoCloseObjects()
             .build();
     }
 

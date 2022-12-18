@@ -48,25 +48,25 @@ public class AbstractPerf {
 
         switch (type) {
             case "TokyoBigMap":
-                return new TokyoBigMapBuilder()
+                return new TokyoBigMapBuilder<String,Item>()
                     .setScratchDirectory(Paths.get("target"))
                     .setKeyType(String.class, stringByteCodec)
                     .setValueType(Item.class, itemByteCodec)
                     .build();
             case "RocksBigMap":
-                return new RocksBigMapBuilder()
+                return new RocksBigMapBuilder<String,Item>()
                     .setScratchDirectory(Paths.get("target"))
                     .setKeyType(String.class, stringByteCodec)
                     .setValueType(Item.class, itemByteCodec)
                     .build();
             case "RocksBigLinkedMap":
-                return new RocksBigLinkedMapBuilder()
+                return new RocksBigLinkedMapBuilder<String,Item>()
                     .setScratchDirectory(Paths.get("target"))
                     .setKeyType(String.class, stringByteCodec)
                     .setValueType(Item.class, itemByteCodec)
                     .build();
             case "LevelBigMap":
-                return new LevelBigMapBuilder()
+                return new LevelBigMapBuilder<String,Item>()
                     .setScratchDirectory(Paths.get("target"))
                     .setKeyType(String.class, stringByteCodec)
                     .setValueType(Item.class, itemByteCodec)

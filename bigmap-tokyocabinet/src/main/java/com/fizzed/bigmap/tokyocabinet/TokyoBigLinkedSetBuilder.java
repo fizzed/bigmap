@@ -15,66 +15,35 @@
  */
 package com.fizzed.bigmap.tokyocabinet;
 
-import com.fizzed.bigmap.BigObjectRegistry;
 import com.fizzed.bigmap.ByteCodec;
 import com.fizzed.bigmap.ByteCodecs;
 import com.fizzed.bigmap.Comparators;
-import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
+import com.fizzed.bigmap.impl.AbstractBigSetBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.impl.None;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 
-public class TokyoBigLinkedSetBuilder<V> extends AbstractBigObjectBuilder {
+public class TokyoBigLinkedSetBuilder<V> extends AbstractBigSetBuilder<V,TokyoBigLinkedSetBuilder<V>> {
 
-    public TokyoBigLinkedSetBuilder<V> registerForGarbageMonitoring() {
-        super._registerForGarbageMonitoring();
-        return this;
-    }
-
-    public TokyoBigLinkedSetBuilder<V> registerForGarbageMonitoring(BigObjectRegistry registry) {
-        super._registerForGarbageMonitoring(registry);
-        return this;
-    }
-
-    public TokyoBigLinkedSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
-        super._setScratchDirectory(scratchDirectory);
-        return this;
-    }
-    
-    public <V2> TokyoBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType) {
-        super._setKeyType(valueType);
-        return (TokyoBigLinkedSetBuilder<V2>)this;
-    }
-
-    public <V2> TokyoBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType, Comparator<V2> valueComparator) {
-        super._setKeyType(valueType, valueComparator);
-        return (TokyoBigLinkedSetBuilder<V2>)this;
-    }
-
-    public <V2> TokyoBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
-        super._setKeyType(valueType, valueCodec);
-        return (TokyoBigLinkedSetBuilder<V2>)this;
-    }
-
-    public <V2> TokyoBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec, Comparator<V2> valueComparator) {
-        super._setKeyType(valueType, valueCodec, valueComparator);
-        return (TokyoBigLinkedSetBuilder<V2>)this;
-    }
-    
     public TokyoBigLinkedSet<V> build() {
         final UUID id = UUID.randomUUID();
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "biglinkedset-tokyo");
+        final Path path = BigMapHelper.resolveScratchPath(this.scratchDirectory, false, id, "biglinkedset-tokyo");
+        // take the path, append the map name, then the extension tokyo needs
+        final Path dataFile = BigMapHelper.appendFileName(path, this.name, ".tcb");
+        final Path i2kFile = BigMapHelper.appendFileName(path, this.name, "i2k", ".tcb");
+        final Path k2iFile = BigMapHelper.appendFileName(path, this.name, "k2i", ".tcb");
 
         final ByteCodec<Integer> integerByteCodec = ByteCodecs.integerCodec();
         final Comparator<Integer> integerComparator = Comparators.autoComparator(Integer.class);
-        final TokyoBigMap<V,None> dataMap = new TokyoBigMap<>(UUID.randomUUID(), dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
-        final TokyoBigMap<Integer,V> insertOrderToKeyMap = new TokyoBigMap<>(UUID.randomUUID(), dir, "i2k", integerByteCodec, integerComparator, (ByteCodec<V>)this.keyCodec);
-        final TokyoBigMap<V,Integer> keyToInsertOrderMap = new TokyoBigMap<>(UUID.randomUUID(), dir, "k2i", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, integerByteCodec);
+        final TokyoBigMap<V,None> dataMap = new TokyoBigMap<>(UUID.randomUUID(), dataFile, this.valueCodec, this.valueComparator, ByteCodecs.noneCodec());
+        final TokyoBigMap<Integer,V> insertOrderToKeyMap = new TokyoBigMap<>(UUID.randomUUID(), i2kFile, integerByteCodec, integerComparator, this.valueCodec);
+        final TokyoBigMap<V,Integer> keyToInsertOrderMap = new TokyoBigMap<>(UUID.randomUUID(), k2iFile, this.valueCodec, this.valueComparator, integerByteCodec);
 
-        final TokyoBigLinkedMap<V,None> map = new TokyoBigLinkedMap<>(id, dir, false, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
+        final TokyoBigLinkedMap<V,None> map = new TokyoBigLinkedMap<>(id, dataFile, false, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
 
         final TokyoBigLinkedSet<V> set = new TokyoBigLinkedSet<>(map);
         set.setListener(this.registry);

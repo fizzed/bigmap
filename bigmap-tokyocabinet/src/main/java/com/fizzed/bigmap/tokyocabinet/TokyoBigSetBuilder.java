@@ -16,56 +16,23 @@
 package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
+import com.fizzed.bigmap.impl.AbstractBigSetBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.impl.None;
 
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 
-public class TokyoBigSetBuilder<V> extends AbstractBigObjectBuilder {
+public class TokyoBigSetBuilder<V> extends AbstractBigSetBuilder<V,TokyoBigSetBuilder<V>> {
 
-    public TokyoBigSetBuilder<V> registerForGarbageMonitoring() {
-        super._registerForGarbageMonitoring();
-        return this;
-    }
-
-    public TokyoBigSetBuilder<V> registerForGarbageMonitoring(BigObjectRegistry registry) {
-        super._registerForGarbageMonitoring(registry);
-        return this;
-    }
-
-    public TokyoBigSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
-        super._setScratchDirectory(scratchDirectory);
-        return this;
-    }
-    
-    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType) {
-        super._setKeyType(valueType);
-        return (TokyoBigSetBuilder<V2>)this;
-    }
-
-    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType, Comparator<V2> valueComparator) {
-        super._setKeyType(valueType, valueComparator);
-        return (TokyoBigSetBuilder<V2>)this;
-    }
-
-    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
-        super._setKeyType(valueType, valueCodec);
-        return (TokyoBigSetBuilder<V2>)this;
-    }
-
-    public <V2> TokyoBigSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec, Comparator<V2> valueComparator) {
-        super._setKeyType(valueType, valueCodec, valueComparator);
-        return (TokyoBigSetBuilder<V2>)this;
-    }
-    
     public TokyoBigSet<V> build() {
         final UUID id = UUID.randomUUID();
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigset-tokyo");
+        final Path path = BigMapHelper.resolveScratchPath(this.scratchDirectory, false, id, "bigset-tokyo");
+        // take the path, append the map name, then the extension tokyo needs
+        final Path file = BigMapHelper.appendFileName(path, this.name, ".tcb");
 
-        final TokyoBigMap<V,None> map = new TokyoBigMap<>(id, dir, "data", (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
+        final TokyoBigMap<V,None> map = new TokyoBigMap<>(id, file, this.valueCodec, this.valueComparator, ByteCodecs.noneCodec());
 
         final TokyoBigSet<V> set = new TokyoBigSet<>(map);
         set.setListener(this.registry);

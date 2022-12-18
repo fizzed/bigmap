@@ -16,10 +16,11 @@ public class TokyoBigMapTest {
 
     @Test
     public void putGetWithStrings() {
-        final Map<String,String> map = new TokyoBigMapBuilder()
+        final Map<String,String> map = new TokyoBigMapBuilder<String,String>()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
+            .autoCloseObjects()
             .build();
 
         map.put("a", "1");
@@ -47,7 +48,7 @@ public class TokyoBigMapTest {
 
     @Test
     public void close() throws IOException {
-        final BigMap<String,String> map = new TokyoBigMapBuilder()
+        final BigMap<String,String> map = new TokyoBigMapBuilder<String,String>()
             .setScratchDirectory(Paths.get("target"))
             .setKeyType(String.class)
             .setValueType(String.class)
@@ -58,7 +59,7 @@ public class TokyoBigMapTest {
         map.close();
 
         assertThat(map.isClosed(), is(true));
-        assertThat(Files.exists(map.getDirectory()), is(false));
+        assertThat(Files.exists(map.getPath()), is(false));
     }
 
 }
