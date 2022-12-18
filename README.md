@@ -1,5 +1,8 @@
 # BigMap by Fizzed
 
+![Java 8, 11, 17](https://github.com/fizzed/bigmap/actions/workflows/java.yml/badge.svg)
+
+
 Lightweight Map, SortedMap, LinkedMap, Set, and SortedSet implementation(s) with minimal 3rd party dependencies that alleviates memory
 pressure by offloading to disk.  Tested on Java 8, 11, and 17.
 
