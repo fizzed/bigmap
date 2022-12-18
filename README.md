@@ -1,9 +1,9 @@
 # BigMap by Fizzed
 
-[![Java 8](https://github.com/fizzed/bigmap/actions/workflows/java8.yaml/badge.svg?style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java8.yaml)
-[![Java 11](https://github.com/fizzed/bigmap/actions/workflows/java11.yaml/badge.svg?style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java11.yaml)
-[![Java 17](https://github.com/fizzed/bigmap/actions/workflows/java17.yaml/badge.svg?style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java17.yaml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.fizzed/bigmap/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.fizzed/bigmap)
+[![Java 8](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java8.yaml?branch=master&label=Java%208&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java8.yaml)
+[![Java 11](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java11.yaml?branch=master&label=Java%2011&style=flat-square))](https://github.com/fizzed/bigmap/actions/workflows/java11.yaml)
+[![Java 17](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java17.yaml?branch=master&label=Java%2017&style=flat-square))](https://github.com/fizzed/bigmap/actions/workflows/java17.yaml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.fizzed/bigmap?style=flat-square)](https://mvnrepository.com/artifact/com.fizzed/bigmap)
 
 Lightweight Map, SortedMap, LinkedMap, Set, and SortedSet implementation(s) with minimal 3rd party dependencies that alleviates memory
 pressure by offloading to disk.  Tested on Java 8, 11, and 17.
