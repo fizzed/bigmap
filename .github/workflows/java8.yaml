@@ -1,4 +1,4 @@
-name: Java 8 CI
+name: Java 8
 
 on: [push]
 
