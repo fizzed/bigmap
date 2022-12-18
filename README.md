@@ -34,7 +34,7 @@ In your maven pom:
 ```java
 import com.fizzed.bigmap.leveldb.LevelBigMapBuilder;
 ...
-Map<Long,String> map = new LevelBigMapBuilder()
+Map<Long,String> map = new LevelBigMapBuilder<Long,String>()
    .setScratchDirectory(Paths.get("target"))
    .setKeyType(Long.class)
    .setValueType(String.class)
@@ -44,7 +44,7 @@ Map<Long,String> map = new LevelBigMapBuilder()
 ```java
 import com.fizzed.bigmap.leveldb.LevelBigLinkedMapBuilder;
 ...
-Map<Long,String> map = new LevelBigLinkedMapBuilder()
+Map<Long,String> map = new LevelBigLinkedMapBuilder<Long,String>()
    .setScratchDirectory(Paths.get("target"))
    .setKeyType(Long.class)
    .setValueType(String.class)
@@ -55,7 +55,7 @@ Map<Long,String> map = new LevelBigLinkedMapBuilder()
 ```java
 import com.fizzed.bigmap.leveldb.LevelBigSetBuilder;
 ...
-Set<Long> set = new LevelBigSetBuilder()
+Set<Long> set = new LevelBigSetBuilder<Long>()
    .setScratchDirectory(Paths.get("target"))
    .setValueType(Long.class)
    .build();
