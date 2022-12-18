@@ -15,20 +15,34 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.leveldb.LevelBigSetBuilder;
+import java.io.Serializable;
 
-import java.nio.file.Paths;
-import java.util.Set;
+public class TestIdentifier implements Serializable {
 
-public class LevelBigSetTest extends AbstractBigSetTest {
+    private String domain;
+    private String name;
 
-    @Override
-    public <V> Set<V> newSet(Class<V> valueType) {
-        return new LevelBigSetBuilder<V>()
-            .setScratchDirectory(Paths.get("target"))
-            .setValueType(valueType)
-            .autoCloseObjects()
-            .build();
+    public TestIdentifier(String domain, String name) {
+        this.domain = domain;
+        this.name = name;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public TestIdentifier setDomain(String domain) {
+        this.domain = domain;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public TestIdentifier setName(String name) {
+        this.name = name;
+        return this;
     }
 
 }

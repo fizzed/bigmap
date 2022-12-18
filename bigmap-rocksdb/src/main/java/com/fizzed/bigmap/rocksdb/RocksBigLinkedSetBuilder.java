@@ -15,11 +15,10 @@
  */
 package com.fizzed.bigmap.rocksdb;
 
-import com.fizzed.bigmap.BigObjectRegistry;
 import com.fizzed.bigmap.ByteCodec;
 import com.fizzed.bigmap.ByteCodecs;
 import com.fizzed.bigmap.Comparators;
-import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
+import com.fizzed.bigmap.impl.AbstractBigSetBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 import com.fizzed.bigmap.impl.None;
 
@@ -27,46 +26,11 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.UUID;
 
-public class RocksBigLinkedSetBuilder<V> extends AbstractBigObjectBuilder {
+public class RocksBigLinkedSetBuilder<V> extends AbstractBigSetBuilder<V,RocksBigLinkedSetBuilder<V>> {
 
-    public RocksBigLinkedSetBuilder<V> registerForGarbageMonitoring() {
-        super._registerForGarbageMonitoring();
-        return this;
-    }
-
-    public RocksBigLinkedSetBuilder<V> registerForGarbageMonitoring(BigObjectRegistry registry) {
-        super._registerForGarbageMonitoring(registry);
-        return this;
-    }
-
-    public RocksBigLinkedSetBuilder<V> setScratchDirectory(Path scratchDirectory) {
-        super._setScratchDirectory(scratchDirectory);
-        return this;
-    }
-    
-    public <V2> RocksBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType) {
-        super._setKeyType(valueType);
-        return (RocksBigLinkedSetBuilder<V2>)this;
-    }
-
-    public <V2> RocksBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType, Comparator<V2> valueComparator) {
-        super._setKeyType(valueType, valueComparator);
-        return (RocksBigLinkedSetBuilder<V2>)this;
-    }
-
-    public <V2> RocksBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
-        super._setKeyType(valueType, valueCodec);
-        return (RocksBigLinkedSetBuilder<V2>)this;
-    }
-
-    public <V2> RocksBigLinkedSetBuilder<V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec, Comparator<V2> valueComparator) {
-        super._setKeyType(valueType, valueCodec, valueComparator);
-        return (RocksBigLinkedSetBuilder<V2>)this;
-    }
-    
     public RocksBigLinkedSet<V> build() {
         final UUID id = UUID.randomUUID();
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "biglinkedset-rocks");
+        final Path dir = BigMapHelper.resolveScratchPath(this.scratchDirectory, false, id, "biglinkedset-rocks");
 
         // we need 3 subdir paths
         final Path dataDir = dir.resolve("data");
@@ -75,9 +39,9 @@ public class RocksBigLinkedSetBuilder<V> extends AbstractBigObjectBuilder {
 
         final ByteCodec<Integer> integerByteCodec = ByteCodecs.integerCodec();
         final Comparator<Integer> integerComparator = Comparators.autoComparator(Integer.class);
-        final RocksBigMap<V,None> dataMap = new RocksBigMap<>(UUID.randomUUID(), dataDir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, ByteCodecs.noneCodec());
-        final RocksBigMap<Integer,V> insertOrderToKeyMap = new RocksBigMap<>(UUID.randomUUID(), i2kDir, integerByteCodec, integerComparator, (ByteCodec<V>)this.keyCodec);
-        final RocksBigMap<V,Integer> keyToInsertOrderMap = new RocksBigMap<>(UUID.randomUUID(), k2iDir, (ByteCodec<V>)this.keyCodec, (Comparator<V>)this.keyComparator, integerByteCodec);
+        final RocksBigMap<V,None> dataMap = new RocksBigMap<>(UUID.randomUUID(), dataDir, this.valueCodec, this.valueComparator, ByteCodecs.noneCodec());
+        final RocksBigMap<Integer,V> insertOrderToKeyMap = new RocksBigMap<>(UUID.randomUUID(), i2kDir, integerByteCodec, integerComparator, this.valueCodec);
+        final RocksBigMap<V,Integer> keyToInsertOrderMap = new RocksBigMap<>(UUID.randomUUID(), k2iDir, this.valueCodec, this.valueComparator, integerByteCodec);
 
         final RocksBigLinkedMap<V,None> map = new RocksBigLinkedMap<>(id, dir, false, dataMap, insertOrderToKeyMap, keyToInsertOrderMap);
 

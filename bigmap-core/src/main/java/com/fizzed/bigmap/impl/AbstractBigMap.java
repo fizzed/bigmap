@@ -17,7 +17,6 @@ package com.fizzed.bigmap.impl;
 
 import com.fizzed.bigmap.*;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -29,7 +28,7 @@ import java.util.UUID;
 abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
 
     protected final UUID id;
-    protected final Path directory;
+    protected final Path path;
     protected final boolean persistent;
     protected final ByteCodec<K> keyCodec;
     protected final Comparator<K> keyComparator;
@@ -42,19 +41,19 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
 
     public AbstractBigMap(
             UUID id,
-            Path directory,
+            Path path,
             boolean persistent,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
         Objects.requireNonNull(id, "id was null");
-        Objects.requireNonNull(directory, "directory was null");
+        Objects.requireNonNull(path, "path was null");
         Objects.requireNonNull(keyCodec, "keyCodec was null");
-        Objects.requireNonNull(keyComparator, "keyComparator was null");
+        //Objects.requireNonNull(keyComparator, "keyComparator was null");
 
         this.id = id;
-        this.directory = directory;
+        this.path = path;
         this.persistent = persistent;
         this.keyCodec = keyCodec;
         this.keyComparator = keyComparator;
@@ -75,8 +74,8 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
     public UUID getId() { return this.id; }
 
     @Override
-    public Path getDirectory() {
-        return this.directory;
+    public Path getPath() {
+        return this.path;
     }
 
     @Override
@@ -128,10 +127,6 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         }
 
         try {
-            if (this.directory != null) {
-                Files.createDirectories(this.directory.toAbsolutePath());
-            }
-
             this._open();
 
             this.size = 0;

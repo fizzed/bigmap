@@ -15,66 +15,19 @@
  */
 package com.fizzed.bigmap.rocksdb;
 
-import com.fizzed.bigmap.*;
-import com.fizzed.bigmap.impl.AbstractBigObjectBuilder;
+import com.fizzed.bigmap.impl.AbstractBigMapBuilder;
 import com.fizzed.bigmap.impl.BigMapHelper;
 
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.UUID;
 
-public class RocksBigMapBuilder<K,V> extends AbstractBigObjectBuilder {
+public class RocksBigMapBuilder<K,V> extends AbstractBigMapBuilder<K,V,RocksBigMapBuilder<K,V>> {
 
-    public RocksBigMapBuilder<K,V> registerForGarbageMonitoring() {
-        super._registerForGarbageMonitoring();
-        return this;
-    }
-
-    public RocksBigMapBuilder<K,V> registerForGarbageMonitoring(BigObjectRegistry registry) {
-        super._registerForGarbageMonitoring(registry);
-        return this;
-    }
-
-    public RocksBigMapBuilder<K,V> setScratchDirectory(Path scratchDirectory) {
-        super._setScratchDirectory(scratchDirectory);
-        return this;
-    }
-
-    public <K2> RocksBigMapBuilder<K2,V> setKeyType(Class<K2> keyType) {
-        super._setKeyType(keyType);
-        return (RocksBigMapBuilder<K2,V>)this;
-    }
-
-    public <K2> RocksBigMapBuilder<K2,V> setKeyType(Class<K2> keyType, Comparator<K2> keyComparator) {
-        super._setKeyType(keyType, keyComparator);
-        return (RocksBigMapBuilder<K2,V>)this;
-    }
-
-    public <K2> RocksBigMapBuilder<K2,V> setKeyType(Class<K2> keyType, ByteCodec<K2> keyCodec) {
-        super._setKeyType(keyType, keyCodec);
-        return (RocksBigMapBuilder<K2,V>)this;
-    }
-
-    public <K2> RocksBigMapBuilder<K2,V> setKeyType(Class<K2> keyType, ByteCodec<K2> keyCodec, Comparator<K2> keyComparator) {
-        super._setKeyType(keyType, keyCodec, keyComparator);
-        return (RocksBigMapBuilder<K2,V>)this;
-    }
-
-    public <V2> RocksBigMapBuilder<K,V2> setValueType(Class<V2> valueType) {
-        super._setValueType(valueType);
-        return (RocksBigMapBuilder<K,V2>)this;
-    }
-
-    public <V2> RocksBigMapBuilder<K,V2> setValueType(Class<V2> valueType, ByteCodec<V2> valueCodec) {
-        super._setValueType(valueType, valueCodec);
-        return (RocksBigMapBuilder<K,V2>)this;
-    }
-    
     public RocksBigMap<K,V> build() {
         final UUID id = UUID.randomUUID();
-        final Path dir = BigMapHelper.resolveScratchDirectory(this.scratchDirectory, false, id, "bigmap-rocks");
+        final Path dir = BigMapHelper.resolveScratchPath(this.scratchDirectory, false, id, "bigmap-rocks");
 
-        final RocksBigMap<K,V> map = new RocksBigMap<>(id, dir, (ByteCodec<K>)this.keyCodec, (Comparator<K>)this.keyComparator, (ByteCodec<V>)this.valueCodec);
+        final RocksBigMap<K,V> map = new RocksBigMap<>(id, dir, this.keyCodec, this.keyComparator, this.valueCodec);
         map.setListener(this.registry);
         map.open();
         return map;

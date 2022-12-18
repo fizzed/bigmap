@@ -30,7 +30,7 @@ abstract public class AbstractBigObjectCloser implements BigObjectCloser {
     }
 
     @Override
-    public Path getDirectory() {
+    public Path getPath() {
         return directory;
     }
 

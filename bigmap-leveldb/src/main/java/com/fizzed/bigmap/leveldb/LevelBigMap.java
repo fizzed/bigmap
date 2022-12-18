@@ -24,6 +24,7 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -56,13 +57,16 @@ public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
         //this.options.cacheSize(this.cacheSize);
 
         try {
+            if (this.path != null) {
+                Files.createDirectories(this.path);
+            }
             // build database, initialize stats we track
-            this.db = factory.open(this.directory.toFile(), this.options);
+            this.db = factory.open(this.path.toFile(), this.options);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        this.closer = new LevelBigObjectCloser(this.id, this.persistent, this.directory, this.db);
+        this.closer = new LevelBigObjectCloser(this.id, this.persistent, this.path, this.db);
     }
 
     @Override

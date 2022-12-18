@@ -16,69 +16,39 @@
 package com.fizzed.bigmap.impl;
 
 import com.fizzed.bigmap.BigObjectRegistry;
-import com.fizzed.bigmap.ByteCodec;
 
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.Objects;
 
 import static com.fizzed.bigmap.ByteCodecs.resolveCodec;
-import static com.fizzed.bigmap.Comparators.autoComparator;
 
-public class AbstractBigObjectBuilder {
+abstract public class AbstractBigObjectBuilder<T> {
 
     protected Path scratchDirectory;
-    protected Class<?> keyClass;
-    protected Class<?> valueClass;
-    protected ByteCodec<?> keyCodec;
-    protected Comparator<?> keyComparator;
-    protected ByteCodec<?> valueCodec;
+    protected String name;
     protected BigObjectRegistry registry;
 
     public AbstractBigObjectBuilder() {
-        this.scratchDirectory = BigMapHelper.resolveTempDirectory();
+        this.scratchDirectory = BigMapHelper.resolveTempDirectory().resolve("bigobjects");
     }
 
-    protected void _registerForGarbageMonitoring() {
-        this._registerForGarbageMonitoring(BigObjectRegistry.getDefault());
+    public T autoCloseObjects() {
+        this.autoCloseObjects(BigObjectRegistry.getDefault());
+        return (T)this;
     }
 
-    protected void _registerForGarbageMonitoring(BigObjectRegistry registry) {
+    public T autoCloseObjects(BigObjectRegistry registry) {
         this.registry = registry;
+        return (T)this;
     }
 
-    protected void _setScratchDirectory(Path scratchDirectory) {
+    public T setScratchDirectory(Path scratchDirectory) {
         this.scratchDirectory = scratchDirectory;
+        return (T)this;
     }
 
-    protected void _setKeyType(Class<?> keyType) {
-        this._setKeyType(keyType, resolveCodec(keyType));
-    }
-
-    protected void _setKeyType(Class<?> keyType, Comparator<?> keyComparator) {
-        this._setKeyType(keyType, resolveCodec(keyType), keyComparator);
-    }
-
-    protected void _setKeyType(Class<?> keyType, ByteCodec<?> keyCodec) {
-        this._setKeyType(keyType, keyCodec, autoComparator(keyType));
-    }
-
-    protected void _setKeyType(Class<?> keyType, ByteCodec<?> keyCodec, Comparator<?> keyComparator) {
-        Objects.requireNonNull(keyType, "keyType was null");
-        Objects.requireNonNull(keyCodec, "keyCodec was null");
-        Objects.requireNonNull(keyComparator, "keyComparator was null");
-        this.keyClass = keyType;
-        this.keyCodec = keyCodec;
-        this.keyComparator = keyComparator;
-    }
-
-    protected void _setValueType(Class<?> valueType) {
-        this._setValueType(valueType, resolveCodec(valueType));
-    }
-
-    protected void _setValueType(Class<?> valueType, ByteCodec<?> valueCodec) {
-        this.valueClass = valueType;
-        this.valueCodec = valueCodec;
+    public T setName(String name) {
+        this.name = name;
+        return (T)this;
     }
 
 }

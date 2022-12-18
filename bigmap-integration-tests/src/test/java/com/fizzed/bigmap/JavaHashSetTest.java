@@ -16,6 +16,8 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.rocksdb.RocksBigSetBuilder;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -27,5 +29,8 @@ public class JavaHashSetTest extends AbstractBigSetTest {
     public <V> Set<V> newSet(Class<V> valueType) {
         return new HashSet<>();
     }
+
+    @Test @Ignore
+    public void addAndContainsWithComplexObject() { }
 
 }

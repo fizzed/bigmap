@@ -15,21 +15,19 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
 import com.fizzed.bigmap.rocksdb.RocksBigSetBuilder;
 
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Set;
 
 public class RocksBigSetTest extends AbstractBigSetTest {
 
     @Override
     public <V> Set<V> newSet(Class<V> valueType) {
-        return new RocksBigSetBuilder()
+        return new RocksBigSetBuilder<V>()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
-            .registerForGarbageMonitoring()
+            .autoCloseObjects()
             .build();
     }
 

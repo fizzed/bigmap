@@ -49,8 +49,8 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
     }
 
     @Override
-    public Path getDirectory() {
-        return this.map.getDirectory();
+    public Path getPath() {
+        return this.map.getPath();
     }
 
     @Override

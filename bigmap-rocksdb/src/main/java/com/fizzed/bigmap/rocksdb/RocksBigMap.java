@@ -24,6 +24,7 @@ import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -55,13 +56,16 @@ public class RocksBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
         this.options.setDisableAutoCompactions(true);
 
         try {
+            if (this.path != null) {
+                Files.createDirectories(this.path);
+            }
             // build database, initialize stats we track
-            this.db = RocksDB.open(this.options, this.directory.toAbsolutePath().toString());
+            this.db = RocksDB.open(this.options, this.path.toAbsolutePath().toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        this.closer = new RocksBigObjectCloser(this.id, this.persistent, this.directory, this.db);
+        this.closer = new RocksBigObjectCloser(this.id, this.persistent, this.path, this.db);
     }
 
     @Override

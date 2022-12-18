@@ -24,10 +24,10 @@ public class TokyoBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override
     public <V> Set<V> newSet(Class<V> valueType) {
-        return new TokyoBigLinkedSetBuilder()
+        return new TokyoBigLinkedSetBuilder<V>()
             .setScratchDirectory(Paths.get("target"))
             .setValueType(valueType)
-            .registerForGarbageMonitoring()
+            .autoCloseObjects()
             .build();
     }
 

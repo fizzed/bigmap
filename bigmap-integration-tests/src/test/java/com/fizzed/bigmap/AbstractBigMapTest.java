@@ -112,6 +112,22 @@ abstract public class AbstractBigMapTest {
     }
 
     @Test
+    public void putAndGetWithComplexObject() {
+        final Map<TestIdentifier,String> map = this.newMap(TestIdentifier.class, String.class);
+
+        map.put(new TestIdentifier("a", "b"), "1");
+        map.put(new TestIdentifier("c", "d"), "2");
+
+        assertThat(map, aMapWithSize(2));
+        assertThat(map.get(new TestIdentifier("a", "b")), is("1"));
+
+        map.remove(new TestIdentifier("a", "b"));
+
+        assertThat(map.get(new TestIdentifier("a", "b")), is(nullValue()));
+        assertThat(map.size(), is(1));
+    }
+
+    @Test
     public void containsKey() throws IOException {
         final Map<String,String> map = this.newMap(String.class, String.class);
 
@@ -564,16 +580,12 @@ abstract public class AbstractBigMapTest {
 
         assertThat(map, aMapWithSize(2));
 
-        Path directory = map.getDirectory();
-
-        assertThat(Files.exists(directory), is(true));
-        assertThat(Files.list(directory).count(), greaterThan(0L));
-        Path firstFile = Files.list(directory).findFirst().orElse(null);
+        assertThat(Files.exists(map.getPath()), is(true));
 
         map.close();
 
         // the directory and everything should be cleaned up now
-        assertThat(Files.exists(directory), is(false));
+        assertThat(Files.exists(map.getPath()), is(false));
         assertThat(map.isClosed(), is(true));
 
         // map.close() should be able to succeed again and not throw an exception

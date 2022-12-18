@@ -41,4 +41,7 @@ public class JavaTreeMapTest extends AbstractBigMapTest {
         super.containsKeyWithNull();
     }
 
+    @Test @Ignore
+    public void putAndGetWithComplexObject() {}
+
 }

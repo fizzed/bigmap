@@ -15,10 +15,6 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.impl.BigMapEntrySet;
-import com.fizzed.bigmap.impl.BigMapKeySet;
-import com.fizzed.bigmap.impl.BigMapValueCollection;
-
 import java.io.Closeable;
 import java.nio.file.Path;
 import java.util.*;
@@ -27,7 +23,7 @@ public interface BigObject extends Closeable {
 
     UUID getId();
 
-    Path getDirectory();
+    Path getPath();
 
     void setListener(BigObjectListener listener);
 

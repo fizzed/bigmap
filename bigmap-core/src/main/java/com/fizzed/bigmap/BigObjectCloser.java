@@ -25,7 +25,7 @@ public interface BigObjectCloser extends Closeable {
 
     boolean isPersistent();
 
-    Path getDirectory();
+    Path getPath();
 
     boolean isClosed();
 

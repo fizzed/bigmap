@@ -41,4 +41,7 @@ public class JavaLinkedHashMapTest extends AbstractBigLinkedMapTest {
         super.putNullKey();
     }
 
+    @Test @Ignore
+    public void putAndGetWithComplexObject() {}
+
 }

@@ -41,4 +41,7 @@ public class JavaHashMapTest extends AbstractBigMapTest {
         super.putNullKey();
     }
 
+    @Test @Ignore
+    public void putAndGetWithComplexObject() {}
+
 }

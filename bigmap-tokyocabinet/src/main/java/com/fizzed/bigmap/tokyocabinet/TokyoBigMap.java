@@ -32,21 +32,17 @@ import java.util.UUID;
 public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBigMap<K,V>, BigSortedMap<K,V> {
 
     protected BDB db;
-    protected final String name;
 
     protected TokyoBigMap(
             UUID id,
-            Path directory,
-            String name,
+            Path file,
             ByteCodec<K> keyCodec,
             Comparator<K> keyComparator,
             ByteCodec<V> valueCodec) {
         
-        super(id, directory, false, keyCodec, keyComparator, valueCodec);
+        super(id, file, false, keyCodec, keyComparator, valueCodec);
         
         Objects.requireNonNull(valueCodec, "valueCodec was null");
-
-        this.name = name;
     }
 
     public BDB getDb() {
@@ -57,16 +53,16 @@ public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
     protected void _open() {
         this.db = new BDB();
         try {
-            Files.createDirectories(this.directory);
+            Files.createDirectories(this.path.getParent());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         // build database, initialize stats we track
-        if (!this.db.open(this.directory.resolve(this.name + ".tcb").toAbsolutePath().toString(), HDB.OWRITER | HDB.OCREAT)){
+        if (!this.db.open(this.path.toAbsolutePath().toString(), HDB.OWRITER | HDB.OCREAT)){
             int ecode = db.ecode();
             throw new RuntimeException("TokyoCabinet open error: " + this.db.errmsg(ecode));
         }
-        this.closer = new TokyoBigObjectCloser(this.id, this.persistent, this.directory, this.db);
+        this.closer = new TokyoBigObjectCloser(this.id, this.persistent, this.path, this.db);
     }
 
     @Override

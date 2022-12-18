@@ -66,7 +66,7 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
-    public Path getDirectory() {
+    public Path getPath() {
         return this.directory;
     }
 
