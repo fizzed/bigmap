@@ -3,7 +3,7 @@
 
     <groupId>com.fizzed</groupId>
     <artifactId>bigmap</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <parent>
@@ -20,7 +20,7 @@
     <scm>
         <url>https://github.com/fizzed/bigmap</url>
         <connection>scm:git:git@github.com:fizzed/bigmap.git</connection>
-      <tag>v1.0.6</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <modules>
