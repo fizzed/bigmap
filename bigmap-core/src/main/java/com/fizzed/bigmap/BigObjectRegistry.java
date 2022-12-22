@@ -92,7 +92,7 @@ public class BigObjectRegistry implements BigObjectListener {
                         final BigObjectCloser closer = BigObjectRegistry.this.closers.remove(ref.getId());
                         BigObjectRegistry.this.weakReferenceMap.remove(ref.getId());
                         if (closer != null) {
-                            log.info("Auto closing big object {} (persistent={}, path={})", id, closer.isPersistent(), closer.getPath());
+                            log.info("Auto closing big object {} (path={})", id, closer.getPath());
                             try {
                                 closer.close();
                             } catch (Throwable t) {
@@ -121,7 +121,7 @@ public class BigObjectRegistry implements BigObjectListener {
                 final UUID id = entry.getKey();
                 final BigObjectCloser closer = entry.getValue();
 
-                log.info("Auto closing big object {} (persistent={}, path={})", id, closer.isPersistent(), closer.getPath());
+                log.info("Auto closing big object {} (path={})", id, closer.getPath());
                 try {
                     closer.close();
                 } catch (Throwable t) {

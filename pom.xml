@@ -14,7 +14,7 @@
     
     <properties>
         <java.version>1.8</java.version>
-        <tokyocabinet.version>0.0.9</tokyocabinet.version>
+        <tokyocabinet.version>0.0.10</tokyocabinet.version>
     </properties>
 
     <scm>
