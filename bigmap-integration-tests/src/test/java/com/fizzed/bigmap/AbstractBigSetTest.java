@@ -219,7 +219,7 @@ abstract public class AbstractBigSetTest {
 
     @Test
     public void iteratingMany() throws IOException {
-        for (int j = 0; j < 500; j++) {
+        for (int j = 0; j < 10; j++) {
             final Set<String> set = this.newSet(String.class);
             for (int i = 0; i < 5000; i++) {
                 UUID uuid = UUID.randomUUID();
