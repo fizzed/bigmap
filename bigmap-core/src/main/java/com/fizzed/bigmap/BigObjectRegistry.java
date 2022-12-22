@@ -79,6 +79,7 @@ public class BigObjectRegistry implements BigObjectListener {
 
         public HeapMonitorThread() {
             this.setName("BigObjectHeapMonitor");
+            this.setDaemon(true);
         }
 
         public void run() {
@@ -114,6 +115,7 @@ public class BigObjectRegistry implements BigObjectListener {
 
         public ShutdownHookThread() {
             this.setName("BigObjectShutdownHook");
+            this.setDaemon(true);
         }
 
         public void run() {
