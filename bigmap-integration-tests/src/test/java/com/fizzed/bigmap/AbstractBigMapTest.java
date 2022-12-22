@@ -15,6 +15,7 @@
  */
 package com.fizzed.bigmap;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -380,6 +381,22 @@ abstract public class AbstractBigMapTest {
         entrySet = map.entrySet();
 
         assertThat(entrySet, hasSize(0));
+    }
+
+    @Test
+    public void iteratingLarger() {
+        final Map<Integer,String> map = this.newMap(Integer.class, String.class);
+
+        for (int i = 0; i < 50000; i++) {
+            map.put(i, "hello #" + i);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            for (String s : map.values()) {
+                assertThat(s.length(), greaterThan(1));
+                MatcherAssert.assertThat(s, is(not(nullValue())));
+            }
+        }
     }
 
     //

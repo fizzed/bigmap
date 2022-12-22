@@ -15,17 +15,18 @@
  */
 package com.fizzed.bigmap;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
-import static com.fizzed.bigmap.impl.BigMapHelper.*;
+import static com.fizzed.bigmap.impl.BigMapHelper.toIteratedList;
+import static com.fizzed.bigmap.impl.BigMapHelper.toValueList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
 
@@ -198,6 +199,41 @@ abstract public class AbstractBigSetTest {
         it = set.iterator();
 
         assertThat(it.hasNext(), is(false));
+    }
+
+    @Test
+    public void iteratingLarger() {
+        final Set<String> set = this.newSet(String.class);
+
+        for (int i = 0; i < 50000; i++) {
+            set.add("hello #" + i);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            for (String s : set) {
+                Assert.assertThat(s.length(), greaterThan(1));
+                assertThat(s, is(not(nullValue())));
+            }
+        }
+    }
+
+    @Test
+    public void iteratingMany() throws IOException {
+        for (int j = 0; j < 500; j++) {
+            final Set<String> set = this.newSet(String.class);
+            for (int i = 0; i < 5000; i++) {
+                UUID uuid = UUID.randomUUID();
+                set.add(uuid.toString());
+            }
+            for (String blah : set) {
+                if (blah == null) {
+                    fail("Value was null");
+                } else {
+                    System.out.println("blah: " + blah);
+                    //log.debug("asdf: {}", blah);
+                }
+            }
+        }
     }
 
     @Test
