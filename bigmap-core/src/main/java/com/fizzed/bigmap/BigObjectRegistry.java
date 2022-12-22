@@ -4,8 +4,10 @@ import com.fizzed.bigmap.impl.BigObjectWeakReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -92,7 +94,7 @@ public class BigObjectRegistry implements BigObjectListener {
                         final BigObjectCloser closer = BigObjectRegistry.this.closers.remove(ref.getId());
                         BigObjectRegistry.this.weakReferenceMap.remove(ref.getId());
                         if (closer != null) {
-                            log.info("Auto closing big object {} (path={})", id, closer.getPath());
+                            logClosing(id, closer);
                             try {
                                 closer.close();
                             } catch (Throwable t) {
@@ -121,7 +123,7 @@ public class BigObjectRegistry implements BigObjectListener {
                 final UUID id = entry.getKey();
                 final BigObjectCloser closer = entry.getValue();
 
-                log.info("Auto closing big object {} (path={})", id, closer.getPath());
+                logClosing(id, closer);
                 try {
                     closer.close();
                 } catch (Throwable t) {
@@ -130,6 +132,20 @@ public class BigObjectRegistry implements BigObjectListener {
             }
         }
 
+    }
+
+    static private final void logClosing(UUID id, BigObjectCloser closer) {
+        // can we detect the file size?
+        long byteSize = -1;
+        if (Files.isRegularFile(closer.getPath())) {
+            try {
+                byteSize = Files.size(closer.getPath());
+            } catch (IOException e) {
+                // silently ignore
+            }
+        }
+
+        log.info("Auto closing BigObject {} (path={}, bytes={})", id, closer.getPath(), byteSize);
     }
 
 }
