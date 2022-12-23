@@ -78,7 +78,7 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
     }
 
     @Override
-    public void close() throws IOException {
+    final synchronized public void close() throws IOException {
         this.map.close();
 
         if (this.listener != null) {
@@ -118,7 +118,22 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
 
     @Override
     public Iterator<V> iterator() {
-        return this.map.keySet().iterator();
+//        return this.map.keySet().iterator();
+        final Iterator<V> it = this.map.keySet().iterator();
+        // NOTE: for auto closing of objects, its critical we maintain an iterator to have a reference back to the
+        // original set, so that the set doesn't qualify for garbage collection in the case where the set is actually
+        // no longer referenced, but someone is still iterating over its iterator!
+        return new Iterator<V>() {
+            @Override
+            public boolean hasNext() {
+                return it.hasNext();
+            }
+
+            @Override
+            public V next() {
+                return it.next();
+            }
+        };
     }
 
     @Override

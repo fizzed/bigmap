@@ -155,22 +155,13 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
 //        }
 //    }
 
-
-    /*@Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        if (this.listener == null && !this.isClosed()) {
-            System.out.println("UH OH - BigMap @ " + this.directory + " was not closed and is being garbage collected!");
-        }
-    }*/
-
     @Override
     final public BigObjectCloser getCloser() {
         return this.closer;
     }
 
     @Override
-    final public void close() throws IOException {
+    final synchronized public void close() throws IOException {
         if (this.closer != null) {
             this.closer.close();
             this.closer = null;

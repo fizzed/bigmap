@@ -103,6 +103,8 @@ public interface ByteArrayBigMap<K,V> extends BigMap<K,V> {
     default Iterator<Entry<K,V>> forwardIterator() {
         final Iterator<KeyValueBytes> iterator = this._forwardIterator();
 
+        // NOTE: if someone is auto closing objects and only have an iterator remaining around, its critical we return
+        // an inner class, which will retain a reference to the enclosing map, so the map doesn't become GC'ed
         return new Iterator<Entry<K, V>>() {
             @Override
             public boolean hasNext() {

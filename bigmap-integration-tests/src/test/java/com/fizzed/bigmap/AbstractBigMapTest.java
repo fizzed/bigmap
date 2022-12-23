@@ -384,17 +384,29 @@ abstract public class AbstractBigMapTest {
     }
 
     @Test
-    public void iteratingLarger() {
-        final Map<Integer,String> map = this.newMap(Integer.class, String.class);
+    public void valuesMaintainsOriginalSetFromBeingGarbageCollected() throws IOException {
+        for (int j = 0; j < 5; j++) {
+            Map<Integer,UUID> map = this.newMap(Integer.class,UUID.class);
 
-        for (int i = 0; i < 50000; i++) {
-            map.put(i, "hello #" + i);
-        }
+            for (int i = 0; i < 5000; i++) {
+                UUID uuid = UUID.randomUUID();
+                map.put(i, uuid);
+            }
 
-        for (int i = 0; i < 5; i++) {
-            for (String s : map.values()) {
-                assertThat(s.length(), greaterThan(1));
-                MatcherAssert.assertThat(s, is(not(nullValue())));
+            // create an iterator
+            Collection<UUID> values = map.values();
+
+            // de-reference map
+            map = null;
+            System.gc();
+            System.gc();    // try to force GC
+
+            int count = 0;
+            for (UUID value : values) {
+                if (value == null) {
+                    fail("value was null in map #" + j + " on iteration " + count);
+                }
+                count++;
             }
         }
     }

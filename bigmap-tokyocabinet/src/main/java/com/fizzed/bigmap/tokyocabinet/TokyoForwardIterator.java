@@ -34,7 +34,7 @@ public class TokyoForwardIterator implements Iterator<KeyValueBytes> {
         }
 
         // we are already on the item we want
-        final KeyValueBytes kvb = new KeyValueBytes( this.cursor.key(),  this.cursor.val());
+        final KeyValueBytes kvb = new KeyValueBytes(this.cursor.key(),  this.cursor.val());
 
         // now we'll iterate to the next
         this.hasNext = this.cursor.next();

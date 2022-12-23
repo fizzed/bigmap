@@ -30,7 +30,7 @@ public class BigObjectRegistry implements BigObjectListener {
         return defaultRegistry;
     }
 
-    private final ConcurrentHashMap<UUID, BigObjectWeakReference> weakReferenceMap;      // weak references to BigObjects
+    private final ConcurrentHashMap<UUID,BigObjectWeakReference> weakReferenceMap;      // weak references to BigObjects
     private final ConcurrentHashMap<UUID,BigObjectCloser> closers;                      // strong references to closers
     private final ReferenceQueue<BigObject> referenceQueue;
     private final HeapMonitorThread garbageMonitorThread;

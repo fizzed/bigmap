@@ -40,7 +40,12 @@ abstract public class AbstractBigObjectCloser implements BigObjectCloser {
     }
 
     @Override
-    public void close() throws IOException {
+    synchronized public void close() throws IOException {
+        // do nothing on multiple closes
+        if (this.closed) {
+            return;
+        }
+
         this.doClose();
 
         if (!this.persistent) {

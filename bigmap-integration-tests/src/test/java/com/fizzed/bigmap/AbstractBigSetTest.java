@@ -15,12 +15,16 @@
  */
 package com.fizzed.bigmap;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.fizzed.bigmap.impl.BigMapHelper.toIteratedList;
 import static com.fizzed.bigmap.impl.BigMapHelper.toValueList;
@@ -31,6 +35,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
 
 abstract public class AbstractBigSetTest {
+    static private final Logger log = LoggerFactory.getLogger(AbstractBigSetTest.class);
 
     abstract public <V> Set<V> newSet(Class<V> valueType);
 
@@ -211,27 +216,66 @@ abstract public class AbstractBigSetTest {
 
         for (int i = 0; i < 5; i++) {
             for (String s : set) {
-                Assert.assertThat(s.length(), greaterThan(1));
+                assertThat(s.length(), greaterThan(1));
                 assertThat(s, is(not(nullValue())));
             }
         }
     }
 
     @Test
-    public void iteratingMany() throws IOException {
-        for (int j = 0; j < 10; j++) {
-            final Set<String> set = this.newSet(String.class);
+    public void manySetsConcurrentlyCreated() throws Exception {
+        final int threadCount = 10;
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        try {
+            for (int i = 0; i < threadCount; i++) {
+                final long delayedStartMillis = i*50L;
+                executor.execute(() -> {
+                    final Set<String> set = this.newSet(String.class);
+
+                    try { Thread.sleep(delayedStartMillis); } catch (InterruptedException e) {}
+
+                    for (int j = 0; j < 5000; j++) {
+                        UUID uuid = UUID.randomUUID();
+                        set.add(uuid.toString());
+                    }
+                    for (String value : set) {
+                        if (value == null) {
+                            fail("value was null");
+                        }
+                    }
+                });
+            }
+        } finally {
+            executor.shutdown();
+            executor.awaitTermination(30, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
+    public void iteratorMaintainsOriginalSetFromBeingGarbageCollected() throws IOException {
+        for (int j = 0; j < 5; j++) {
+            Set<String> set = this.newSet(String.class);
+
             for (int i = 0; i < 5000; i++) {
                 UUID uuid = UUID.randomUUID();
                 set.add(uuid.toString());
             }
-            for (String blah : set) {
-                if (blah == null) {
-                    fail("Value was null");
-                } else {
-                    //System.out.println("blah: " + blah);
-                    //log.debug("asdf: {}", blah);
+
+            // create an iterator
+            Iterator<String> it = set.iterator();
+
+            // de-reference set
+            set = null;
+            System.gc();
+            System.gc();    // try to force GC
+
+            int count = 0;
+            while (it.hasNext()) {
+                String value = it.next();
+                if (value == null) {
+                    fail("value was null in map #" + j + " on iteration " + count);
                 }
+                count++;
             }
         }
     }
