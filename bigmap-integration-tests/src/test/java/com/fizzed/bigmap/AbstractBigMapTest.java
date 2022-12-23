@@ -483,6 +483,44 @@ abstract public class AbstractBigMapTest {
         assertThat(toValueList(map), hasItems("0", "1", "2", "3", "5", "123456789"));
     }
 
+    //
+    // BigMap tests
+    //
+    @Test
+    public void setAndDelete() {
+        final Map<String,String> _map = this.newMap(String.class, String.class);
+
+        assumeThat(_map, instanceOf(BigMap.class));
+
+        final BigMap<String,String> map = (BigMap<String,String>)_map;
+
+        map.set("a", "1");
+
+        assertThat(map.get("a"), is("1"));
+        assertThat(map.size(), is(1));
+        assertThat(map.isEmpty(), is(false));
+
+        map.delete("a");
+
+        assertThat(map.get("a"), is(nullValue()));
+        assertThat(map.size(), is(0));
+        assertThat(map.isEmpty(), is(true));
+
+        map.delete("a");
+
+        assertThat(map.get("a"), is(nullValue()));
+        assertThat(map.size(), is(0));
+        assertThat(map.isEmpty(), is(true));
+
+        map.set("b", "2");
+
+        assertThat(map.size(), is(1));
+
+        map.set("b", "3");
+
+        assertThat(map.size(), is(1));
+    }
+
     @Test
     public void getMutable() {
         final Map<String,String> _map = this.newMap(String.class, String.class);
@@ -561,39 +599,6 @@ abstract public class AbstractBigMapTest {
         // the new value should have been persisted back now
         assertThat(map.get("a").containsKey("b"), is(true));
         assertThat(map.get("a").getProperty("b"), is("hello"));
-    }
-
-    @Test
-    public void byteSizeTracking() {
-        final Map<String,String> _map = this.newMap(String.class, String.class);
-
-        assumeThat(_map, instanceOf(BigMap.class));
-
-        final BigMap<String,String> map = (BigMap<String,String>)_map;
-
-        map.put("1", "123456789");
-        map.put("2", "-10");
-
-        assertThat(map.getKeyByteSize(), is(2L));
-        assertThat(map.getValueByteSize(), is(12L));
-
-        // replace value updates bytes
-        map.put("2", "1");
-
-        assertThat(map.getKeyByteSize(), is(2L));
-        assertThat(map.getValueByteSize(), is(10L));
-
-        // remove value updates
-        map.remove("2");
-
-        assertThat(map.getKeyByteSize(), is(1L));
-        assertThat(map.getValueByteSize(), is(9L));
-
-        map.clear();
-
-        assertThat(map.size(), is(0));
-        assertThat(map.getKeyByteSize(), is(0L));
-        assertThat(map.getValueByteSize(), is(0L));
     }
 
     @Test

@@ -27,7 +27,23 @@ public interface BigSet<V> extends Set<V>, BigObject {
 
     Comparator<V> getValueComparator();
 
-    long getValueByteSize();
+    /**
+     * IF YOU DO NOT NEED TO KNOW IF IT WAS REMOVED, PLEASE USE {@link #delete(Object)}
+     *
+     * With most implementations of a bigset, its two operations to remove a value AND return back if it existed. In
+     * most cases, you ignore the returned value and it just costs more time/effort than is needed.
+     *
+     * Otherwise, this method works identical to a standard Map implementation.
+     */
+    @Override
+    boolean remove(Object value);
+
+    /**
+     * Typically, this is more efficient than a {@link #remove(Object)} since the value is deleted and no check is
+     * performed if it exists first.
+     * @param value
+     */
+    void delete(V value);
 
     @Override
     default boolean containsAll(Collection<?> c) {

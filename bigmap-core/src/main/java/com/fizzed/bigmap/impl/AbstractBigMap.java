@@ -34,8 +34,6 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
     protected final Comparator<K> keyComparator;
     protected final ByteCodec<V> valueCodec;
     protected int size;
-    protected long keyByteSize;
-    protected long valueByteSize;
     protected BigObjectListener listener;
     protected BigObjectCloser closer;
 
@@ -104,16 +102,6 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
-    public long getKeyByteSize() {
-        return this.keyByteSize;
-    }
-
-    @Override
-    public long getValueByteSize() {
-        return this.valueByteSize;
-    }
-
-    @Override
     public int size() {
         return this.size;
     }
@@ -130,8 +118,6 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
             this._open();
 
             this.size = 0;
-            this.keyByteSize = 0L;
-            this.valueByteSize = 0L;
         } catch (Exception e) {
             throw new BigMapDataException(e);
         }
@@ -182,16 +168,12 @@ abstract public class AbstractBigMap<K,V> implements BigMap<K,V> {
         }
     }
 
-    public void _entryAdded(long keyByteSize, long valueByteSize) {
+    public void _entryAdded() {
         this.size++;
-        this.keyByteSize += keyByteSize;
-        this.valueByteSize += valueByteSize;
     }
 
-    public void _entryRemoved(long keyByteSize, long valueByteSize) {
+    public void _entryRemoved() {
         this.size--;
-        this.keyByteSize -= keyByteSize;
-        this.valueByteSize -= valueByteSize;
     }
 
 }

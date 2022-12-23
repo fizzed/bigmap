@@ -52,18 +52,37 @@ public interface ByteArrayBigMap<K,V> extends BigMap<K,V> {
 
         // existing entry
         if (oldValueBytes != null) {
-            this._entryRemoved(0, sizeOf(oldValueBytes));
-            this._entryAdded(0, sizeOf(valueBytes));
             return this.getValueCodec().deserialize(oldValueBytes);
         }
         else {
             // new entry
-            this._entryAdded(sizeOf(keyBytes), sizeOf(valueBytes));
+            this._entryAdded();
             return null;
         }
     }
 
     byte[] _put(byte[] keyBytes, byte[] valueBytes);
+
+    @Override
+    default void set(K key, V value) {
+        this.checkIfClosed();
+
+        Objects.requireNonNull(key, "key was null");
+        Objects.requireNonNull(value, "value was null");
+
+        final byte[] keyBytes = this.getKeyCodec().serialize(key);
+        final byte[] valueBytes = this.getValueCodec().serialize(value);
+
+        // existing entry
+        if (!this._containsKey(keyBytes)) {
+            // new entry
+            this._entryAdded();
+        }
+
+        this._set(keyBytes, valueBytes);
+    }
+
+    void _set(byte[] keyBytes, byte[] valueBytes);
 
     @Override
     default boolean containsKey(Object key) {
@@ -87,7 +106,7 @@ public interface ByteArrayBigMap<K,V> extends BigMap<K,V> {
         byte[] valueBytes = this._remove(keyBytes);
 
         if (valueBytes != null) {
-            this._entryRemoved(sizeOf(keyBytes), sizeOf(valueBytes));
+            this._entryRemoved();
         }
 
         return this.getValueCodec().deserialize(valueBytes);
@@ -95,9 +114,26 @@ public interface ByteArrayBigMap<K,V> extends BigMap<K,V> {
 
     byte[] _remove(byte[] keyBytes);
 
-    void _entryAdded(long keyByteSize, long valueByteSize);
+    @Override
+    default void delete(Object key) {
+        this.checkIfClosed();
 
-    void _entryRemoved(long keyByteSize, long valueByteSize);
+        Objects.requireNonNull(key, "key was null");
+
+        byte[] keyBytes = this.getKeyCodec().serialize((K)key);
+
+        if (this._containsKey(keyBytes)) {
+            this._entryRemoved();
+        }
+
+        this._delete(keyBytes);
+    }
+
+    void _delete(byte[] keyBytes);
+
+    void _entryAdded();
+
+    void _entryRemoved();
 
     @Override
     default Iterator<Entry<K,V>> forwardIterator() {

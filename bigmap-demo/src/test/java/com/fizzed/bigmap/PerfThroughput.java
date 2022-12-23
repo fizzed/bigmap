@@ -34,7 +34,7 @@ public class PerfThroughput extends AbstractPerf {
         // config options
         //
 
-        String type = "TokyoBigMap";
+//        String type = "TokyoBigMap";
 //        String type = "LevelBigMap";
 //        String type = "RocksBigLinkedMap";
 //        String type = "RocksBigMap";
@@ -42,8 +42,9 @@ public class PerfThroughput extends AbstractPerf {
 //        String type = "TokyoCabinetMap";
 //        String type = "KyotoCabinetMap";
 //        String type = "TkrzwCabinetMap";
+        String type = "MapDBMap";
         int mapCount = 10;
-        int entryCountPerMap = 3000;
+        int entryCountPerMap = 300000;
 
         //
         //

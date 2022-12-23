@@ -80,6 +80,11 @@ public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
     }
 
     @Override
+    public void _set(byte[] keyBytes, byte[] valueBytes) {
+        this.db.put(keyBytes, valueBytes);
+    }
+
+    @Override
     public boolean _containsKey(byte[] keyBytes) {
         return this.db.get(keyBytes) != null;
     }
@@ -93,6 +98,11 @@ public class TokyoBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
         }
 
         return null;
+    }
+
+    @Override
+    public void _delete(byte[] keyBytes) {
+        this.db.out(keyBytes);
     }
 
     @Override

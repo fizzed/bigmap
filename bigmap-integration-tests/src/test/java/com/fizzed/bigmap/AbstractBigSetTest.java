@@ -15,6 +15,7 @@
  */
 package com.fizzed.bigmap;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,32 +208,13 @@ abstract public class AbstractBigSetTest {
     }
 
     @Test
-    public void iteratingLarger() {
-        final Set<String> set = this.newSet(String.class);
-
-        for (int i = 0; i < 50000; i++) {
-            set.add("hello #" + i);
-        }
-
-        for (int i = 0; i < 5; i++) {
-            for (String s : set) {
-                assertThat(s.length(), greaterThan(1));
-                assertThat(s, is(not(nullValue())));
-            }
-        }
-    }
-
-    @Test
     public void manySetsConcurrentlyCreated() throws Exception {
         final int threadCount = 10;
         final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         try {
             for (int i = 0; i < threadCount; i++) {
-                final long delayedStartMillis = i*50L;
                 executor.execute(() -> {
                     final Set<String> set = this.newSet(String.class);
-
-                    try { Thread.sleep(delayedStartMillis); } catch (InterruptedException e) {}
 
                     for (int j = 0; j < 5000; j++) {
                         UUID uuid = UUID.randomUUID();
@@ -298,28 +280,45 @@ abstract public class AbstractBigSetTest {
         assertThat(toValueList(set), hasItems(-10L, 1L, 2L, 3L, 5L, 123456789L));
     }
 
+    //
+    // BigSets
+    //
+
     @Test
-    public void byteSizeTracking() {
+    public void addAndDelete() {
         final Set<String> _set = this.newSet(String.class);
 
         assumeThat(_set, instanceOf(BigSet.class));
 
         final BigSet<String> set = (BigSet<String>)_set;
 
-        set.add("1");
-        set.add("2");
+        set.add("a");
 
-        assertThat(set.getValueByteSize(), is(2L));
+        assertThat(set, hasItem("a"));
+        assertThat(set.contains("a"), is(true));
+        assertThat(set.size(), is(1));
+        assertThat(set.isEmpty(), is(false));
 
-        // replace value updates bytes
-        set.add("2");
+        set.delete("a");
 
-        assertThat(set.getValueByteSize(), is(2L));
+        assertThat(set.contains("a"), is(false));
+        assertThat(set.size(), is(0));
+        assertThat(set.isEmpty(), is(true));
 
-        // remove value updates
-        set.remove("2");
+        set.delete("b");
 
-        assertThat(set.getValueByteSize(), is(1L));
+        assertThat(set.contains("b"), is(false));
+        assertThat(set.size(), is(0));
+
+        set.add("b");
+
+        assertThat(set.contains("b"), is(true));
+        assertThat(set.size(), is(1));
+
+        set.add("b");       // duplicate item
+
+        assertThat(set.contains("b"), is(true));
+        assertThat(set.size(), is(1));
     }
 
     @Test

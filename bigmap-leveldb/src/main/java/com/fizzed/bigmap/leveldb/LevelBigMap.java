@@ -94,6 +94,16 @@ public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
     }
 
     @Override
+    public void _set(byte[] keyBytes, byte[] valueBytes) {
+        try {
+            this.db.put(keyBytes, valueBytes);
+        }
+        catch (DBException e) {
+            throw new BigMapDataException(e);
+        }
+    }
+
+    @Override
     public boolean _containsKey(byte[] keyBytes) {
         try {
             return this.db.get(keyBytes) != null;
@@ -111,6 +121,16 @@ public class LevelBigMap<K,V> extends AbstractBigMap<K,V> implements ByteArrayBi
             this.db.delete(keyBytes);
 
             return valueBytes;
+        }
+        catch (DBException e) {
+            throw new BigMapDataException(e);
+        }
+    }
+
+    @Override
+    public void _delete(byte[] keyBytes) {
+        try {
+            this.db.delete(keyBytes);
         }
         catch (DBException e) {
             throw new BigMapDataException(e);

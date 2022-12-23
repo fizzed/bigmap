@@ -111,7 +111,14 @@
             <version>0.0.2</version>
             <scope>test</scope>
         </dependency>
-        
+
+        <!-- for testing mapdb -->
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+
     </dependencies>
     
 </project>

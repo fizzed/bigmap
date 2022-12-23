@@ -34,10 +34,6 @@ public interface BigMap<K,V> extends Map<K,V>, BigObject {
 
     ByteCodec<V> getValueCodec();
 
-    long getKeyByteSize();
-
-    long getValueByteSize();
-
     @Override
     default boolean isEmpty() {
         return this.size() <= 0;
@@ -49,6 +45,41 @@ public interface BigMap<K,V> extends Map<K,V>, BigObject {
 
         throw new BigMapNonScalableException("Poor performance for checking if map contains a value. Method unsupported.");
     }
+
+    /**
+     * IF YOU DO NOT NEED THE RETURN VALUE, PLEASE USE {@link #set(Object, Object)}
+     *
+     * With most implementations of a bigmap, its two operations to put a value AND return back the old value. In
+     * most cases, you ignore the returned value and it just costs more time/effort than is needed.
+     *
+     * Otherwise, this method works identical to a standard Map implementation.
+     */
+    @Override
+    V put(K key, V value);
+
+    /**
+     * Typically, this is more efficient than a {@link #put(Object, Object)} since the old value is not returned.
+     * @param key
+     * @param value
+     */
+    void set(K key, V value);
+
+    /**
+     * IF YOU DO NOT NEED THE RETURN VALUE, PLEASE USE {@link #delete(Object)}
+     *
+     * With most implementations of a bigmap, its two operations to remove a value AND return back the old value. In
+     * most cases, you ignore the returned value and it just costs more time/effort than is needed.
+     *
+     * Otherwise, this method works identical to a standard Map implementation.
+     */
+    @Override
+    V remove(Object key);
+
+    /**
+     * Typically, this is more efficient than a {@link #put(Object, Object)} since the old value is not returned.
+     * @param key
+     */
+    void delete(K key);
 
     /**
      * BE CAREFUL WITH MODIFYING ANY RETURN VALUE FROM THIS METHOD. Unlike traditional in-memory maps, the BigMap will
@@ -123,7 +154,7 @@ public interface BigMap<K,V> extends Map<K,V>, BigObject {
     default void putAll(Map<? extends K, ? extends V> m) {
         if (m != null) {
             m.forEach((k, v) -> {
-                this.put(k, v);
+                this.set(k, v);
             });
         }
     }

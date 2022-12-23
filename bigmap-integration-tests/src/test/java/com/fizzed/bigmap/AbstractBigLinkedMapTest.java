@@ -211,37 +211,4 @@ abstract public class AbstractBigLinkedMapTest extends AbstractBigMapTest {
         assertThat(toKeyList(map), hasItems(2, 1));
     }
 
-    @Test
-    public void byteSizeTracking() {
-        final Map<String,String> _map = this.newMap(String.class, String.class);
-
-        assumeThat(_map, instanceOf(AbstractBigLinkedMap.class));
-
-        final BigMap<String,String> map = (BigMap<String,String>)_map;
-
-        map.put("1", "123456789");
-        map.put("2", "-10");
-
-        // NOTE: there are 3 underlying maps being used and so the key+values are always increased
-        assertThat(map.getKeyByteSize(), is(2L+8L+2L));
-        assertThat(map.getValueByteSize(), is(22L));
-
-        // replace value updates bytes
-        map.put("2", "1");
-
-        assertThat(map.getKeyByteSize(), is(2L+8L+2L));
-        assertThat(map.getValueByteSize(), is(20L));
-
-        // remove value updates
-        map.remove("2");
-
-        assertThat(map.getKeyByteSize(), is(1L+4L+1L));
-        assertThat(map.getValueByteSize(), is(14L));
-
-        map.remove("1");
-
-        assertThat(map.getKeyByteSize(), is(0L));
-        assertThat(map.getValueByteSize(), is(0L));
-    }
-
 }

@@ -109,16 +109,6 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
     }
 
     @Override
-    public long getKeyByteSize() {
-        return this.dataMap.getKeyByteSize() + this.insertOrderToKeyMap.getKeyByteSize() + this.keyToInsertOrderMap.getKeyByteSize();
-    }
-
-    @Override
-    public long getValueByteSize() {
-        return this.dataMap.getValueByteSize() + this.insertOrderToKeyMap.getValueByteSize() + this.keyToInsertOrderMap.getValueByteSize();
-    }
-
-    @Override
     public ByteCodec<K> getKeyCodec() {
         return this.dataMap.getKeyCodec();
     }
@@ -163,20 +153,40 @@ abstract public class AbstractBigLinkedMap<K,V> implements BigMap<K,V> {
         // if the map is missing this key, then we want to track its insertion order
         if (!this.dataMap.containsKey(key)) {
             Integer insertOrder = this.insertCounter.incrementAndGet();
-            this.insertOrderToKeyMap.put(insertOrder, key);
-            this.keyToInsertOrderMap.put(key, insertOrder);
+            this.insertOrderToKeyMap.set(insertOrder, key);
+            this.keyToInsertOrderMap.set(key, insertOrder);
         }
         return this.dataMap.put(key, value);
+    }
+
+    @Override
+    public void set(K key, V value) {
+        // if the map is missing this key, then we want to track its insertion order
+        if (!this.dataMap.containsKey(key)) {
+            Integer insertOrder = this.insertCounter.incrementAndGet();
+            this.insertOrderToKeyMap.set(insertOrder, key);
+            this.keyToInsertOrderMap.set(key, insertOrder);
+        }
+        this.dataMap.set(key, value);
     }
 
     @Override
     public V remove(Object key) {
         final Integer insertOrder = this.keyToInsertOrderMap.remove(key);
         if (insertOrder != null) {
-            this.insertOrderToKeyMap.remove(insertOrder);
+            this.insertOrderToKeyMap.delete(insertOrder);
             return this.dataMap.remove(key);
         }
         return null;
+    }
+
+    @Override
+    public void delete(K key) {
+        final Integer insertOrder = this.keyToInsertOrderMap.remove(key);
+        if (insertOrder != null) {
+            this.insertOrderToKeyMap.delete(insertOrder);
+            this.dataMap.delete(key);
+        }
     }
 
     @Override

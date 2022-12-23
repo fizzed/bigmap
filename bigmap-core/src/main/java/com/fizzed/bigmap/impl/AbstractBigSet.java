@@ -97,11 +97,6 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
     }
 
     @Override
-    public long getValueByteSize() {
-        return this.map.getKeyByteSize();
-    }
-
-    @Override
     public int size() {
         return this.map.size();
     }
@@ -151,7 +146,7 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
         if (this.map.containsKey(o)) {
             return false;
         }
-        this.map.put(o, None.NONE);
+        this.map.set(o, None.NONE);
         return true;
     }
 
@@ -160,8 +155,13 @@ abstract public class AbstractBigSet<V> implements BigSet<V> {
         if (!this.map.containsKey(o)) {
             return false;
         }
-        this.map.remove(o);
+        this.map.delete((V)o);
         return true;
+    }
+
+    @Override
+    public void delete(Object o) {
+        this.map.delete((V)o);
     }
 
     @Override

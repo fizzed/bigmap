@@ -21,6 +21,12 @@ import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
 import com.fizzed.bigmap.rocksdb.RocksBigMapBuilder;
 import com.fizzed.bigmap.tokyocabinet.TokyoBigMapBuilder;
 import com.fizzed.crux.util.StopWatch;
+import org.jetbrains.annotations.NotNull;
+import org.mapdb.DataInput2;
+import org.mapdb.DataOutput2;
+import org.mapdb.Serializer;
+import org.mapdb.serializer.GroupSerializer;
+import org.mapdb.serializer.GroupSerializerObjectArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
@@ -71,6 +77,27 @@ public class AbstractPerf {
                     .setKeyType(String.class, stringByteCodec)
                     .setValueType(Item.class, itemByteCodec)
                     .build();
+            case "MapDBMap": {
+                org.mapdb.DB db = org.mapdb.DBMaker.tempFileDB().make();
+                Map map = db.treeMap("map")
+                    .keySerializer(Serializer.STRING)
+                    .valueSerializer(new GroupSerializerObjectArray<Item>() {
+                        @Override
+                        public void serialize(@NotNull DataOutput2 out, @NotNull Item value) throws IOException {
+                            //out.write(itemByteCodec.serialize(value));
+                            out.writeUTF("a");
+                        }
+
+                        @Override
+                        public Item deserialize(@NotNull DataInput2 input, int available) throws IOException {
+                            //return itemByteCodec.deserialize(input.);
+                            String s = input.readUTF();
+                            return new Item();
+                        }
+                    })
+                    .createOrOpen();
+                return map;
+            }
             case "MVStoreMap": {
                 org.h2.mvstore.MVStore mvstore = (org.h2.mvstore.MVStore) ENGINE_STATICS.computeIfAbsent("mvstore", k -> {
                     try {
