@@ -87,10 +87,10 @@ public class JacksonByteCodecTest {
             .setType(WidgetType.A)
             .setCreatedAt(Instant.parse("2022-11-12T01:02:03.456Z"));
 
-        System.out.println(Base16.encode(byteCodec.serialize(w1)));
+        byte[] bytes = byteCodec.serialize(w1);
+        final Widget w2 = byteCodec.deserialize(bytes);
 
-        assertThat(byteCodec.serialize(w1), is(Base16.decode("7b0a2020227322203a202261222c0a2020226922203a20352c0a2020227479706522203a202261222c0a202022637265617465645f617422203a2022323032322d31312d31325430313a30323a30332e3435365a220a7d")));
-        assertThat(byteCodec.deserialize(Base16.decode("7b0a2020227322203a202261222c0a2020226922203a20352c0a2020227479706522203a202261222c0a202022637265617465645f617422203a2022323032322d31312d31325430313a30323a30332e3435365a220a7d")), is(w1));
+        assertThat(w2, is(w1));
     }
 
     static public enum WidgetType {
