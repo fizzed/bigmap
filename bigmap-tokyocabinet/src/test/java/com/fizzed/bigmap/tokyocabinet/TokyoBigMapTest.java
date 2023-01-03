@@ -2,6 +2,8 @@ package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.BigMap;
 import org.junit.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 
+@DisabledOnOs(OS.WINDOWS)
 public class TokyoBigMapTest {
 
     @Test
