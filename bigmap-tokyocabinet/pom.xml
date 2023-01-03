@@ -21,14 +21,16 @@
 
         <dependency>
             <groupId>com.fizzed</groupId>
-            <artifactId>tokyocabinet-linux-x64</artifactId>
+            <artifactId>tokyocabinet-api</artifactId>
         </dependency>
 
-	<dependency>
+        <!-- these MUST be provided by user of this library at runtime -->
+        <dependency>
             <groupId>com.fizzed</groupId>
-            <artifactId>tokyocabinet-macos-x64</artifactId>
+            <artifactId>tokyocabinet-all-natives</artifactId>
+            <scope>provided</scope>
         </dependency>
-        
+
         <!-- testing -->
 
         <dependency>

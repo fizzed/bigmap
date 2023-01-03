@@ -14,7 +14,7 @@
     
     <properties>
         <java.version>1.8</java.version>
-        <tokyocabinet.version>0.0.10</tokyocabinet.version>
+        <tokyocabinet.version>0.0.11</tokyocabinet.version>
     </properties>
 
     <scm>
@@ -37,7 +37,7 @@
     <dependencyManagement>
         
         <dependencies>
-            
+
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-core</artifactId>
@@ -71,14 +71,10 @@
             <!-- tokyocabinet impl -->
             <dependency>
                 <groupId>com.fizzed</groupId>
-                <artifactId>tokyocabinet-linux-x64</artifactId>
+                <artifactId>tokyocabinet-bom</artifactId>
                 <version>${tokyocabinet.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fizzed</groupId>
-                <artifactId>tokyocabinet-macos-x64</artifactId>
-                <version>${tokyocabinet.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
 
             <!-- pure java leveldb for bigmap-leveldb only -->

@@ -51,6 +51,13 @@
             <artifactId>bigmap-tokyocabinet</artifactId>
         </dependency>
 
+        <!-- these MUST be provided by user of this library at runtime -->
+        <dependency>
+            <groupId>com.fizzed</groupId>
+            <artifactId>tokyocabinet-all-natives</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- testing -->
 
         <dependency>
