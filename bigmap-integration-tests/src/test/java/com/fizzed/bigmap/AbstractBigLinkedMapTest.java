@@ -16,7 +16,7 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.impl.AbstractBigLinkedMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,10 +25,9 @@ import java.util.*;
 
 import static com.fizzed.bigmap.impl.BigMapHelper.*;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 abstract public class AbstractBigLinkedMapTest extends AbstractBigMapTest {
 

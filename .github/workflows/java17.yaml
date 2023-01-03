@@ -1,10 +1,10 @@
 name: Java 17
-
-on: [push]
-
+on:
+  - push
+  - workflow_dispatch
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up Azul JDK 17
@@ -13,5 +13,5 @@ jobs:
           java-version: 17
           distribution: 'zulu'
           cache: 'maven'
-      - name: Build with Maven
+      - name: Test in Maven
         run: mvn test

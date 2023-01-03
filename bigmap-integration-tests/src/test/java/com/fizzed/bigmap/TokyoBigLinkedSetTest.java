@@ -16,10 +16,13 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.tokyocabinet.TokyoBigLinkedSetBuilder;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Paths;
 import java.util.Set;
 
+@DisabledOnOs(OS.WINDOWS)
 public class TokyoBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override

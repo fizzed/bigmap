@@ -16,10 +16,13 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.tokyocabinet.TokyoBigMapBuilder;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Paths;
 import java.util.Map;
 
+@DisabledOnOs(OS.WINDOWS)
 public class TokyoBigMapTest extends AbstractBigMapTest {
 
     @Override
