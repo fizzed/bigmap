@@ -1,9 +1,14 @@
 # BigMap by Fizzed
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.fizzed/bigmap?color=blue&style=flat-square)](https://mvnrepository.com/artifact/com.fizzed/bigmap)
+
 [![Java 8](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java8.yaml?branch=master&label=Java%208&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java8.yaml)
 [![Java 11](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java11.yaml?branch=master&label=Java%2011&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java11.yaml)
 [![Java 17](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java17.yaml?branch=master&label=Java%2017&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java17.yaml)
-[![Maven Central](https://img.shields.io/maven-central/v/com.fizzed/bigmap?color=blue&style=flat-square)](https://mvnrepository.com/artifact/com.fizzed/bigmap)
+
+[![Linux x64](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java11.yaml?branch=master&label=Linux%20x64&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java11.yaml)
+[![MacOS x64](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/macos-x64.yaml?branch=master&label=MacOS%20x64&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/macos-x64.yaml)
+[![Windows x64](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/windows-x64.yaml?branch=master&label=Windows%20x64&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/windows-x64.yaml)
 
 [Fizzed, Inc.](http://fizzed.com) (Follow on Twitter: [@fizzed_inc](http://twitter.com/fizzed_inc))
 
@@ -21,9 +26,55 @@ Based on our primary need for minimal memory usage (including a desire to not re
 and as small as possible dependencies, we narrowed in on the older, but still impressive TokyoCabinet vs.
 some of the more recent entrants like RocksDB.
 
-## Example LevelBigMap Usage
+## Usage
 
-In your maven pom:
+With many of our implementations (e.g. rocksdb or leveldb), you can simply use the dependency below and add it to
+your maven POM file.  However, with tokyocabinet, there are many native libs you will need to include. To simplify
+managing these versions, you should consider importing our bill-of-materials BOM.
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.fizzed</groupId>
+            <artifactId>bigmap-bom</artifactId>
+            <version>VERSION-HERE</version>
+            <scope>import</scope>
+            <type>pom</type>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+Then to use tokyocabinet implementation, add the following:
+
+```xml
+<dependency>
+    <groupId>com.fizzed</groupId>
+    <artifactId>bigmap-tokyocabinet</artifactId>
+    <!-- you can omit the version if you used our BOM above -->
+    <version>VERSION-HERE</version>
+</dependency>
+
+<dependency>
+    <groupId>com.fizzed</groupId>
+    <artifactId>tokyocabinet-linux-x64</artifactId>
+    <!-- you can omit the version if you used our BOM above -->
+    <version>VERSION-OF-TOKYOCABINET-HERE</version>
+</dependency>
+```
+
+Or for rocksdb
+
+```xml
+<dependency>
+    <groupId>com.fizzed</groupId>
+    <artifactId>bigmap-rocksdb</artifactId>
+    <version>VERSION-HERE</version>
+</dependency>
+```
+
+Or for leveldb
 
 ```xml
 <dependency>
@@ -32,6 +83,8 @@ In your maven pom:
     <version>VERSION-HERE</version>
 </dependency>
 ```
+
+Then in your Java code
 
 ```java
 import com.fizzed.bigmap.leveldb.LevelBigMapBuilder;
@@ -196,4 +249,4 @@ Total disk used: 24135 (MB)
 
 ## License
 
-Apache 2 License!
+Apache 2 License
