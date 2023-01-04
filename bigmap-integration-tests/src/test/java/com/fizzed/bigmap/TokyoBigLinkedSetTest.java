@@ -22,7 +22,7 @@ import org.junit.jupiter.api.condition.OS;
 import java.nio.file.Paths;
 import java.util.Set;
 
-@DisabledOnOs(OS.WINDOWS)
+@DisabledOnOs(value=OS.WINDOWS, disabledReason="TokyoCabinet does not support windows")
 public class TokyoBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override

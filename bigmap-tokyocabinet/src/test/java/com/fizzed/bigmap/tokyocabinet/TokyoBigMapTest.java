@@ -1,7 +1,8 @@
 package com.fizzed.bigmap.tokyocabinet;
 
 import com.fizzed.bigmap.BigMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
@@ -12,7 +13,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @DisabledOnOs(OS.WINDOWS)
 public class TokyoBigMapTest {

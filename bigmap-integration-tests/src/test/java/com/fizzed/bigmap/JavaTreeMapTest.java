@@ -15,14 +15,11 @@
  */
 package com.fizzed.bigmap;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.TreeMap;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class JavaTreeMapTest extends AbstractBigMapTest {
 
@@ -31,17 +28,18 @@ public class JavaTreeMapTest extends AbstractBigMapTest {
         return new TreeMap<>();
     }
 
-    @Test  @Ignore("nulls are technically allowed with a java hashmap")
+    @Test
+    @Disabled("nulls are technically allowed with a java hashmap")
     public void putNullValue() {
         super.putNullKey();
     }
 
-    @Test  @Ignore("nulls are technically NOT allowed with a java treemap")
+    @Test  @Disabled("nulls are technically NOT allowed with a java treemap")
     public void containsKeyWithNull() {
         super.containsKeyWithNull();
     }
 
-    @Test @Ignore
+    @Test @Disabled
     public void putAndGetWithComplexObject() {}
 
 }

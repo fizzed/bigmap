@@ -15,14 +15,10 @@
  */
 package com.fizzed.bigmap;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 public class JavaHashMapTest extends AbstractBigMapTest {
 
@@ -31,17 +27,17 @@ public class JavaHashMapTest extends AbstractBigMapTest {
         return new HashMap<>();
     }
 
-    @Test @Ignore("nulls are technically allowed with a java hashmap")
+    @Test @Disabled("nulls are technically allowed with a java hashmap")
     public void putNullKey() {
         super.putNullKey();
     }
 
-    @Test  @Ignore("nulls are technically allowed with a java hashmap")
+    @Test  @Disabled("nulls are technically allowed with a java hashmap")
     public void putNullValue() {
         super.putNullKey();
     }
 
-    @Test @Ignore
+    @Test @Disabled
     public void putAndGetWithComplexObject() {}
 
 }

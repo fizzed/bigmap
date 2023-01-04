@@ -15,8 +15,7 @@
  */
 package com.fizzed.bigmap;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +31,8 @@ import static com.fizzed.bigmap.impl.BigMapHelper.toValueList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 abstract public class AbstractBigSetTest {
     static private final Logger log = LoggerFactory.getLogger(AbstractBigSetTest.class);
@@ -266,7 +265,7 @@ abstract public class AbstractBigSetTest {
     public void sortedSetOrdered() {
         final Set<Long> _set = this.newSet(Long.class);
 
-        assumeThat(_set, instanceOf(SortedSet.class));
+        assumeTrue(_set instanceof SortedSet);
 
         final SortedSet<Long> set = (SortedSet<Long>)_set;
 
@@ -288,7 +287,7 @@ abstract public class AbstractBigSetTest {
     public void addAndDelete() {
         final Set<String> _set = this.newSet(String.class);
 
-        assumeThat(_set, instanceOf(BigSet.class));
+        assumeTrue(_set instanceof BigSet);
 
         final BigSet<String> set = (BigSet<String>)_set;
 
@@ -325,7 +324,7 @@ abstract public class AbstractBigSetTest {
     public void close() throws IOException {
         final Set<String> _set = this.newSet(String.class);
 
-        assumeThat(_set, instanceOf(BigSet.class));
+        assumeTrue(_set instanceof BigSet);
 
         final BigSet<String> set = (BigSet<String>)_set;
 
@@ -357,7 +356,7 @@ abstract public class AbstractBigSetTest {
     public void closeRemovesFromRegistry() throws IOException {
         final Set<String> _set = this.newSet(String.class);
 
-        assumeThat(_set, instanceOf(BigSet.class));
+        assumeTrue(_set instanceof BigSet);
 
         final BigSet<String> set = (BigSet<String>)_set;
 
@@ -383,7 +382,7 @@ abstract public class AbstractBigSetTest {
     public void dereferenceAutomaticallyGarbageCollectsFromRegistry() throws Exception {
         Set<String> _set = this.newSet(String.class);
 
-        assumeThat(_set, instanceOf(BigSet.class));
+        assumeTrue(_set instanceof BigSet);
 
         BigSet<String> set = (BigSet<String>)_set;
 

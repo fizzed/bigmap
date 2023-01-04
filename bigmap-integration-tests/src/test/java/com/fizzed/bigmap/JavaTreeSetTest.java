@@ -15,8 +15,8 @@
  */
 package com.fizzed.bigmap;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -28,7 +28,8 @@ public class JavaTreeSetTest extends AbstractBigSetTest {
         return new TreeSet<>();
     }
 
-    @Test @Ignore
+    @Test
+    @Disabled
     public void addAndContainsWithComplexObject() { }
 
 }

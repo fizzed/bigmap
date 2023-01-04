@@ -15,20 +15,17 @@
  */
 package com.fizzed.bigmap;
 
-import org.hamcrest.MatcherAssert;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 
 import static com.fizzed.bigmap.impl.BigMapHelper.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 abstract public class AbstractBigMapTest {
 
@@ -419,7 +416,7 @@ abstract public class AbstractBigMapTest {
     public void firstKey() {
         final Map<Long,String> _map = this.newMap(Long.class, String.class);
 
-        assumeThat(_map, instanceOf(SortedMap.class));
+        assumeTrue(_map instanceof SortedMap);
 
         final SortedMap<Long,String> map = (SortedMap<Long,String>)_map;
 
@@ -469,7 +466,7 @@ abstract public class AbstractBigMapTest {
     public void sortedOrdering() {
         final Map<Long,String> _map = this.newMap(Long.class, String.class);
 
-        assumeThat(_map, instanceOf(SortedMap.class));
+        assumeTrue(_map instanceof SortedMap);
 
         final SortedMap<Long,String> map = (SortedMap<Long,String>)_map;
 
@@ -490,7 +487,7 @@ abstract public class AbstractBigMapTest {
     public void setAndDelete() {
         final Map<String,String> _map = this.newMap(String.class, String.class);
 
-        assumeThat(_map, instanceOf(BigMap.class));
+        assumeTrue(_map instanceof BigMap);
 
         final BigMap<String,String> map = (BigMap<String,String>)_map;
 
@@ -525,7 +522,7 @@ abstract public class AbstractBigMapTest {
     public void getMutable() {
         final Map<String,String> _map = this.newMap(String.class, String.class);
 
-        assumeThat(_map, instanceOf(BigMap.class));
+        assumeTrue(_map instanceof BigMap);
 
         final BigMap<String,String> map = (BigMap<String,String>)_map;
 
@@ -578,7 +575,7 @@ abstract public class AbstractBigMapTest {
     public void getMutableWithComplexObject() {
         final Map<String,Properties> _map = this.newMap(String.class, Properties.class);
 
-        assumeThat(_map, instanceOf(BigMap.class));
+        assumeTrue(_map instanceof BigMap);
 
         final BigMap<String,Properties> map = (BigMap<String,Properties>)_map;
 
@@ -605,7 +602,7 @@ abstract public class AbstractBigMapTest {
     public void close() throws IOException {
         final Map<String,String> _map = this.newMap(String.class, String.class);
 
-        assumeThat(_map, instanceOf(BigMap.class));
+        assumeTrue(_map instanceof BigMap);
 
         final BigMap<String,String> map = (BigMap<String,String>)_map;
 
@@ -637,7 +634,7 @@ abstract public class AbstractBigMapTest {
     public void closeRemovesFromRegistry() throws IOException {
         final Map<String,String> _map = this.newMap(String.class, String.class);
 
-        assumeThat(_map, instanceOf(BigMap.class));
+        assumeTrue(_map instanceof BigMap);
 
         final BigMap<String,String> map = (BigMap<String,String>)_map;
 
@@ -663,7 +660,7 @@ abstract public class AbstractBigMapTest {
     public void dereferenceAutomaticallyGarbageCollectsFromRegistry() throws Exception {
         Map<String,String> _map = this.newMap(String.class, String.class);
 
-        assumeThat(_map, instanceOf(BigMap.class));
+        assumeTrue(_map instanceof BigMap);
 
         BigMap<String,String> map = (BigMap<String,String>)_map;
 
