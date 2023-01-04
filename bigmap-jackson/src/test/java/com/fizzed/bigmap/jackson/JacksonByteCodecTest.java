@@ -12,16 +12,15 @@ import com.fizzed.crux.jackson.CruxUtilModule;
 import com.fizzed.crux.jackson.EnumStrategyModule;
 import com.fizzed.crux.jackson.JavaTimePlusModule;
 import com.fizzed.crux.util.Base16;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.TimeZone;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class JacksonByteCodecTest {
 

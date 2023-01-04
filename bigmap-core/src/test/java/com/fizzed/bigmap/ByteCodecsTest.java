@@ -18,15 +18,16 @@ package com.fizzed.bigmap;
 import com.fizzed.crux.util.Base16;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import org.junit.jupiter.api.Test;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import org.junit.Test;
 
 public class ByteCodecsTest {
  

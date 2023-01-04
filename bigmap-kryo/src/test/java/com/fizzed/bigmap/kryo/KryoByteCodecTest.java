@@ -2,14 +2,14 @@ package com.fizzed.bigmap.kryo;
 
 import com.fizzed.bigmap.ByteCodecs;
 import com.fizzed.crux.util.Base16;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class KryoByteCodecTest {
 
