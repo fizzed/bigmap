@@ -70,11 +70,11 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
         
         <dependency>
             <groupId>ch.qos.logback</groupId>
