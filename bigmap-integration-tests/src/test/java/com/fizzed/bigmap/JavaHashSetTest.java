@@ -15,11 +15,9 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.rocksdb.RocksBigSetBuilder;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +28,8 @@ public class JavaHashSetTest extends AbstractBigSetTest {
         return new HashSet<>();
     }
 
-    @Test @Ignore
+    @Test
+    @Disabled
     public void addAndContainsWithComplexObject() { }
 
 }

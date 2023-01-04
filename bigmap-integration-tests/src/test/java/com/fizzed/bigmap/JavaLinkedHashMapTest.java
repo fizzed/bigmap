@@ -15,11 +15,9 @@
  */
 package com.fizzed.bigmap;
 
-import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -31,17 +29,17 @@ public class JavaLinkedHashMapTest extends AbstractBigLinkedMapTest {
     }
 
     @Test
-    @Ignore("nulls are technically allowed with a java hashmap")
+    @Disabled("nulls are technically allowed with a java hashmap")
     public void putNullKey() {
         super.putNullKey();
     }
 
-    @Test  @Ignore("nulls are technically allowed with a java hashmap")
+    @Test  @Disabled("nulls are technically allowed with a java hashmap")
     public void putNullValue() {
         super.putNullKey();
     }
 
-    @Test @Ignore
+    @Test @Disabled
     public void putAndGetWithComplexObject() {}
 
 }
