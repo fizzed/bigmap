@@ -14,7 +14,7 @@
     <properties>
         <java.version>1.8</java.version>
         <tokyocabinet.version>0.0.12</tokyocabinet.version>
-        <tkzrw.version>0.0.5</tkzrw.version>
+        <tkrzw.version>0.0.6</tkrzw.version>
     </properties>
 
     <scm>
@@ -30,6 +30,7 @@
         <module>bigmap-leveldb</module>
         <module>bigmap-rocksdb</module>
         <module>bigmap-tokyocabinet</module>
+        <module>bigmap-tkrzw</module>
         <module>bigmap-integration-tests</module>
         <module>bigmap-demo</module>
         <!-- last module must be deployed for nexus plugin to work -->
@@ -86,11 +87,26 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>bigmap-tkrzw</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- tokyocabinet impl -->
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>tokyocabinet-bom</artifactId>
                 <version>${tokyocabinet.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <!-- tkrzw impl -->
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>tkrzw-bom</artifactId>
+                <version>${tkrzw.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
