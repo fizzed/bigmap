@@ -18,28 +18,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class TkrzwBigMapTest {
 
     @Test
-    public void iterator() {
-        DBM dbm = new DBM();
-        dbm.open("target.tkt", true);
-
-        Iterator iterator = dbm.makeIterator();
-
-        Status status = iterator.first();
-        System.out.println("status: " + status.getCode());
-
-        byte[] key = iterator.getKey();
-        System.out.println("key was " + key);
-
-        byte[] value = iterator.getValue();
-        System.out.println("value was " + value);
-
-        iterator.get(status);
-        System.out.println("status: " + status.getCode());
-
-        iterator.step(status);
-        System.out.println("status: " + status.getCode());
-    }
-    @Test
     public void putGetWithStrings() {
         final Map<String,String> map = new TkrzwBigMapBuilder<String,String>()
             .setScratchDirectory(Paths.get("target"))
