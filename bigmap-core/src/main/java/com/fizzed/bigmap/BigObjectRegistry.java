@@ -33,18 +33,17 @@ public class BigObjectRegistry implements BigObjectListener {
     private final ConcurrentHashMap<UUID,BigObjectWeakReference> weakReferenceMap;      // weak references to BigObjects
     private final ConcurrentHashMap<UUID,BigObjectCloser> closers;                      // strong references to closers
     private final ReferenceQueue<BigObject> referenceQueue;
-    private final HeapMonitorThread garbageMonitorThread;
+    private final HeapMonitorThread heapMonitorThread;
     private final ShutdownHookThread shutdownHookThread;
 
     private BigObjectRegistry() {
         this.weakReferenceMap = new ConcurrentHashMap<>();
         this.closers = new ConcurrentHashMap<>();
         this.referenceQueue = new ReferenceQueue<>();
-        this.garbageMonitorThread = new HeapMonitorThread();
+        this.heapMonitorThread = new HeapMonitorThread();
         this.shutdownHookThread = new ShutdownHookThread();
         Runtime.getRuntime().addShutdownHook(this.shutdownHookThread);
-
-        this.garbageMonitorThread.start();
+        this.heapMonitorThread.start();
     }
 
     public void register(BigObject bigObject) {
@@ -147,7 +146,7 @@ public class BigObjectRegistry implements BigObjectListener {
             }
         }
 
-        log.info("Auto closing BigObject {} (path={}, bytes={})", id, closer.getPath(), byteSize);
+        log.debug("Auto closing BigObject {} (path={}, bytes={})", id, closer.getPath(), byteSize);
     }
 
 }
