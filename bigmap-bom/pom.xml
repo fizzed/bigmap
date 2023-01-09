@@ -3,7 +3,7 @@
 
     <artifactId>bigmap-bom</artifactId>
     <name>bigmap-bom</name>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     
     <parent>
         <groupId>com.fizzed</groupId>
