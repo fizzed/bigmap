@@ -17,31 +17,43 @@
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-core</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-kryo</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-jackson</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-leveldb</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-rocksdb</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>bigmap-tokyocabinet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>bigmap-tkrzw</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- this will make it easy for consumers of this lib to get the natives they need -->
