@@ -13,8 +13,8 @@
     
     <properties>
         <java.version>1.8</java.version>
-        <tokyocabinet.version>0.0.12</tokyocabinet.version>
-        <tkrzw.version>0.0.6</tkrzw.version>
+        <tokyocabinet.version>0.0.14</tokyocabinet.version>
+        <tkrzw.version>0.0.7</tkrzw.version>
     </properties>
 
     <scm>
