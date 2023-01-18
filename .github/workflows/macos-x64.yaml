@@ -14,4 +14,4 @@ jobs:
           distribution: 'zulu'
           cache: 'maven'
       - name: Test in Maven
-        run: mvn test
+        run: mvn --no-transfer-progress -B test
