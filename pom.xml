@@ -13,8 +13,8 @@
     
     <properties>
         <java.version>1.8</java.version>
-        <tokyocabinet.version>0.0.14</tokyocabinet.version>
-        <tkrzw.version>0.0.7</tkrzw.version>
+        <tokyocabinet.version>0.0.15</tokyocabinet.version>
+        <tkrzw.version>0.0.8</tkrzw.version>
     </properties>
 
     <scm>
@@ -43,12 +43,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.1.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.2.1</version>
             </plugin>
         </plugins>
     </build>
@@ -122,7 +122,7 @@
             <dependency>
                 <groupId>org.rocksdb</groupId>
                 <artifactId>rocksdbjni</artifactId>
-                <version>7.8.3</version>
+                <version>8.3.2</version>
             </dependency>
             
             <!-- testing -->
@@ -130,7 +130,7 @@
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>crux-util</artifactId>
-                <version>1.0.13</version>
+                <version>1.0.40</version>
             </dependency>
             
             <dependency>
@@ -145,24 +145,11 @@
                 <version>2.0.0.0</version>
             </dependency>
 
-            <!--<dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.1</version>
-            </dependency>-->
-
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>5.8.1</version>
             </dependency>
-
-            <!-- only if junit4 is present -->
-            <!--<dependency>
-                <groupId>org.junit.vintage</groupId>
-                <artifactId>junit-vintage-engine</artifactId>
-                <version>5.8.1</version>
-            </dependency>-->
             
             <dependency>
                 <groupId>org.mockito</groupId>
