@@ -266,4 +266,6 @@ Total disk used: 24135 (MB)
 
 ## License
 
-Apache 2 License
+Copyright (C) 2020+ Fizzed, Inc.
+
+This work is licensed under the Apache License, Version 2.0. See LICENSE for details.
