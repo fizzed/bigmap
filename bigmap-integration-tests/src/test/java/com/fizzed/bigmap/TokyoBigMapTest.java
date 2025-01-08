@@ -22,7 +22,7 @@ import org.junit.jupiter.api.condition.OS;
 import java.nio.file.Paths;
 import java.util.Map;
 
-@DisabledOnOs(value=OS.WINDOWS, disabledReason="TokyoCabinet does not support windows")
+@DisabledOnOs({ OS.WINDOWS, OS.FREEBSD, OS.OPENBSD })
 public class TokyoBigMapTest extends AbstractBigMapTest {
 
     @Override

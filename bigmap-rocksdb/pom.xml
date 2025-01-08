@@ -26,6 +26,12 @@
         <!-- testing -->
 
         <dependency>
+            <groupId>com.fizzed</groupId>
+            <artifactId>jne</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>java-hamcrest</artifactId>
             <scope>test</scope>

@@ -1,6 +1,8 @@
 import com.fizzed.blaze.Config;
 import com.fizzed.blaze.Contexts;
 import com.fizzed.blaze.Task;
+import com.fizzed.buildx.Buildx;
+import com.fizzed.buildx.Target;
 import com.fizzed.jne.HardwareArchitecture;
 import com.fizzed.jne.JavaHome;
 import com.fizzed.jne.JavaHomeFinder;
@@ -85,6 +87,28 @@ public class blaze {
 
         log.info("Success on JDKs:");
         jdks.forEach(jdk -> log.info("  {}", jdk));
+    }
+
+    private final List<Target> crossTestTargets = asList(
+        new Target("linux", "x64").setTags("test").setHost("build-x64-linux-latest"),
+        new Target("linux", "arm64").setTags("test").setHost("build-arm64-linux-latest"),
+        new Target("linux", "riscv64").setTags("test").setHost("build-riscv64-linux-latest"),
+        new Target("macos", "x64").setTags("test").setHost("build-x64-macos-latest"),
+        new Target("macos", "arm64").setTags("test").setHost("build-arm64-macos-latest"),
+        new Target("windows", "x64").setTags("test").setHost("build-x64-windows-latest"),
+        new Target("windows", "arm64").setTags("test").setHost("build-arm64-windows-latest"),
+        new Target("freebsd", "x64").setTags("test").setHost("build-x64-freebsd-latest"),
+        new Target("openbsd", "x64").setTags("test").setHost("build-x64-openbsd-latest")
+    );
+
+    @Task(order = 1)
+    public void cross_tests() throws Exception {
+        new Buildx(crossTestTargets)
+            .tags("test")
+            .execute((target, project) -> {
+                project.action("mvn", "clean", "test")
+                    .run();
+            });
     }
 
 }
