@@ -16,11 +16,24 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.rocksdb.RocksBigLinkedMapBuilder;
+import com.fizzed.jne.HardwareArchitecture;
+import com.fizzed.jne.NativeTarget;
+import com.fizzed.jne.OperatingSystem;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.nio.file.Paths;
 import java.util.Map;
 
+@DisabledIf("isUnsupportedOs")
 public class RocksBigLinkedMapTest extends AbstractBigLinkedMapTest {
+
+    static public boolean isUnsupportedOs() {
+        final NativeTarget current = NativeTarget.detect();
+        return current.getOperatingSystem() == OperatingSystem.FREEBSD
+            || current.getOperatingSystem() == OperatingSystem.OPENBSD
+            || (current.getOperatingSystem() == OperatingSystem.WINDOWS && current.getHardwareArchitecture() == HardwareArchitecture.ARM64)
+            || (current.getOperatingSystem() == OperatingSystem.LINUX && current.getHardwareArchitecture() == HardwareArchitecture.RISCV64);
+    }
 
     @Override
     public <K,V> Map<K, V> newMap(Class<K> keyType, Class<V> valueType) {

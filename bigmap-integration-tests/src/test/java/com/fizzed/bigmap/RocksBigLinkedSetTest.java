@@ -16,11 +16,24 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.rocksdb.RocksBigLinkedSetBuilder;
+import com.fizzed.jne.HardwareArchitecture;
+import com.fizzed.jne.NativeTarget;
+import com.fizzed.jne.OperatingSystem;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.nio.file.Paths;
 import java.util.Set;
 
+@DisabledIf("isUnsupportedOs")
 public class RocksBigLinkedSetTest extends AbstractBigLinkedSetTest {
+
+    static public boolean isUnsupportedOs() {
+        final NativeTarget current = NativeTarget.detect();
+        return current.getOperatingSystem() == OperatingSystem.FREEBSD
+            || current.getOperatingSystem() == OperatingSystem.OPENBSD
+            || (current.getOperatingSystem() == OperatingSystem.WINDOWS && current.getHardwareArchitecture() == HardwareArchitecture.ARM64)
+            || (current.getOperatingSystem() == OperatingSystem.LINUX && current.getHardwareArchitecture() == HardwareArchitecture.RISCV64);
+    }
 
     @Override
     public <V> Set<V> newSet(Class<V> valueType) {

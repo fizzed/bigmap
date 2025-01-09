@@ -2,9 +2,8 @@ package com.fizzed.bigmap.tkrzw;
 
 import com.fizzed.bigmap.BigMap;
 import org.junit.jupiter.api.Test;
-import tkrzw.DBM;
-import tkrzw.Iterator;
-import tkrzw.Status;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +14,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@DisabledOnOs({ OS.FREEBSD, OS.OPENBSD })
 public class TkrzwBigMapTest {
 
     @Test

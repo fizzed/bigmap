@@ -16,10 +16,13 @@
 package com.fizzed.bigmap;
 
 import com.fizzed.bigmap.tkrzw.TkrzwBigLinkedSetBuilder;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Paths;
 import java.util.Set;
 
+@DisabledOnOs({ OS.FREEBSD, OS.OPENBSD })
 public class TkrzwBigLinkedSetTest extends AbstractBigLinkedSetTest {
 
     @Override
