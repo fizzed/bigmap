@@ -1,4 +1,4 @@
-name: MacOS x64
+name: MacOS arm64
 on:
   - push
   - workflow_dispatch
