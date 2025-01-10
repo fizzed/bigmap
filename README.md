@@ -2,9 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.fizzed/bigmap?color=blue&style=flat-square)](https://mvnrepository.com/artifact/com.fizzed/bigmap)
 
-## Automated Testing
-
-The following Java versions and platforms are tested using GitHub workflows:
+cccccc
 
 [![Java 8](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java8.yaml?branch=master&label=Java%208&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java8.yaml)
 [![Java 11](https://img.shields.io/github/actions/workflow/status/fizzed/bigmap/java11.yaml?branch=master&label=Java%2011&style=flat-square)](https://github.com/fizzed/bigmap/actions/workflows/java11.yaml)
@@ -17,12 +15,13 @@ The following Java versions and platforms are tested using GitHub workflows:
 
 The following platforms are tested using the [Fizzed, Inc.](http://fizzed.com) build system:
 
-![Linux arm64](https://img.shields.io/badge/Linux%20arm64-passing-green)
-![Linux riscv64](https://img.shields.io/badge/Linux%20riscv64-passing-green)
-![MacOS x64](https://img.shields.io/badge/MacOS%20x64-passing-green)
-![Windows arm64](https://img.shields.io/badge/Windows%20arm64-passing-green)
-![FreeBSD x64](https://img.shields.io/badge/FreeBSD%20x64-passing-green)
-![OpenBSD x64](https://img.shields.io/badge/OpenBSD%20x64-passing-green)
+[![Linux arm64](https://img.shields.io/badge/Linux%20arm64-passing-green)](buildx-results.txt)
+[![Linux riscv64](https://img.shields.io/badge/Linux%20riscv64-passing-green)](buildx-results.txt)
+[![Linux MUSL x64](https://img.shields.io/badge/Linux%20MUSL%20x64-passing-green)](buildx-results.txt)
+[![MacOS x64](https://img.shields.io/badge/MacOS%20x64-passing-green)](buildx-results.txt)
+[![Windows arm64](https://img.shields.io/badge/Windows%20arm64-passing-green)](buildx-results.txt)
+[![FreeBSD x64](https://img.shields.io/badge/FreeBSD%20x64-passing-green)](buildx-results.txt)
+[![OpenBSD x64](https://img.shields.io/badge/OpenBSD%20x64-passing-green)](buildx-results.txt)
 
 ## Overview
 
