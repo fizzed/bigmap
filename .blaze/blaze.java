@@ -90,15 +90,16 @@ public class blaze {
     }
 
     private final List<Target> crossTestTargets = asList(
-        new Target("linux", "x64").setTags("test").setHost("build-x64-linux-latest"),
-        new Target("linux", "arm64").setTags("test").setHost("build-arm64-linux-latest"),
-        new Target("linux", "riscv64").setTags("test").setHost("build-riscv64-linux-latest"),
-        new Target("macos", "x64").setTags("test").setHost("build-x64-macos-latest"),
-        new Target("macos", "arm64").setTags("test").setHost("build-arm64-macos-latest"),
-        new Target("windows", "x64").setTags("test").setHost("build-x64-windows-latest"),
-        new Target("windows", "arm64").setTags("test").setHost("build-arm64-windows-latest"),
-        new Target("freebsd", "x64").setTags("test").setHost("build-x64-freebsd-latest"),
-        new Target("openbsd", "x64").setTags("test").setHost("build-x64-openbsd-latest")
+        new Target("linux", "x64").setTags("test").setHost("bmh-build-x64-linux-latest"),
+        new Target("linux", "arm64").setTags("test").setHost("bmh-build-arm64-linux-latest"),
+        new Target("linux", "riscv64").setTags("test").setHost("bmh-build-riscv64-linux-latest"),
+        new Target("linux_musl", "x64").setTags("test").setHost("bmh-build-x64-linux-musl-latest"),
+        new Target("macos", "x64").setTags("test").setHost("bmh-build-x64-macos-latest"),
+        new Target("macos", "arm64").setTags("test").setHost("bmh-build-arm64-macos-latest"),
+        new Target("windows", "x64").setTags("test").setHost("bmh-build-x64-windows-latest"),
+        new Target("windows", "arm64").setTags("test").setHost("bmh-build-arm64-windows-latest"),
+        new Target("freebsd", "x64").setTags("test").setHost("bmh-build-x64-freebsd-latest"),
+        new Target("openbsd", "x64").setTags("test").setHost("bmh-build-x64-openbsd-latest")
     );
 
     @Task(order = 1)
