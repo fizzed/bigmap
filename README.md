@@ -67,7 +67,7 @@ managing these versions, you should consider importing our bill-of-materials BOM
         <dependency>
             <groupId>com.fizzed</groupId>
             <artifactId>bigmap-bom</artifactId>
-            <version>VERSION-HERE</version>
+            <version>1.0.16</version>
             <scope>import</scope>
             <type>pom</type>
         </dependency>
@@ -82,7 +82,7 @@ Then to use tokyocabinet implementation, add the following:
     <groupId>com.fizzed</groupId>
     <artifactId>bigmap-tokyocabinet</artifactId>
     <!-- you can omit the version if you used our BOM above -->
-    <version>VERSION-HERE</version>
+    <version>1.0.16</version>
 </dependency>
 
 <dependency>
@@ -99,7 +99,7 @@ Or for rocksdb
 <dependency>
     <groupId>com.fizzed</groupId>
     <artifactId>bigmap-rocksdb</artifactId>
-    <version>VERSION-HERE</version>
+    <version>1.0.16</version>
 </dependency>
 ```
 
@@ -109,7 +109,7 @@ Or for leveldb
 <dependency>
     <groupId>com.fizzed</groupId>
     <artifactId>bigmap-leveldb</artifactId>
-    <version>VERSION-HERE</version>
+    <version>1.0.16</version>
 </dependency>
 ```
 
