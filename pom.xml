@@ -120,7 +120,7 @@
             <dependency>
                 <groupId>com.fizzed</groupId>
                 <artifactId>crux-util</artifactId>
-                <version>1.0.40</version>
+                <version>1.0.48</version>
             </dependency>
             
             <dependency>
