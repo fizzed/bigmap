@@ -56,7 +56,7 @@ Project sponsors may include the following benefits:
 ## Usage
 
 With many of our implementations (e.g. rocksdb or leveldb), you can simply use the dependency below and add it to
-your maven POM file.  However, with tokyocabinet, there are many native libs you will need to include. To simplify
+your maven POM file.  However, with tokyocabinet or tkrzw, there are many native libs you will need to include. To simplify
 managing these versions, you should consider importing our bill-of-materials BOM.
 
 ```xml
@@ -87,7 +87,25 @@ Then to use tokyocabinet implementation, add the following:
     <groupId>com.fizzed</groupId>
     <artifactId>tokyocabinet-linux-x64</artifactId>
     <!-- you can omit the version if you used our BOM above -->
+    <version>VERSION-HERE</version>
+</dependency>
+```
+
+Then to use tkrzw implementation, add the following:
+
+```xml
+<dependency>
+    <groupId>com.fizzed</groupId>
+    <artifactId>bigmap-tkrzw</artifactId>
+    <!-- you can omit the version if you used our BOM above -->
     <version>1.0.16</version>
+</dependency>
+
+<dependency>
+    <groupId>com.fizzed</groupId>
+    <artifactId>tkrzw-linux-x64</artifactId>
+    <!-- you can omit the version if you used our BOM above -->
+    <version>VERSION-HERE</version>
 </dependency>
 ```
 
@@ -276,6 +294,6 @@ Total disk used: 24135 (MB)
 
 ## License
 
-Copyright (C) 2020+ Fizzed, Inc.
+Copyright (C) 2025 Fizzed, Inc.
 
 This work is licensed under the Apache License, Version 2.0. See LICENSE for details.

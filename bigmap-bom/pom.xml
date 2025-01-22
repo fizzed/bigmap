@@ -65,6 +65,15 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- this will make it easy for consumers of this lib to get the natives they need -->
+            <dependency>
+                <groupId>com.fizzed</groupId>
+                <artifactId>tkrzw-bom</artifactId>
+                <version>${tkrzw.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     
