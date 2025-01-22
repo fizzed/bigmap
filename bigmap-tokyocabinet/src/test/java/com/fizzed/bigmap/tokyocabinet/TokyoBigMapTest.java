@@ -15,7 +15,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@DisabledOnOs({ OS.WINDOWS, OS.FREEBSD, OS.OPENBSD })
+@DisabledOnOs({ OS.WINDOWS })
 public class TokyoBigMapTest {
 
     @Test

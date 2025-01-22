@@ -22,7 +22,7 @@ import org.junit.jupiter.api.condition.OS;
 import java.nio.file.Paths;
 import java.util.Set;
 
-@DisabledOnOs({ OS.WINDOWS, OS.FREEBSD, OS.OPENBSD })
+@DisabledOnOs({ OS.WINDOWS })
 public class TokyoBigSetTest extends AbstractBigSetTest {
 
     @Override
