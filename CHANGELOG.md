@@ -1,5 +1,11 @@
 # Bigmap for Java
 
+## 1.1.0 - 2025-01-22
+ - Bump tokyocabinet v0.0.16
+ - Bump tkrzw v0.0.9
+ - Bump rocksdb v9.8.4
+ - Bump kryo v5.6.2 
+
 ## 1.0.16 - 2023-11-04
  - Improved build system for cross testing different JDK versions
  - Bump tokyocabinet v0.0.15
