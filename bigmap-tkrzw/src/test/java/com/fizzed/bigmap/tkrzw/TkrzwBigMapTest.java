@@ -14,7 +14,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@DisabledOnOs({ OS.FREEBSD, OS.OPENBSD })
+//@DisabledOnOs({ OS.FREEBSD, OS.OPENBSD })
 public class TkrzwBigMapTest {
 
     @Test

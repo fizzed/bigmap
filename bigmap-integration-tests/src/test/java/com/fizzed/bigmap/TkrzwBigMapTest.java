@@ -22,7 +22,7 @@ import org.junit.jupiter.api.condition.OS;
 import java.nio.file.Paths;
 import java.util.Map;
 
-@DisabledOnOs({ OS.FREEBSD, OS.OPENBSD })
+//@DisabledOnOs({ OS.FREEBSD, OS.OPENBSD })
 public class TkrzwBigMapTest extends AbstractBigMapTest {
 
     @Override
